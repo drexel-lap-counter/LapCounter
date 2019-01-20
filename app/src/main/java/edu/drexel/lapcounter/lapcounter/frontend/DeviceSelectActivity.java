@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
@@ -45,12 +48,18 @@ public class DeviceSelectActivity extends AppCompatActivity {
         // Set a callback for whenever we find a bluetooth device
         mDeviceScanner.setCallback(mDeviceCallback);
 
-        // TODO: Eventually we will want to use mDeviceScanner.setAddressWhitelist();
-        // to filter for only the registered devices, but that requires having a schema and
-        // stuff like that. Set the whitelist any time before startScan()
+        // TODO: Remove this example eventually
+        // Example of setting a whitelist. This is so only registered devices show up.
+        List<String> whitelist = new ArrayList<>();
+        whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
+        whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
+        mDeviceScanner.setAddressWhitelist(whitelist);
 
         // Start the scan. This will call the callback a bunch of times.
         mDeviceScanner.startScan();
+
+        // NOTE: I did not implement the onPause() and onResume() logic. Ideally you should
+        // stop the scan on pause and start it on resume in both this aand DeviceScanActivity.
     }
 
     // NOTE: there should be a second action for selecting a device as the active one to use
