@@ -1,11 +1,13 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Intent;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.OnItemSelectedListener;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -16,6 +18,10 @@ public class SettingsActivity extends AppCompatActivity {
 
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Settings");
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(new OnItemSelectedListener(this));
+        navigation.getMenu().getItem(3).setChecked(true);
     }
 
     public void setPoolSize(View view) {

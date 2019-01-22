@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">LapCounter</string>
     <string name="title_activity_test_navbar">TestNavbar</string>
+
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_analytics">Analytics</string>
+    <string name="title_past_workouts">History</string>
+    <string name="title_settings">Settings</string>
 </resources>
