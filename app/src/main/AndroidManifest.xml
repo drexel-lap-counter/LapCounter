@@ -20,9 +20,6 @@
         <activity android:name=".frontend.CurrentWorkoutActivity" />
         <activity android:name=".frontend.WorkoutHistoryActivity" />
         <activity android:name=".frontend.PastWorkoutsActivity" />
-        <activity
-            android:name=".frontend.TestNavbar"
-            android:label="@string/title_activity_test_navbar" />
         <activity android:name=".frontend.SettingsActivity" />
         <activity android:name=".frontend.PoolSizeActivity" />
         <activity android:name=".frontend.DeviceSelectActivity" />

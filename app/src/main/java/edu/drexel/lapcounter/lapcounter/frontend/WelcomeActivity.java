@@ -1,15 +1,15 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Intent;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.OnItemSelectedListener;
+import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class WelcomeActivity extends AppCompatActivity {
+    private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +19,7 @@ public class WelcomeActivity extends AppCompatActivity {
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Welcome");
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(new OnItemSelectedListener(this));
-        navigation.getMenu().getItem(0).setChecked(true);
+        mNavBar.init();
     }
 
     public void nextClicked(View view) {
