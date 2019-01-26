@@ -1,8 +1,8 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -12,12 +12,15 @@ import java.util.List;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
+import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 /**
  * It's a bit confusing at this point, but this class is for scanning for *registered*
  * bluetooth devices. DeviceScanActivity is for scanning for *new devices*
  */
 public class DeviceSelectActivity extends AppCompatActivity {
+    private final NavBar mNavBar = new NavBar(this);
+
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
     // Sample device scanner
@@ -44,6 +47,8 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Select Device");
+
+        mNavBar.init();
 
         // Set a callback for whenever we find a bluetooth device
         mDeviceScanner.setCallback(mDeviceCallback);
