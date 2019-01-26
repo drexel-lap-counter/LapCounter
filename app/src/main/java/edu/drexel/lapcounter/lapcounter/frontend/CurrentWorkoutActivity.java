@@ -9,7 +9,7 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class CurrentWorkoutActivity extends AppCompatActivity {
-    private final NavBar mNavBar = new NavBar(this);
+    private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
