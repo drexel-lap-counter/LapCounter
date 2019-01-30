@@ -6,27 +6,50 @@
     android:layout_height="match_parent"
     tools:context=".frontend.DeviceSelectActivity">
 
+    <TextView
+        android:id="@+id/connected_device_view"
+        android:layout_width="419dp"
+        android:layout_height="81dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/app_name"
+        android:textSize="30dp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/button10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/button9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="80dp"
         android:onClick="viewDevice"
         android:text="View Device Info"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button10"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="80dp"
         android:onClick="scanForDevices"
         android:text="Add New Device"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button9" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="689dp"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/button10" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
