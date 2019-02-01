@@ -14,7 +14,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="@string/app_name"
         android:textSize="30dp"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/button10"
@@ -30,6 +29,8 @@
         android:layout_marginTop="80dp"
         android:onClick="viewDevice"
         android:text="View Device Info"
+        android:enabled="false"
+        android:alpha=".25"
         app:layout_constraintStart_toEndOf="@+id/button10"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,7 +46,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/my_recycler_view"
+        android:id="@+id/device_select_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="689dp"
         android:scrollbars="vertical"
