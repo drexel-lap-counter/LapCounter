@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
@@ -19,6 +20,7 @@ import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class DeviceScanActivity extends AppCompatActivity {
 
+    private List<String> whitelist;
     private Button mButton;
     private Device mDevice;
     private RecyclerView mRecyclerView;
@@ -41,8 +43,11 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Discovered '%s' '%s' %s", deviceName, deviceAddress, rssi));
             Device found_device = new Device(deviceName,deviceAddress,rssi);
-            mAdapter.addItem(found_device);
-            mAdapter.notifyDataSetChanged();
+            if(!whitelist.contains(found_device.getMac()))
+            {
+                mAdapter.addItem(found_device);
+                mAdapter.notifyDataSetChanged();
+            }
             // TODO: Store the device information and display it in the list however you need.
         }
     };
@@ -57,6 +62,12 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mNavBar.init();
 
+        //Once data storge implementation is complete, load whitelist from storage
+        //It is either that, or get it from DeviceSelect, but i think loading again
+        //might be better then passing all data to this activity,
+        whitelist = new ArrayList<String>();
+        whitelist.add("FF:FF:FF:FF:FF:00");
+        whitelist.add("FF:FF:FF:FF:FF:01");
         mButton = findViewById(R.id.button13);
         //RecyclerView
         mRecyclerView = findViewById(R.id.device_scan_recycler_view);
