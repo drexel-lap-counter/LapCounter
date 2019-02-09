@@ -14,8 +14,17 @@
         android:layout_marginTop="16dp"
         android:onClick="selectDevice"
         android:text="Confirm Device"
+        android:enabled="false"
+        android:alpha=".25"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/device_scan_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="689dp"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/button13" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -29,4 +38,15 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation"
         app:labelVisibilityMode="labeled" />
+
+    <TextView
+        android:id="@+id/scan_device_selected"
+        android:layout_width="121dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="92dp"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="@+id/button13"
+        app:layout_constraintStart_toEndOf="@+id/button13"
+        app:layout_constraintTop_toTopOf="@+id/button13" />
+
 </android.support.constraint.ConstraintLayout>

@@ -10,6 +10,10 @@ import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class CalibrateDeviceActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
+    private final String mDeviceName = "DEVICE_NAME";
+    private final String mDeviceMAC = "DEVICE_MAC";
+    private final String mDeviceRSSI = "DEVICE_RSSI";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
