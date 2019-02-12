@@ -26,7 +26,8 @@
         <activity android:name=".frontend.WorkoutDetailsActivity" />
         <activity android:name=".frontend.CalibrateDeviceActivity" />
         <activity android:name=".frontend.DeviceScanActivity" />
-        <activity android:name=".frontend.DeviceInfoActivity"></activity>
+        <activity android:name=".frontend.DeviceInfoActivity" />
+        <activity android:name=".frontend.temp.ReceiverTest"></activity>
     </application>
 
 </manifest>
