@@ -7,6 +7,8 @@ import android.content.Context;
  * state changes as intents.
  */
 public class LocationStateMachine {
+
+
     /**
      * States of the machine
      */
@@ -41,5 +43,11 @@ public class LocationStateMachine {
 
     public LocationStateMachine(Context context) {
         mContext = context;
+    }
+
+
+    public void initCallbacks(SimpleMessageReceiver mReceiver) {
+        // TODO: Listen for events from the RSSIManager
+        // See DisconnectManager for an example setup.
     }
 }

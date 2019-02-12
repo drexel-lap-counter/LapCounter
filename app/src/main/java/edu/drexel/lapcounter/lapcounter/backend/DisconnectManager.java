@@ -27,6 +27,52 @@ public class DisconnectManager {
     private RSSIManager mRssiManager;
     private LocationStateMachine mStateMachine;
 
+
+    // Callbacks =================================================================================
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mReconnectFunc = new ReconnectFunction();
+            ReconnectFunction.SwimmerState beforeSnapshot = mReconnectFunc.new SwimmerState();
+            // TODO: Populate the snapshot with data queried from the rssiManager and state machine
+            // also remember to add the timestamp
+
+            mReconnectFunc.setBeforeState(beforeSnapshot);
+        }
+    };
+
+    private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            // TODO: How to distinguish the first connection from reconnections?
+
+            // TODO: Save the timestamp for later
+            // TODO: yell at the RSSI component to poll faster
+        }
+    };
+
+    private SimpleMessageReceiver.MessageHandler onTransition = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            // TODO: filter for only Unknown -> * events
+            ReconnectFunction.SwimmerState afterSnapshot = mReconnectFunc.new SwimmerState();
+            // TODO: Query the RSSI and state machine to populate the state
+            boolean countLap = mReconnectFunc.computeLapsMissed(afterSnapshot);
+
+            if (countLap)
+                publishMissedLap();
+        }
+    };
+
+    // =========================================================================================
+
+    public DisconnectManager(Context context, RSSIManager rssi, LocationStateMachine stateMachine) {
+        mContext = context;
+        mRssiManager = rssi;
+        mStateMachine = stateMachine;
+    }
+
+
     /**
      * Handle the following intents:
      *
@@ -37,60 +83,12 @@ public class DisconnectManager {
      *
      * STATE_TRANSITION -> Listen for transitions out of the unknown state. If this is because
      *      of a reconnection,
-     *
      */
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            switch(action) {
-                case BLEService.ACTION_DEVICE_DISCONNECTED:
-                    onDisconnect();
-                    break;
-                case BLEService.ACTION_DEVICE_CONNECTED:
-                    onReconnect();
-                    break;
-                case LocationStateMachine.ACTION_STATE_TRANSITION:
-                    onStateTransition();
-                    break;
-            }
-        }
-    };
-
-    public DisconnectManager(Context context, RSSIManager rssi, LocationStateMachine stateMachine) {
-        mContext = context;
-        mRssiManager = rssi;
-        mStateMachine = stateMachine;
+    void initCallbacks(SimpleMessageReceiver receiver) {
+        receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
+        receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onReconnect);
+        receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
     }
-
-    void onDisconnect() {
-        mReconnectFunc = new ReconnectFunction();
-        ReconnectFunction.SwimmerState beforeSnapshot = mReconnectFunc.new SwimmerState();
-        // TODO: Populate the snapshot with data queried from the rssiManager and state machine
-        // also remember to add the timestamp
-
-        mReconnectFunc.setBeforeState(beforeSnapshot);
-    }
-
-    void onReconnect() {
-        // TODO: How to distinguish the first connection from reconnections?
-
-        // TODO: Save the timestamp for later
-        // TODO: yell at the RSSI component to poll faster
-
-    }
-
-    void onStateTransition() {
-        // TODO: filter for only Unknown -> * events
-        ReconnectFunction.SwimmerState afterSnapshot = mReconnectFunc.new SwimmerState();
-        // TODO: Query the RSSI and state machine to populate the state
-        boolean countLap = mReconnectFunc.computeLapsMissed(afterSnapshot);
-
-        if (countLap)
-            publishMissedLap();
-    }
-
     /**
      * Publish a missed lap
      */

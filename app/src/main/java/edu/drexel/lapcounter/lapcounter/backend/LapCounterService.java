@@ -29,11 +29,44 @@ public class LapCounterService extends Service {
      */
     private LapCounter mLapCounter = new LapCounter(this);
 
+    /**
+     * This Service owns this simplified BroadcastReceiver so we only have one for the entire
+     * service. The sub-components of the lap counting system will register callbacks with this
+     * object as needed.
+     */
+    private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
-    // TODO: not sure where to trigger registering the broadcastReceivers.
-    // perhaps in onCreeate() and onDestroy()?
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        //TODO: Not sure if this is the best place for this code, review this before we finish
+        initCallbacks();
+        mReceiver.attach(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // TODO: Again, not sure if this is the best place for this or if we even need to
+        // unbind the callbacks
+        mReceiver.detatch(this);
+    }
+
+    /**
+     * Go through the sub-components and have them all register callback functions for
+     * whatever events are applicable.
+     */
+    private void initCallbacks() {
+        mLapCounter.initCallbacks(mReceiver);
+        mDisconnectManager.initCallbacks(mReceiver);
+        mStateMachine.initCallbacks(mReceiver);
+        mRssiManager.initCallbacks(mReceiver);
+    }
 }

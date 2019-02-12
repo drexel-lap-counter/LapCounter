@@ -11,4 +11,10 @@ public class RSSIManager {
     public RSSIManager(Context context) {
         mContext = context;
     }
+
+    public void initCallbacks(SimpleMessageReceiver mReceiver) {
+        // TODO: Subscribe to events from BLE Service
+
+        // See DisconnectManager for example code.
+    }
 }
