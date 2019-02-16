@@ -6,9 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Helper;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 /**
@@ -91,7 +90,7 @@ public class ReceiverTest extends AppCompatActivity {
 
         // Unsubscribe from events
         // This is shorthand for unregisterReceiver()
-        mReceiver.detatch(this);
+        mReceiver.detach(this);
     }
 
     /**
@@ -123,6 +122,6 @@ public class ReceiverTest extends AppCompatActivity {
 
         // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
         // can broadcast intents
-        sendBroadcast(intent);
+        Helper.sendBroadcast(this, intent);
     }
 }
