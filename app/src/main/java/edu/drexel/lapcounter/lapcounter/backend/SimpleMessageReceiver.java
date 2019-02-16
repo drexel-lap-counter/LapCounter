@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,15 +54,17 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
      * @param context the Activity/Service that owns the receiver
      */
     public void attach(Context context) {
-        context.registerReceiver(this, this.mIntentFilter);
+//        context.registerReceiver(this, this.mIntentFilter);
+        LocalBroadcastManager.getInstance(context).registerReceiver(this, this.mIntentFilter);
     }
 
     /**
      * If the owner of this receiver needs to stop receiving events, call this method.
      * @param context the parent Activity/Service that owns this receiver
      */
-    public void detatch(Context context) {
-        context.unregisterReceiver(this);
+    public void detach(Context context) {
+//        context.unregisterReceiver(this);
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
     }
 
     @Override

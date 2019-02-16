@@ -4,16 +4,16 @@ package edu.drexel.lapcounter.lapcounter.backend;
  * This class handles the somewhat complicated logic for determining if a lap was missed due
  * to a disconnection. It represents a function
  *
- * reconnect_func :: (SwimmerState, SwimmerState) -> bool
+ * reconnect_func :: (AthleteState, AthleteState) -> bool
  *
- * Given the before and after states of the swimmer (see below), this function will return true
+ * Given the before and after states of the athlete (see below), this function will return true
  * if a lap was missed.
  */
 public class ReconnectFunction {
     /**
-     * Snapshot of the estimated state of the swimmer in the pool.
+     * Snapshot of the estimated state of the athlete.
      */
-    public class SwimmerState {
+    public class AthleteState {
         /**
          * Near/Far state (no unknown state
          */
@@ -21,9 +21,9 @@ public class ReconnectFunction {
         /**
          * Snapshot filtered RSSI value to sort states by distance (roughly)
          */
-        public int distRssi;
+        public double distRssi;
         /**
-         * Is the swimmer swimming out or back?
+         * Is the athlete out or back?
          * Either RSSIManager.DIRECTION_OUT or DIRECTION_IN
          */
         public int travelDirection;
@@ -34,14 +34,14 @@ public class ReconnectFunction {
     }
 
     // States immediately before and after a disconnection.
-    private SwimmerState mBeforeDisconnect;
-    private SwimmerState mAfterReconnect;
+    private AthleteState mBeforeDisconnect;
+    private AthleteState mAfterReconnect;
 
     /**
      * Store the state just before the disconnect for later diagnostics.
      * @param beforeDisconnect the state just before the D/C
      */
-    void setBeforeState(SwimmerState beforeDisconnect) {
+    void setBeforeState(AthleteState beforeDisconnect) {
         mBeforeDisconnect = beforeDisconnect;
     }
 
@@ -51,7 +51,7 @@ public class ReconnectFunction {
      * @param afterReconnect first valid state after a reconnect
      * @return true if an extra lap should be counted, false otherwise.
      */
-    boolean computeLapsMissed(SwimmerState afterReconnect) {
+    boolean computeLapsMissed(AthleteState afterReconnect) {
         mAfterReconnect = afterReconnect;
 
         // TODO: Complicated Logic goes here. Probably will take a few subroutines.

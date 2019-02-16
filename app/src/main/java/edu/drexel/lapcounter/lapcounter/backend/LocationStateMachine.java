@@ -1,13 +1,17 @@
 package edu.drexel.lapcounter.lapcounter.backend;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
+import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_IN;
+import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_OUT;
 
 /**
  * This class keeps track of whether the athlete is "near" or "far" from the phone. It publishes
  * state changes as intents.
  */
 public class LocationStateMachine {
-
 
     /**
      * States of the machine
@@ -29,25 +33,80 @@ public class LocationStateMachine {
         /**
          * This represents that the athlete is far away from the phone (past the threshold)
          */
-        FAR
+        FAR,
     }
 
     public static final String ACTION_STATE_TRANSITION =
             "edu.drexel.lapcounter.lapcounter.ACTION_STATE_TRANSITION";
 
-    // A context for publishing events
-    private Context mContext;
+    public static final String EXTRA_STATE_BEFORE =
+            "edu.drexel.lapcounter.lapcounter.EXTRA_STATE_BEFORE";
+
+    public static final String EXTRA_STATE_AFTER =
+            "edu.drexel.lapcounter.lapcounter.EXTRA_STATE_AFTER";
+
+    // Used to publish events
+    private LocalBroadcastManager mBroadcastManager;
 
     // Current state
     private State mState;
 
-    public LocationStateMachine(Context context) {
-        mContext = context;
+    // RSSI threshold that separates State.NEAR and State.FAR.
+    private double mThreshold;
+
+    public LocationStateMachine(Context context, double threshold) {
+        mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        mThreshold = threshold;
     }
 
+    private boolean crossedAndMovingAwayFromThreshold(double rssi, int direction) {
+        return mState == State.NEAR &&     // We were previously within the threshold,
+               rssi > mThreshold    &&     // and then we crossed it,
+               direction == DIRECTION_OUT; // by moving away from it.
+    }
 
-    public void initCallbacks(SimpleMessageReceiver mReceiver) {
-        // TODO: Listen for events from the RSSIManager
-        // See DisconnectManager for an example setup.
+    private boolean crossedAndWithinThreshold(double rssi, int direction) {
+        return mState == State.FAR &&
+               rssi <= mThreshold  &&
+               direction == DIRECTION_IN;
+    }
+
+    private SimpleMessageReceiver.MessageHandler onRssiAndDirection = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            double rssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0);
+            int direction = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
+
+            if (crossedAndMovingAwayFromThreshold(rssi, direction)) {
+                mState = State.FAR;
+                publishStateTransition(State.NEAR, mState);
+            } else if (crossedAndWithinThreshold(rssi, direction)) {
+                mState = State.NEAR;
+                publishStateTransition(State.FAR, mState);
+            }
+        }
+    };
+
+    private void publishStateTransition(State before, State after) {
+        Intent intent = new Intent(ACTION_STATE_TRANSITION);
+        intent.putExtra(EXTRA_STATE_BEFORE, before);
+        intent.putExtra(EXTRA_STATE_AFTER, after);
+        mBroadcastManager.sendBroadcast(intent);
+    }
+
+    public void initCallbacks(SimpleMessageReceiver receiver) {
+        receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssiAndDirection);
+    }
+
+    public State getZone() {
+        return mState;
+    }
+
+    public void pickZone() {
+        // TODO: Unknown -> Near/Far
+    }
+
+    public void reset() {
+        mState = State.UNKNOWN;
     }
 }

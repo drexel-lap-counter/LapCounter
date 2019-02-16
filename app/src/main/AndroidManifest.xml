@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.drexel.lapcounter.lapcounter">
 
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,6 +12,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".frontend.temp.LapCounterServiceTest"></activity>
+
+        <service
+            android:name=".backend.BLEService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".backend.LapCounterService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity android:name=".frontend.LoadingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +42,7 @@
         <activity android:name=".frontend.CalibrateDeviceActivity" />
         <activity android:name=".frontend.DeviceScanActivity" />
         <activity android:name=".frontend.DeviceInfoActivity" />
-        <activity android:name=".frontend.temp.ReceiverTest"></activity>
+        <activity android:name=".frontend.temp.ReceiverTest" />
     </application>
 
 </manifest>

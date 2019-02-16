@@ -2,9 +2,11 @@ package edu.drexel.lapcounter.lapcounter.backend;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 
 public class LapCounterService extends Service {
+    private final static String TAG = LapCounterService.class.getSimpleName();
 
     /**
      * This component listens for raw RSSI values and applies filters to them to make
@@ -12,10 +14,12 @@ public class LapCounterService extends Service {
      */
     private RSSIManager mRssiManager = new RSSIManager(this);
 
+    // TODO: Load from calibration.
+    private static final double DEFAULT_THRESHOLD = 60;
     /**
      * The location state machine tracks the state of the athlete.
      */
-    private LocationStateMachine mStateMachine = new LocationStateMachine(this);
+    private LocationStateMachine mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
 
     /**
      * This component monitors the bluetooth service for disconnects/reconnects and
@@ -36,9 +40,36 @@ public class LapCounterService extends Service {
      */
     private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
+/*
+NOTE: https://developer.android.com/guide/components/bound-services
+
+Questions:
+    1. Does a bound service continue to run when all bound clients are suspended, i.e., in the
+    back stack?
+
+    2. If no, then can another Activity _not_ bound to the service still receive
+    broadcasts from the service?
+
+Something to keep in mind for future Royce:
+"Although you usually implement either onBind() or onStartCommand(), it's sometimes necessary to
+implement both. For example, a music player might find it useful to allow its service to run
+indefinitely and also provide binding. This way, an activity can start the service to play some
+music and the music continues to play even if the user leaves the application. Then, when the
+user returns to the application, the activity can bind to the service to regain control of
+playback."
+*/
+
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        public LapCounterService getService() {
+            return LapCounterService.this;
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -56,7 +87,7 @@ public class LapCounterService extends Service {
 
         // TODO: Again, not sure if this is the best place for this or if we even need to
         // unbind the callbacks
-        mReceiver.detatch(this);
+        mReceiver.detach(this);
     }
 
     /**

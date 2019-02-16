@@ -2,6 +2,10 @@ package edu.drexel.lapcounter.lapcounter.backend;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+
+import static edu.drexel.lapcounter.lapcounter.backend.LocationStateMachine.EXTRA_STATE_AFTER;
+import static edu.drexel.lapcounter.lapcounter.backend.LocationStateMachine.EXTRA_STATE_BEFORE;
 
 /**
  * Lightweight class for tracking the lap count number. It subscribes to events to determine
@@ -27,9 +31,9 @@ public class LapCounter {
     private int mLapCount = 0;
 
     /**
-     * Parent LapCounter Service
+     * Used to publish events.
      */
-    private Context mContext;
+    private LocalBroadcastManager mBroadcastManager;
 
     /**
      * Count laps in the normal case: a state transition. This method filters for
@@ -41,9 +45,12 @@ public class LapCounter {
         public void onMessage(Intent message) {
             // TODO: Check the intent's extras for the before and after states
             // on Far -> Near increment mLapCount;
+            LocationStateMachine.State before = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_BEFORE);
+            LocationStateMachine.State after = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_AFTER);
 
-            // TODO: Only call this if a lap is counted.
-            incrementCounter();
+            if (before == LocationStateMachine.State.FAR && after == LocationStateMachine.State.NEAR) {
+                incrementCounter();
+            }
         }
     };
 
@@ -58,9 +65,8 @@ public class LapCounter {
     };
 
     public LapCounter(Context context) {
-        mContext = context;
+        mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
-
 
     private void incrementCounter() {
         mLapCount += LAP_INCREMENT;
@@ -73,7 +79,7 @@ public class LapCounter {
     private void publishLapCount() {
         final Intent intent = new Intent(ACTION_LAP_COUNT_UPDATED);
         intent.putExtra(EXTRA_LAP_COUNT, mLapCount);
-        mContext.sendBroadcast(intent);
+        mBroadcastManager.sendBroadcast(intent);
     }
 
 
