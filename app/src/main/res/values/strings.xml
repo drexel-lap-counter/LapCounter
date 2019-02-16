@@ -11,5 +11,8 @@
     <string name="pauseButtonLabel">Pause</string>
     <string name="startButtonLabel">Start</string>
     <string name="restartButtonLabel">Restart</string>
-
+    <string name="select_device">Select Device</string>
+    <string name="i_device_name">DEVICE_NAME</string>
+    <string name="i_device_mac">DEVICE_MAC</string>
+    <string name="i_device_rssi">DEVICE_RSSI</string>
 </resources>
