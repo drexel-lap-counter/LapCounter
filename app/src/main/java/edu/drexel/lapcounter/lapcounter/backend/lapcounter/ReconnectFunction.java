@@ -60,7 +60,7 @@ public class ReconnectFunction {
 
         // States are either near or far at this point in the code
         boolean wasFar = mBeforeDisconnect.zone == LocationStateMachine.State.FAR;
-        boolean isFar = mAfterReconnect.zone == LocationStateMachine.State.NEAR;
+        boolean isFar = mAfterReconnect.zone == LocationStateMachine.State.FAR;
 
         long delay = (mAfterReconnect.timestamp - mBeforeDisconnect.timestamp) / 1000;
         boolean isLongDelay = delay >= LONG_DELAY_THRESHOLD_SEC;
