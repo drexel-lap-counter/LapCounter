@@ -20,7 +20,7 @@
             android:exported="false" />
 
         <service
-            android:name=".backend.LapCounterService"
+            android:name=".backend.lapcounter.LapCounterService"
             android:enabled="true"
             android:exported="false" />
 

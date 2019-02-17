@@ -1,9 +1,12 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+
+import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 public class LapCounterService extends Service {
     private final static String TAG = LapCounterService.class.getSimpleName();

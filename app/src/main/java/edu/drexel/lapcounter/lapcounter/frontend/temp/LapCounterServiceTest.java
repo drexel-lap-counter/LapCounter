@@ -15,7 +15,7 @@ import java.util.Map;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.LapCounterService;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 
 public class LapCounterServiceTest extends AppCompatActivity {
     private static final String TAG = LapCounterServiceTest.class.getSimpleName();

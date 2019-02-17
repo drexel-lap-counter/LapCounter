@@ -1,11 +1,13 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import static edu.drexel.lapcounter.lapcounter.backend.LocationStateMachine.EXTRA_STATE_AFTER;
-import static edu.drexel.lapcounter.lapcounter.backend.LocationStateMachine.EXTRA_STATE_BEFORE;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+
+import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_AFTER;
+import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_BEFORE;
 
 /**
  * Lightweight class for tracking the lap count number. It subscribes to events to determine

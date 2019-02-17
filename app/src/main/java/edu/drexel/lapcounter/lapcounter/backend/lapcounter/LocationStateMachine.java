@@ -1,8 +1,11 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+
+import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_IN;
 import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_OUT;
