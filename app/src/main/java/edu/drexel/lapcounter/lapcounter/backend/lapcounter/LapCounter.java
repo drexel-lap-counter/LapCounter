@@ -6,6 +6,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
+import static edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver.MessageHandler;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_AFTER;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_BEFORE;
 
@@ -42,14 +43,13 @@ public class LapCounter {
      * FAR -> NEAR transitions only
      * @param intent the received message
      */
-    private SimpleMessageReceiver.MessageHandler countLaps = new SimpleMessageReceiver.MessageHandler() {
+    private MessageHandler countLaps = new MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            // TODO: Check the intent's extras for the before and after states
-            // on Far -> Near increment mLapCount;
             LocationStateMachine.State before = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_BEFORE);
             LocationStateMachine.State after = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_AFTER);
 
+            // on Far -> Near increment mLapCount;
             if (before == LocationStateMachine.State.FAR && after == LocationStateMachine.State.NEAR) {
                 incrementCounter();
             }
@@ -59,7 +59,7 @@ public class LapCounter {
     /**
      * Every Missed Laps events corresponds to 1 counter increment.
      */
-    private SimpleMessageReceiver.MessageHandler onMissedLaps = new SimpleMessageReceiver.MessageHandler() {
+    private MessageHandler onMissedLaps = new MessageHandler() {
         @Override
         public void onMessage(Intent message) {
             incrementCounter();
