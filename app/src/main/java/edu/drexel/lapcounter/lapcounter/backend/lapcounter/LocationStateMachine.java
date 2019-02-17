@@ -80,7 +80,9 @@ public class LocationStateMachine {
             double rssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0);
             int direction = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
 
-            if (crossedAndMovingAwayFromThreshold(rssi, direction)) {
+            if (mState == State.UNKNOWN) {
+                pickZone(rssi);
+            } else if (crossedAndMovingAwayFromThreshold(rssi, direction)) {
                 mState = State.FAR;
                 publishStateTransition(State.NEAR, mState);
             } else if (crossedAndWithinThreshold(rssi, direction)) {
@@ -105,11 +107,27 @@ public class LocationStateMachine {
         return mState;
     }
 
-    public void pickZone() {
-        // TODO: Unknown -> Near/Far
+    /**
+     * As soon as we get a first valid filtered RSSI value while still in the UNKNOWN state,
+     * compare the RSSI value with the threshold and transition to the corresponding state
+     * @param rssi the filtered RSSI value (in absolute value)
+     */
+    public void pickZone(double rssi) {
+        if (rssi > mThreshold)
+            mState = State.FAR;
+        else
+            mState = State.NEAR;
+
+        publishStateTransition(State.UNKNOWN, mState);
     }
 
-    public void reset() {
+    /**
+     * When a device disconnects, go back to the Unknown state
+     */
+    public void onDisconnect() {
+        State oldState = mState;
         mState = State.UNKNOWN;
+
+        publishStateTransition(oldState, mState);
     }
 }

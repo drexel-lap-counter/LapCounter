@@ -34,6 +34,9 @@ public class DisconnectManager {
     private RSSIManager mRssiManager;
     private LocationStateMachine mStateMachine;
 
+    // Keep track of the time of reconnection.
+    private long mAfterTimestamp = -1;
+
     // Callbacks =================================================================================
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
@@ -41,30 +44,32 @@ public class DisconnectManager {
             mReconnectFunc = new ReconnectFunction();
             ReconnectFunction.AthleteState beforeSnapshot = mReconnectFunc.new AthleteState();
 
+            // Save what zone the athlete is in. Then set the state to UNKNOWN
             beforeSnapshot.zone = mStateMachine.getZone();
+            mStateMachine.onDisconnect();
+
+            // TODO: Query these from the BLEService, not RSSIManager directly.
             beforeSnapshot.distRssi = mRssiManager.getRssi();
             beforeSnapshot.travelDirection = mRssiManager.getDirection();
+            mRssiManager.clear();
+
+            // Save the currrent time
             beforeSnapshot.timestamp = System.currentTimeMillis();
 
+            // Add the before state to the reconnection function.
             mReconnectFunc.setBeforeState(beforeSnapshot);
-
-            mRssiManager.clear();
-            mStateMachine.reset();
         }
     };
 
-    private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
+    private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            // TODO: How to distinguish the first connection from reconnections?
-            // On connect, save the device address.
-            // On connect, check the device address. If the device address is the same, then
-            // we'll consider this connect to be a reconnect.
+            // We want the timestamp of reconnection, even though we are not done with the
+            // logic for a second or two while the RSSIManager refills the buffer. So save it
+            // in a member variable.
+            mAfterTimestamp = System.currentTimeMillis();
 
-
-
-            // TODO: Save the timestamp for later
-            // TODO: yell at the RSSI component to poll faster
+            // Yell at the RSSI Manager to poll faster.
             mRssiManager.setPollFrequency(CONNECT_RSSI_POLL_MS);
         }
     };
@@ -72,11 +77,28 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onTransition = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            // TODO: filter for only Unknown -> * events
-            ReconnectFunction.AthleteState afterSnapshot = mReconnectFunc.new AthleteState();
-            // TODO: Query the RSSI and state machine to populate the state
-            boolean countLap = mReconnectFunc.computeLapsMissed(afterSnapshot);
+            LocationStateMachine.State beforeState = (LocationStateMachine.State)
+                    message.getSerializableExtra(LocationStateMachine.EXTRA_STATE_BEFORE);
+            LocationStateMachine.State afterState = (LocationStateMachine.State)
+                    message.getSerializableExtra(LocationStateMachine.EXTRA_STATE_AFTER);
 
+            // We only care about Unknown -> any other state. Filter out irrelevant transitions here
+            if (beforeState != LocationStateMachine.State.UNKNOWN)
+                return;
+
+            // Now we have enough information to complete an after reconnection state snapshot.
+            ReconnectFunction.AthleteState afterSnapshot = mReconnectFunc.new AthleteState();
+            afterSnapshot.zone = afterState;
+
+            // Store the timestamp and clear the internal state.
+            afterSnapshot.timestamp = mAfterTimestamp;
+            mAfterTimestamp = -1;
+
+            // TODO: Query BLEService for the other two variables.
+
+            // Use the reconnection function to examine the state and determine if we
+            // should count a missed lap.
+            boolean countLap = mReconnectFunc.computeLapsMissed(afterSnapshot);
             if (countLap)
                 publishMissedLap();
         }
@@ -104,7 +126,8 @@ public class DisconnectManager {
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
-        receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onConnect);
+        //TODO: This should be reconnect events only.
+        receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onReconnect);
         receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
     }
     /**
