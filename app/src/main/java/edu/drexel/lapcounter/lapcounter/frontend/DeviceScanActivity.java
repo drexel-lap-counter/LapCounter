@@ -142,7 +142,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         // User chose not to enable Bluetooth. Exit gracefully.
         if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_OK && getLocationPermission()) {
+            if (resultCode == Activity.RESULT_OK /*&& getLocationPermission()*/) {
                 mDeviceScanner = new BLEScanner(this);
             } else {
                 mDeviceScanner = new DummyDeviceScanner();

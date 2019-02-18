@@ -113,11 +113,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
         whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
         whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
 
-        // Todo: Remove.
-        // Hardcode the Puck to ease testing while a BLE DeviceScanner gets implemented.
-        mAdapter.addItem(new Device("Puck", "D1:AA:19:79:8A:18", -35));
-        mAdapter.notifyDataSetChanged();
-
         mDeviceScanner.setAddressWhitelist(whitelist);
 
         // Start the scan. This will call the callback a bunch of times.
