@@ -1,6 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
 /**
  * This class handles the somewhat complicated logic for determining if a lap was missed due

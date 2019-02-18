@@ -15,7 +15,12 @@
         <activity android:name=".frontend.temp.LapCounterServiceTest"></activity>
 
         <service
-            android:name=".backend.BLEService"
+            android:name=".backend.ble.BLEComm"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".backend.ble.BLEService"
             android:enabled="true"
             android:exported="false" />
 

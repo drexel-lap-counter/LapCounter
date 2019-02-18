@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
-import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_IN;
-import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_OUT;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_IN;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_OUT;
 
 /**
  * This class keeps track of whether the athlete is "near" or "far" from the phone. It publishes

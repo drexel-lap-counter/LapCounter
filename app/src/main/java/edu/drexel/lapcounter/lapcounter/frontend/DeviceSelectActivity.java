@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
+import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
@@ -38,14 +38,14 @@ public class DeviceSelectActivity extends AppCompatActivity {
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
     // Sample device scanner
-    private BLEScanner mDeviceScanner = new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
      *
      * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
-    private BLEScanner.Callback mDeviceCallback = new BLEScanner.Callback() {
+    private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Found Registered Device '%s' '%s' %s", deviceName, deviceAddress, rssi));

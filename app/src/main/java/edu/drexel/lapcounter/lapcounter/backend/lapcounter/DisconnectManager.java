@@ -4,8 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import edu.drexel.lapcounter.lapcounter.backend.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 public class DisconnectManager {
@@ -27,11 +28,8 @@ public class DisconnectManager {
      */
     private ReconnectFunction mReconnectFunc = null;
 
-    // How often the RSSIManager should poll for the RSSI after connecting.
-    private static final int CONNECT_RSSI_POLL_MS = 100;
-
     // References to other components for direct querying
-    private RSSIManager mRssiManager;
+    private BLEService mBleService;
     private LocationStateMachine mStateMachine;
 
     // Keep track of the time of reconnection.
@@ -48,12 +46,11 @@ public class DisconnectManager {
             beforeSnapshot.zone = mStateMachine.getZone();
             mStateMachine.onDisconnect();
 
-            // TODO: Query these from the BLEService, not RSSIManager directly.
-            beforeSnapshot.distRssi = mRssiManager.getRssi();
-            beforeSnapshot.travelDirection = mRssiManager.getDirection();
-            mRssiManager.clear();
+            beforeSnapshot.distRssi = mBleService.getRssi();
+            beforeSnapshot.travelDirection = mBleService.getDirection();
+            mBleService.clearRssiManager();
 
-            // Save the currrent time
+            // Save the current time
             beforeSnapshot.timestamp = System.currentTimeMillis();
 
             // Add the before state to the reconnection function.
@@ -68,9 +65,6 @@ public class DisconnectManager {
             // logic for a second or two while the RSSIManager refills the buffer. So save it
             // in a member variable.
             mAfterTimestamp = System.currentTimeMillis();
-
-            // Yell at the RSSI Manager to poll faster.
-            mRssiManager.setPollFrequency(CONNECT_RSSI_POLL_MS);
         }
     };
 
@@ -94,7 +88,9 @@ public class DisconnectManager {
             afterSnapshot.timestamp = mAfterTimestamp;
             mAfterTimestamp = -1;
 
-            // TODO: Query BLEService for the other two variables.
+            // Get the athlete's new position and direction.
+            afterSnapshot.distRssi = mBleService.getRssi();
+            afterSnapshot.travelDirection = mBleService.getDirection();
 
             // Use the reconnection function to examine the state and determine if we
             // should count a missed lap.
@@ -106,9 +102,9 @@ public class DisconnectManager {
 
     // =========================================================================================
 
-    public DisconnectManager(Context context, RSSIManager rssi, LocationStateMachine stateMachine) {
+    public DisconnectManager(Context context, BLEService bleService, LocationStateMachine stateMachine) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
-        mRssiManager = rssi;
+        mBleService = bleService;
         mStateMachine = stateMachine;
     }
 
@@ -119,15 +115,14 @@ public class DisconnectManager {
      * DEVICE_DISCONNECTED -> Alert other components of the disconnect while keeping track
      *      of the current state to help with the reconnect logic
      *
-     * DEVICE_CONNECTED -> start the reconnection process
+     * DEVICE_RECONNECTED -> Start the reconnection process
      *
      * STATE_TRANSITION -> Listen for transitions out of the unknown state. If this is because
      *      of a reconnection,
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
-        receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
-        //TODO: This should be reconnect events only.
-        receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onReconnect);
+        receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
+        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
         receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
     }
     /**

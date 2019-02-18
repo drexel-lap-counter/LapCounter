@@ -1,7 +1,13 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.Manifest;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
+import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
@@ -30,15 +37,17 @@ public class DeviceScanActivity extends AppCompatActivity {
     private static final String TAG = DeviceScanActivity.class.getSimpleName();
     private final NavBar mNavBar = new NavBar(this);
 
-    // Sample device scanner
-    private BLEScanner mDeviceScanner = new DummyDeviceScanner();
+    // Unique IDs for requesting permissions
+    private static final int REQUEST_LOCATION = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
 
+    private DeviceScanner mDeviceScanner;
     /**
      * This callback gets called *once per device discovered*. Use it to populate
      *
      * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
-    private BLEScanner.Callback mDeviceCallback = new BLEScanner.Callback() {
+    private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Discovered '%s' '%s' %s", deviceName, deviceAddress, rssi));
@@ -108,23 +117,58 @@ public class DeviceScanActivity extends AppCompatActivity {
             }
         }));
 
+        requestBluetoothPermission();
+    }
 
+    private boolean getLocationPermission() {
+        String permission = Manifest.permission.ACCESS_COARSE_LOCATION;
+        int currentPermission = ActivityCompat.checkSelfPermission(this, permission);
+        boolean canRequest = currentPermission == PackageManager.PERMISSION_GRANTED;
 
+        if (canRequest) {
+            ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_LOCATION);
+            return true;
+        }
 
-        // Set a callback for whenever we find a bluetooth device
-        mDeviceScanner.setCallback(mDeviceCallback);
+        return false;
+    }
 
-        // NOTE: Unlike DeviceSelectActivity, we do NOT add a whitelist here.
+    private void requestBluetoothPermission() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
 
-        // Start the scan. This will call the callback a bunch of times.
-        mDeviceScanner.startScan();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        // User chose not to enable Bluetooth. Exit gracefully.
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK && getLocationPermission()) {
+                mDeviceScanner = new BLEScanner(this);
+            } else {
+                mDeviceScanner = new DummyDeviceScanner();
+            }
+
+            // Set a callback for whenever we find a bluetooth device
+            mDeviceScanner.setCallback(mDeviceCallback);
+
+            // NOTE: Unlike DeviceSelectActivity, we do NOT add a whitelist here.
+
+            // Start the scan. This will call the callback a bunch of times.
+            mDeviceScanner.startScan();
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onPause()
     {
         super.onPause();
-        mDeviceScanner.stopScan();
+
+        if (mDeviceScanner != null) {
+            mDeviceScanner.stopScan();
+        }
+
         mAdapter.clearItems();
         mAdapter.notifyDataSetChanged();
     }
@@ -133,7 +177,10 @@ public class DeviceScanActivity extends AppCompatActivity {
     protected void onResume()
     {
         super.onResume();
-        mDeviceScanner.startScan();
+
+        if (mDeviceScanner != null) {
+            mDeviceScanner.startScan();
+        }
     }
 
     public void selectDevice(View view) {

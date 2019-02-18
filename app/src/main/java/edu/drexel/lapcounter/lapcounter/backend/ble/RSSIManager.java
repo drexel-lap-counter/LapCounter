@@ -1,16 +1,23 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-public class RSSIManager {
-    public final static String ACTION_RSSI_AND_DIR_AVAILABLE =
-            "edu.drexel.lapcounter.lapcounter.backend.ACTION_RSSI_AND_DIR_AVAILABLE";
+import edu.drexel.lapcounter.lapcounter.backend.MovingAverage;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.SlidingWindow;
 
-    public final static String EXTRA_RSSI = "edu.drexel.lapcounter.lapcounter.backend.EXTRA_RSSI";
-    public final static String EXTRA_DIRECTION =
-            "edu.drexel.lapcounter.lapcounter.backend.EXTRA_DIRECTION";
+public class RSSIManager {
+    private static String qualify(String s) {
+        return RSSIManager.class.getPackage().getName() + "." + s;
+    }
+
+    public final static String ACTION_RSSI_AND_DIR_AVAILABLE =
+            qualify("ACTION_RSSI_AND_DIR_AVAILABLE");
+
+    public final static String EXTRA_RSSI = qualify("EXTRA_RSSI");
+    public final static String EXTRA_DIRECTION = qualify("EXTRA_DIRECTION");
 
     public static final int DIRECTION_OUT = 1;
     public static final int DIRECTION_IN = -1;
@@ -28,12 +35,13 @@ public class RSSIManager {
 
     // TODO: Schedule RSSI Request.
     private static final int NORMAL_RSSI_PERIOD_MS = 300;
+    private static final int RECONNECT_RSSI_PERIOD_MS = 100;
     private int mPollFrequencyMs = NORMAL_RSSI_PERIOD_MS;
 
     private SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            int rssi = Math.abs(message.getIntExtra(BLEService.EXTRA_RAW_RSSI, 0));
+            int rssi = Math.abs(message.getIntExtra(BLEComm.EXTRA_RAW_RSSI, 0));
 
             if (rssi == 0) {
                 return;
@@ -50,13 +58,21 @@ public class RSSIManager {
         }
     };
 
+    private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            // Poll faster.
+            mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
+        }
+    };
 
     public RSSIManager(Context context) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
-        receiver.registerHandler(BLEService.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
+        receiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
+        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
     }
 
     public double getRssi() {
@@ -84,10 +100,6 @@ public class RSSIManager {
 
     private boolean windowsAreFull() {
         return mFilter.windowIsFull() && mRssiDeltas.isFull();
-    }
-
-    public void setPollFrequency(int frequencyMs) {
-        mPollFrequencyMs = frequencyMs;
     }
 
     public void clear() {
