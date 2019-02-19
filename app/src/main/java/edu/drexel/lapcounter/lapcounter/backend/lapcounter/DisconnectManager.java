@@ -27,37 +27,23 @@ public class DisconnectManager {
      */
     private ReconnectFunction mReconnectFunc = null;
 
-    // How often the RSSIManager should poll for the RSSI after connecting.
-    private static final int CONNECT_RSSI_POLL_MS = 100;
-
-    // References to other components for direct querying
-    private RSSIManager mRssiManager;
-    private LocationStateMachine mStateMachine;
-
-    // Keep track of the time of reconnection.
-    private long mAfterTimestamp = -1;
+    /**
+     * Current state of the athlete. This is updated on receiving incoming intents. As needed,
+     * snapshots of this state are passed to the reconnect function
+     */
+    private AthleteState mCurrentState = new AthleteState();
 
     // Callbacks =================================================================================
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
             mReconnectFunc = new ReconnectFunction();
-            ReconnectFunction.AthleteState beforeSnapshot = mReconnectFunc.new AthleteState();
 
-            // Save what zone the athlete is in. Then set the state to UNKNOWN
-            beforeSnapshot.zone = mStateMachine.getZone();
-            mStateMachine.onDisconnect();
-
-            // TODO: Query these from the BLEService, not RSSIManager directly.
-            beforeSnapshot.distRssi = mRssiManager.getRssi();
-            beforeSnapshot.travelDirection = mRssiManager.getDirection();
-            mRssiManager.clear();
-
-            // Save the currrent time
-            beforeSnapshot.timestamp = System.currentTimeMillis();
+            // Save the current time
+            mCurrentState.timestamp = System.currentTimeMillis();
 
             // Add the before state to the reconnection function.
-            mReconnectFunc.setBeforeState(beforeSnapshot);
+            mReconnectFunc.setBeforeState(mCurrentState.copy());
         }
     };
 
@@ -67,10 +53,7 @@ public class DisconnectManager {
             // We want the timestamp of reconnection, even though we are not done with the
             // logic for a second or two while the RSSIManager refills the buffer. So save it
             // in a member variable.
-            mAfterTimestamp = System.currentTimeMillis();
-
-            // Yell at the RSSI Manager to poll faster.
-            mRssiManager.setPollFrequency(CONNECT_RSSI_POLL_MS);
+            mCurrentState.timestamp = System.currentTimeMillis();
         }
     };
 
@@ -82,34 +65,36 @@ public class DisconnectManager {
             LocationStateMachine.State afterState = (LocationStateMachine.State)
                     message.getSerializableExtra(LocationStateMachine.EXTRA_STATE_AFTER);
 
+            // Update the current zone, we'll need this for the reconnection function.
+            if (afterState != LocationStateMachine.State.UNKNOWN) {
+                mCurrentState.zone = afterState;
+            }
+
             // We only care about Unknown -> any other state. Filter out irrelevant transitions here
             if (beforeState != LocationStateMachine.State.UNKNOWN)
                 return;
 
-            // Now we have enough information to complete an after reconnection state snapshot.
-            ReconnectFunction.AthleteState afterSnapshot = mReconnectFunc.new AthleteState();
-            afterSnapshot.zone = afterState;
-
-            // Store the timestamp and clear the internal state.
-            afterSnapshot.timestamp = mAfterTimestamp;
-            mAfterTimestamp = -1;
-
-            // TODO: Query BLEService for the other two variables.
-
             // Use the reconnection function to examine the state and determine if we
             // should count a missed lap.
-            boolean countLap = mReconnectFunc.computeLapsMissed(afterSnapshot);
+            boolean countLap = mReconnectFunc.computeLapsMissed(mCurrentState.copy());
             if (countLap)
                 publishMissedLap();
         }
     };
 
+    private SimpleMessageReceiver.MessageHandler onRssi = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            // Store the current RSSI value in the state snapshot
+            mCurrentState.distRssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0.0);
+            mCurrentState.travelDirection = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
+        }
+    };
+
     // =========================================================================================
 
-    public DisconnectManager(Context context, RSSIManager rssi, LocationStateMachine stateMachine) {
+    public DisconnectManager(Context context) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
-        mRssiManager = rssi;
-        mStateMachine = stateMachine;
     }
 
 
@@ -125,6 +110,7 @@ public class DisconnectManager {
      *      of a reconnection,
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
+        receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
         receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
         //TODO: This should be reconnect events only.
         receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onReconnect);

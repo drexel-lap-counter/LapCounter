@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import edu.drexel.lapcounter.lapcounter.backend.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
@@ -92,6 +93,16 @@ public class LocationStateMachine {
         }
     };
 
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            State oldState = mState;
+            mState = State.UNKNOWN;
+
+            publishStateTransition(oldState, mState);
+        }
+    };
+
     private void publishStateTransition(State before, State after) {
         Intent intent = new Intent(ACTION_STATE_TRANSITION);
         intent.putExtra(EXTRA_STATE_BEFORE, before);
@@ -101,10 +112,7 @@ public class LocationStateMachine {
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssiAndDirection);
-    }
-
-    public State getZone() {
-        return mState;
+        receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
     }
 
     /**
@@ -119,15 +127,5 @@ public class LocationStateMachine {
             mState = State.NEAR;
 
         publishStateTransition(State.UNKNOWN, mState);
-    }
-
-    /**
-     * When a device disconnects, go back to the Unknown state
-     */
-    public void onDisconnect() {
-        State oldState = mState;
-        mState = State.UNKNOWN;
-
-        publishStateTransition(oldState, mState);
     }
 }

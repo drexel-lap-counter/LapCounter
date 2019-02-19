@@ -14,29 +14,6 @@ import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
 public class ReconnectFunction {
     private static final int LONG_DELAY_THRESHOLD_SEC = 30;
 
-    /**
-     * Snapshot of the estimated state of the athlete.
-     */
-    public class AthleteState {
-        /**
-         * Near/Far state (no unknown state
-         */
-        public LocationStateMachine.State zone;
-        /**
-         * Snapshot filtered RSSI value to sort states by distance (roughly)
-         */
-        public double distRssi;
-        /**
-         * Is the athlete out or back?
-         * Either RSSIManager.DIRECTION_OUT or DIRECTION_IN
-         */
-        public int travelDirection;
-        /**
-         * Unix timestamp of the snapshot
-         */
-        public long timestamp;
-    }
-
     // States immediately before and after a disconnection.
     private AthleteState mBeforeDisconnect;
     private AthleteState mAfterReconnect;

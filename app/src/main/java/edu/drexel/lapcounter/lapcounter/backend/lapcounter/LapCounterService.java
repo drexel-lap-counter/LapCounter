@@ -28,8 +28,7 @@ public class LapCounterService extends Service {
      * This component monitors the bluetooth service for disconnects/reconnects and
      * orchestrates changes to the state across components
      */
-    private DisconnectManager mDisconnectManager =
-            new DisconnectManager(this, mRssiManager, mStateMachine);
+    private DisconnectManager mDisconnectManager = new DisconnectManager(this);
 
     /**
      * This component simply counts laps (including publishing an event whenever a lap is counted.
