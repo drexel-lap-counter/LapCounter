@@ -14,20 +14,20 @@ import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
 
 public class BLEScanner implements DeviceScanner {
     private List<String> mWhitelist;
-    private BLEComm mBleComm;
+    private BLEService mBleService;
     private Context mParentContext;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
-    private ServiceConnection mBleCommConnection = new ServiceConnection() {
+    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            BLEComm.LocalBinder binder = (BLEComm.LocalBinder) service;
-            mBleComm = binder.getService();
-            mBleComm.startScan(mLeScanCallback);
+            BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
+            mBleService = binder.getService();
+            mBleService.startScan(mLeScanCallback);
         }
 
         public void onServiceDisconnected(ComponentName arg0) {
-            mBleComm = null;
+            mBleService = null;
         }
     };
 
@@ -56,13 +56,13 @@ public class BLEScanner implements DeviceScanner {
 
     @Override
     public void startScan() {
-        Intent intent = new Intent(mParentContext, BLEComm.class);
-        mParentContext.bindService(intent, mBleCommConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = new Intent(mParentContext, BLEService.class);
+        mParentContext.bindService(intent, mBleServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void stopScan() {
-        mBleComm.stopScan(mLeScanCallback);
-        mParentContext.unbindService(mBleCommConnection);
+        mBleService.stopScan(mLeScanCallback);
+        mParentContext.unbindService(mBleServiceConnection);
     }
 }

@@ -194,6 +194,7 @@ public class BLEComm extends Service {
         }
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+        mConnectionState = STATE_DISCONNECTED;
     }
 
     public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
