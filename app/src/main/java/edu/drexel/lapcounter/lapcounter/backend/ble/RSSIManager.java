@@ -2,6 +2,7 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.MovingAverage;
@@ -33,10 +34,14 @@ public class RSSIManager {
     private double mPreviousRssi;
     private double mCurrentRssi;
 
-    // TODO: Schedule RSSI Request.
     private static final int NORMAL_RSSI_PERIOD_MS = 300;
     private static final int RECONNECT_RSSI_PERIOD_MS = 100;
-    private int mPollFrequencyMs = NORMAL_RSSI_PERIOD_MS;
+
+    private int mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
+
+    private final BLEComm mBleComm;
+
+    private final Handler mHandler = new Handler();
 
     private SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
@@ -58,21 +63,48 @@ public class RSSIManager {
         }
     };
 
-    private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
+    private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            // Poll faster.
             mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
+            scheduleRssiRequest();
         }
     };
 
-    public RSSIManager(Context context) {
+
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            clear();
+            mHandler.removeCallbacks(mRequestRssi);
+        }
+    };
+
+    private final Runnable mRequestRssi = new Runnable() {
+        @Override
+        public void run() {
+            if (mBleComm.getConnectionState() != BLEComm.STATE_CONNECTED) {
+                return;
+            }
+
+            mBleComm.requestRssi();
+            scheduleRssiRequest();
+        }
+    };
+
+    private void scheduleRssiRequest() {
+        mHandler.postDelayed(mRequestRssi, mPollFrequencyMs);
+    }
+
+    public RSSIManager(Context context, BLEComm bleComm) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        mBleComm = bleComm;
     }
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
+        receiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
         receiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
-        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
     }
 
     public double getRssi() {

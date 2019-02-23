@@ -187,7 +187,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         // TODO: Register the device before transitioning
         //Pass device object to intent
         // Go directly to calibration
-        Intent intent = new Intent(this, CalibrateDeviceActivity.class);
+        Intent intent = new Intent(this, DummyCalibrateDeviceActivity.class);
         intent.putExtra("DEVICE_NAME",mDevice.getName());
         intent.putExtra("DEVICE_MAC",mDevice.getMac());
         intent.putExtra("DEVICE_RSSI",mDevice.getRssi());

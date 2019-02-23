@@ -21,16 +21,17 @@ public class BLEComm extends Service {
     // Unique IDs for the Intents this server publishes
     public final static String ACTION_CONNECTED = qualify("ACTION_CONNECTED");
     public final static String ACTION_DISCONNECTED = qualify("ACTION_DISCONNECTED");
-    public final static String ACTION_RECONNECTED = qualify("ACTION_RECONNECTED");
     public final static String ACTION_RAW_RSSI_AVAILABLE = qualify("ACTION_RAW_RSSI_AVAILABLE");
 
     // Tag for the RSSI data in the Intent payload
     public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
 
+    public final static String EXTRA_IS_RECONNECT = qualify("EXTRA_IS_RECONNECT");
+
     // States of connection
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
+    public static final int STATE_DISCONNECTED = 0;
+    public static final int STATE_CONNECTING = 1;
+    public static final int STATE_CONNECTED = 2;
 
     private final IBinder mBinder = new LocalBinder();
     private String mPreviousConnectAddress;
@@ -53,17 +54,13 @@ public class BLEComm extends Service {
                 mConnectionState = STATE_CONNECTED;
                 Log.d(TAG, "Connected to GATT server. status = " + status);
 
-                if (mCurrentConnectAddress.equals(mPreviousConnectAddress)) {
-                    broadcastUpdate(ACTION_RECONNECTED);
-                } else {
-                    broadcastUpdate(ACTION_CONNECTED);
-                }
+                boolean isReconnect = mCurrentConnectAddress.equals(mPreviousConnectAddress);
+                broadcastConnect(isReconnect);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
                 Log.d(TAG, "Disconnected from GATT server. status = " + status);
                 broadcastUpdate(ACTION_DISCONNECTED);
             }
-
         }
 
         @Override
@@ -117,6 +114,12 @@ public class BLEComm extends Service {
 
     private void localBroadcast(Intent intent) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void broadcastConnect(boolean isReconnect) {
+        Intent intent = new Intent(ACTION_CONNECTED);
+        intent.putExtra(EXTRA_IS_RECONNECT, isReconnect);
+        localBroadcast(intent);
     }
 
     /**
@@ -203,6 +206,10 @@ public class BLEComm extends Service {
 
     public void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
         mBluetoothAdapter.stopLeScan(scanCallback);
+    }
+
+    public int getConnectionState() {
+        return mConnectionState;
     }
 
     public class LocalBinder extends Binder {

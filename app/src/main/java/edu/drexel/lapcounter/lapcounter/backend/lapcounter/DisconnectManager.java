@@ -46,9 +46,6 @@ public class DisconnectManager {
             beforeSnapshot.zone = mStateMachine.getZone();
             mStateMachine.onDisconnect();
 
-            beforeSnapshot.distRssi = mBleService.getRssi();
-            beforeSnapshot.travelDirection = mBleService.getDirection();
-            mBleService.clearRssiManager();
 
             // Save the current time
             beforeSnapshot.timestamp = System.currentTimeMillis();
@@ -61,6 +58,12 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            boolean isReconnect = message.getBooleanExtra(BLEComm.EXTRA_IS_RECONNECT, false);
+
+            if (!isReconnect) {
+                return;
+            }
+
             // We want the timestamp of reconnection, even though we are not done with the
             // logic for a second or two while the RSSIManager refills the buffer. So save it
             // in a member variable.
@@ -88,9 +91,6 @@ public class DisconnectManager {
             afterSnapshot.timestamp = mAfterTimestamp;
             mAfterTimestamp = -1;
 
-            // Get the athlete's new position and direction.
-            afterSnapshot.distRssi = mBleService.getRssi();
-            afterSnapshot.travelDirection = mBleService.getDirection();
 
             // Use the reconnection function to examine the state and determine if we
             // should count a missed lap.
@@ -122,7 +122,7 @@ public class DisconnectManager {
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
-        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
+        receiver.registerHandler(BLEComm.ACTION_CONNECTED, onReconnect);
         receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
     }
     /**

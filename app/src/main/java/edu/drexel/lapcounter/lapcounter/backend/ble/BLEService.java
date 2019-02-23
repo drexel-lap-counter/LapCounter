@@ -18,7 +18,6 @@ public class BLEService extends Service {
     private boolean mShouldScan = false;
     private BluetoothAdapter.LeScanCallback mScanCallback;
 
-
     public class LocalBinder extends Binder {
         public BLEService getService() {
             return BLEService.this;
@@ -35,6 +34,7 @@ public class BLEService extends Service {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BLEComm.LocalBinder binder = (BLEComm.LocalBinder) service;
             mBleComm = binder.getService();
+            mRssiManager = new RSSIManager(BLEService.this, mBleComm);
 
             if (mShouldScan) {
                 mBleComm.startScan(mScanCallback);
@@ -49,7 +49,6 @@ public class BLEService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mRssiManager = new RSSIManager(this);
         Intent intent = new Intent(this, BLEComm.class);
         bindService(intent, mBleCommConnection, Context.BIND_AUTO_CREATE);
     }
@@ -58,18 +57,6 @@ public class BLEService extends Service {
     public void onDestroy() {
         unbindService(mBleCommConnection);
         super.onDestroy();
-    }
-
-    public double getRssi() {
-        return mRssiManager.getRssi();
-    }
-
-    public int getDirection() {
-        return mRssiManager.getDirection();
-    }
-
-    public void clearRssiManager() {
-        mRssiManager.clear();
     }
 
     public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
