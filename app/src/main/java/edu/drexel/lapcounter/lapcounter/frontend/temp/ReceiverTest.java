@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.Helper;
+import edu.drexel.lapcounter.lapcounter.backend.BroadcastHelper;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 /**
@@ -122,6 +122,6 @@ public class ReceiverTest extends AppCompatActivity {
 
         // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
         // can broadcast intents
-        Helper.sendBroadcast(this, intent);
+        BroadcastHelper.sendBroadcast(this, intent);
     }
 }
