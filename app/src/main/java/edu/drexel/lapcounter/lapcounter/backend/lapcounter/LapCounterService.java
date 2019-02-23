@@ -2,25 +2,16 @@ package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 
-import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
-import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
 public class LapCounterService extends Service {
     private final static String TAG = LapCounterService.class.getSimpleName();
-
-    /**
-     * This component listens for raw RSSI values and applies filters to them to make
-     * the data easier for other components to consume
-     */
-    private RSSIManager mRssiManager = new RSSIManager(this);
 
     // TODO: Load from calibration.
     private static final double DEFAULT_THRESHOLD = 60;
@@ -105,6 +96,5 @@ public class LapCounterService extends Service {
         mLapCounter.initCallbacks(mReceiver);
         mDisconnectManager.initCallbacks(mReceiver);
         mStateMachine.initCallbacks(mReceiver);
-        mRssiManager.initCallbacks(mReceiver);
     }
 }
