@@ -6,6 +6,47 @@
     android:layout_height="match_parent"
     tools:context=".frontend.WorkoutHistoryActivity">
 
+    <TextView
+        android:id="@+id/Workout_History_SelectDate_Text"
+        android:layout_width="96dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:text="Select Dates: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/Workout_History_Start_Date"
+        android:layout_width="72dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:text="Start Date"
+        app:layout_constraintStart_toEndOf="@+id/Workout_History_SelectDate_Text"
+        app:layout_constraintTop_toTopOf="@+id/Workout_History_SelectDate_Text" />
+
+    <TextView
+        android:id="@+id/Workout_History_End_Date"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="8dp"
+        android:text="End Date"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.425"
+        app:layout_constraintStart_toEndOf="@+id/Workout_History_T"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/Workout_History_T"
+        android:layout_width="28dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="28dp"
+        android:text="To"
+        app:layout_constraintStart_toEndOf="@+id/Workout_History_Start_Date"
+        app:layout_constraintTop_toTopOf="@+id/Workout_History_Start_Date" />
+
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
@@ -18,4 +59,108 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation"
         app:labelVisibilityMode="labeled" />
+
+    <TextView
+        android:id="@+id/WORKOUT_HISTORY_TTL_DIST_TRAV"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="58dp"
+        android:text="Total Distance Traveled: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Workout_History_SelectDate_Text" />
+
+    <TextView
+        android:id="@+id/WORKOUT_HISTORY_AVG_WRK_TIME"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Avg Workout Time:  "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WORKOUT_HISTORY_TTL_DIST_TRAV" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="38dp"
+        android:text="Duration: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WORKOUT_HISTORY_AVG_WRK_TIME" />
+
+    <TextView
+        android:id="@+id/WORKOUT_HISTORY_AVGWD"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="25dp"
+        android:text="Avg Workout Distance: "
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/TDT_Data"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="132dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="32dp"
+        android:text="TDT Data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/WORKOUT_HISTORY_TTL_DIST_TRAV"
+        app:layout_constraintTop_toBottomOf="@+id/Workout_History_End_Date" />
+
+    <TextView
+        android:id="@+id/AVGWT_Data"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="200dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="AVGWT Data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.948"
+        app:layout_constraintStart_toEndOf="@+id/WORKOUT_HISTORY_AVG_WRK_TIME"
+        app:layout_constraintTop_toBottomOf="@+id/TDT_Data" />
+
+    <TextView
+        android:id="@+id/DUR_Data"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="228dp"
+        android:layout_marginTop="38dp"
+        android:layout_marginEnd="31dp"
+        android:text="DUR Data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/AVGWT_Data" />
+
+    <TextView
+        android:id="@+id/AVG_WD_Data"
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="32dp"
+        android:text="AVG WD Data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/WORKOUT_HISTORY_AVGWD"
+        app:layout_constraintTop_toBottomOf="@+id/DUR_Data" />
+
+
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/bargraph"
+        android:layout_width="364dp"
+        android:layout_height="157dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+    </com.github.mikephil.charting.charts.BarChart>
 </android.support.constraint.ConstraintLayout>
