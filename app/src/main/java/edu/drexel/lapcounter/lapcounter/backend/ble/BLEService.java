@@ -11,9 +11,13 @@ import android.os.IBinder;
 
 public class BLEService extends Service {
     private BLEComm mBleComm;
-    private final RSSIManager mRssiManager = new RSSIManager(this);
+    private RSSIManager mRssiManager;
 
     private final IBinder mBinder = new LocalBinder();
+
+    private boolean mShouldScan = false;
+    private BluetoothAdapter.LeScanCallback mScanCallback;
+
 
     public class LocalBinder extends Binder {
         public BLEService getService() {
@@ -31,6 +35,10 @@ public class BLEService extends Service {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BLEComm.LocalBinder binder = (BLEComm.LocalBinder) service;
             mBleComm = binder.getService();
+
+            if (mShouldScan) {
+                mBleComm.startScan(mScanCallback);
+            }
         }
 
         public void onServiceDisconnected(ComponentName arg0) {
@@ -41,6 +49,7 @@ public class BLEService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mRssiManager = new RSSIManager(this);
         Intent intent = new Intent(this, BLEComm.class);
         bindService(intent, mBleCommConnection, Context.BIND_AUTO_CREATE);
     }
@@ -64,11 +73,21 @@ public class BLEService extends Service {
     }
 
     public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        mBleComm.startScan(scanCallback);
+        if (mBleComm == null) {
+            mShouldScan = true;
+            mScanCallback = scanCallback;
+        } else {
+            mBleComm.startScan(scanCallback);
+        }
     }
 
     public void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        mBleComm.stopScan(scanCallback);
+        if (mBleComm != null) {
+            mBleComm.stopScan(scanCallback);
+        }
+
+        mShouldScan = false;
+        mScanCallback = null;
     }
 
     public boolean connect(String deviceAddress) {
