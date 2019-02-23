@@ -8,6 +8,10 @@ import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
+/**
+ * This class listens for BLE disconnect/reconnect events and using information about the
+ * RSSI and state, determine if the athlete missed any laps
+ */
 public class DisconnectManager {
     /**
      * This intent is published on a reconnection event when the ReconnectFunction determines
@@ -34,6 +38,10 @@ public class DisconnectManager {
     private AthleteState mCurrentState = new AthleteState();
 
     // Callbacks =================================================================================
+    /**
+     * On disconnect, take a "before disconnect" snapshot of the current state and start setting up
+     * the reconnect function. We need to wait for after reconnection to get the "after" state.
+     */
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -47,6 +55,10 @@ public class DisconnectManager {
         }
     };
 
+    /**
+     * As soon as we get a reconnection event, save a timestamp of reconnection, but we have
+     * to wait a little bit for the filtered RSSI values to start trickling through.
+     */
     private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -63,6 +75,14 @@ public class DisconnectManager {
         }
     };
 
+    /**
+     * When we hear of a transition from a state machine, update the current state (only if the
+     * new state is near/far).
+     *
+     * If the transition is from unknown -> near/far, we now have enough information to
+     * compute the "after reconnect" snapshot. Now we can compute any missed laps and publish
+     * them if needed.
+     */
     private SimpleMessageReceiver.MessageHandler onTransition = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -88,6 +108,11 @@ public class DisconnectManager {
         }
     };
 
+    /**
+     * When we get a filtered RSSI value message, save the RSSI and direction.
+     * These values are only used to create the "before disconnect" or "after reconnect"
+     * state snapshots as needed.
+     */
     private SimpleMessageReceiver.MessageHandler onRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -99,6 +124,10 @@ public class DisconnectManager {
 
     // =========================================================================================
 
+    /**
+     * Constructor
+     * @param context the parent service for setting up Intent broadcasts
+     */
     public DisconnectManager(Context context) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
@@ -107,13 +136,15 @@ public class DisconnectManager {
     /**
      * Handle the following intents:
      *
-     * DEVICE_DISCONNECTED -> Alert other components of the disconnect while keeping track
-     *      of the current state to help with the reconnect logic
+     * DISCONNECTED -> Take a snapshot of the athlete's state just before the disconnection
      *
-     * DEVICE_CONNECTED -> start the reconnection process
+     * RECONNECTED -> Start the reconnection process
      *
-     * STATE_TRANSITION -> Listen for transitions out of the unknown state. If this is because
-     *      of a reconnection,
+     * STATE_TRANSITION -> If the transition is to near/far, just keep track of this.
+     *      If the transition is from unknown -> near/far, also compute the ReconnectFunction
+     *      to see if we missed any laps
+     *
+     * RSSI_AVAILABLE -> Store the RSSI for use in computing before/after snapshots
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);

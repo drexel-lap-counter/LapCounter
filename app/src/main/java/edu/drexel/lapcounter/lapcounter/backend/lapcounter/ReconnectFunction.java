@@ -14,8 +14,13 @@ import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 public class ReconnectFunction {
     private static final int LONG_DELAY_THRESHOLD_SEC = 30;
 
-    // States immediately before and after a disconnection.
+    /**
+     * State just before disconnecting
+     */
     private AthleteState mBeforeDisconnect;
+    /**
+     * State just after reconnecting
+     */
     private AthleteState mAfterReconnect;
 
     /**
