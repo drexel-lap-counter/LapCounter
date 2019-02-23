@@ -15,4 +15,7 @@
     <string name="i_device_name">DEVICE_NAME</string>
     <string name="i_device_mac">DEVICE_MAC</string>
     <string name="i_device_rssi">DEVICE_RSSI</string>
+    <string name="no">NO</string>
+    <string name="yes">YES</string>
+    <string name="resumeButtonLabel">RESUME</string>
 </resources>
