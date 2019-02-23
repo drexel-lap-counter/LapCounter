@@ -1,21 +1,17 @@
 package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
 public class LapCounterService extends Service {
     private final static String TAG = LapCounterService.class.getSimpleName();
-
-    /**
-     * This component listens for raw RSSI values and applies filters to them to make
-     * the data easier for other components to consume
-     */
-    private RSSIManager mRssiManager = new RSSIManager(this);
 
     // TODO: Load from calibration.
     private static final double DEFAULT_THRESHOLD = 60;
@@ -42,24 +38,7 @@ public class LapCounterService extends Service {
      */
     private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
-/*
-NOTE: https://developer.android.com/guide/components/bound-services
-
-Questions:
-    1. Does a bound service continue to run when all bound clients are suspended, i.e., in the
-    back stack?
-
-    2. If no, then can another Activity _not_ bound to the service still receive
-    broadcasts from the service?
-
-Something to keep in mind for future Royce:
-"Although you usually implement either onBind() or onStartCommand(), it's sometimes necessary to
-implement both. For example, a music player might find it useful to allow its service to run
-indefinitely and also provide binding. This way, an activity can start the service to play some
-music and the music continues to play even if the user leaves the application. Then, when the
-user returns to the application, the activity can bind to the service to regain control of
-playback."
-*/
+    private BLEService mBleService;
 
     private final IBinder mBinder = new LocalBinder();
 
@@ -77,19 +56,34 @@ playback."
     @Override
     public void onCreate() {
         super.onCreate();
+        bindToBleService();
+    }
 
-        //TODO: Not sure if this is the best place for this code, review this before we finish
-        initCallbacks();
-        mReceiver.attach(this);
+    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
+            mBleService = binder.getService();
+
+            initCallbacks();
+            mReceiver.attach(LapCounterService.this);
+        }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBleService = null;
+        }
+    };
+
+    private void bindToBleService() {
+        Intent intent = new Intent(this, BLEService.class);
+        bindService(intent, mBleServiceConnection, BIND_AUTO_CREATE);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        // TODO: Again, not sure if this is the best place for this or if we even need to
-        // unbind the callbacks
         mReceiver.detach(this);
+        unbindService(mBleServiceConnection);
     }
 
     /**
@@ -100,6 +94,5 @@ playback."
         mLapCounter.initCallbacks(mReceiver);
         mDisconnectManager.initCallbacks(mReceiver);
         mStateMachine.initCallbacks(mReceiver);
-        mRssiManager.initCallbacks(mReceiver);
     }
 }

@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import edu.drexel.lapcounter.lapcounter.backend.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
-import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_IN;
-import static edu.drexel.lapcounter.lapcounter.backend.RSSIManager.DIRECTION_OUT;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_IN;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_OUT;
 
 /**
  * This class keeps track of whether the athlete is "near" or "far" from the phone. It publishes
@@ -112,7 +112,7 @@ public class LocationStateMachine {
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssiAndDirection);
-        receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
+        receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
     }
 
     /**

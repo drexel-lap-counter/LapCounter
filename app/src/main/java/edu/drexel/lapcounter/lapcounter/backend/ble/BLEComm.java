@@ -1,4 +1,4 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -14,35 +14,36 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-// TODO: BLEComm
-public class BLEService extends Service {
+public class BLEComm extends Service {
     // Tag for logging
-    public static final String TAG = BLEService.class.getSimpleName();
+    public static final String TAG = BLEComm.class.getSimpleName();
+
+    // Unique IDs for the Intents this server publishes
+    public final static String ACTION_CONNECTED = qualify("ACTION_CONNECTED");
+    public final static String ACTION_DISCONNECTED = qualify("ACTION_DISCONNECTED");
+    public final static String ACTION_RAW_RSSI_AVAILABLE = qualify("ACTION_RAW_RSSI_AVAILABLE");
+
+    // Tag for the RSSI data in the Intent payload
+    public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
+
+    public final static String EXTRA_IS_RECONNECT = qualify("EXTRA_IS_RECONNECT");
 
     // States of connection
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
+    public static final int STATE_DISCONNECTED = 0;
+    public static final int STATE_CONNECTING = 1;
+    public static final int STATE_CONNECTED = 2;
+
+    private final IBinder mBinder = new LocalBinder();
+    private String mPreviousConnectAddress;
+    private String mCurrentConnectAddress;
 
     // These are needed for making connections
-    private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
 
     // The GATT server. Most of this service interacts with this object
     private BluetoothGatt mBluetoothGatt;
+
     private int mConnectionState = STATE_DISCONNECTED;
-
-    // Unique IDs for the Intents this server publishes
-    public final static String ACTION_DEVICE_CONNECTED =
-            "edu.drexel.lapcounter.lapcounter.backend.ACTION_DEVICE_CONNECTED";
-    public final static String ACTION_DEVICE_DISCONNECTED =
-            "edu.drexel.lapcounter.lapcounter.backend.ACTION_DEVICE_DISCONNECTED";
-    public final static String ACTION_RAW_RSSI_AVAILABLE =
-            "edu.drexel.lapcounter.lapcounter.backend.ACTION_RAW_RSSI_AVAILABLE";
-
-    // Tag for the RSSI data in the Intent payload
-    public final static String EXTRA_RAW_RSSI =
-            "edu.drexel.lapcounter.lapcounter.backend.EXTRA_RAW_RSSI";
 
     // Callback for GATT serverevents.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -52,13 +53,14 @@ public class BLEService extends Service {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnectionState = STATE_CONNECTED;
                 Log.d(TAG, "Connected to GATT server. status = " + status);
-                broadcastUpdate(ACTION_DEVICE_CONNECTED);
+
+                boolean isReconnect = mCurrentConnectAddress.equals(mPreviousConnectAddress);
+                broadcastConnect(isReconnect);
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
                 Log.d(TAG, "Disconnected from GATT server. status = " + status);
-                broadcastUpdate(ACTION_DEVICE_DISCONNECTED);
+                broadcastUpdate(ACTION_DISCONNECTED);
             }
-
         }
 
         @Override
@@ -73,12 +75,20 @@ public class BLEService extends Service {
 
     };
 
-    private final IBinder mBinder = new LocalBinder();
+    private static String qualify(String s) {
+        return BLEComm.class.getPackage().getName() + "." + s;
+    }
 
-    public class LocalBinder extends Binder {
-        public BLEService getService() {
-            return BLEService.this;
-        }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = manager.getAdapter();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -94,31 +104,6 @@ public class BLEService extends Service {
     }
 
     /**
-     * Initializes a reference to the local Bluetooth adapter.
-     *
-     * @return Return true if the initialization is successful.
-     */
-    public boolean initialize() {
-        // For API level 18 and above, get a reference to BluetoothAdapter through
-        // BluetoothManager.
-        if (mBluetoothManager == null) {
-            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-            if (mBluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
-                return false;
-            }
-        }
-
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Use the GATT object to request an update to the RSSI
      */
     public void requestRssi() {
@@ -131,8 +116,15 @@ public class BLEService extends Service {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
+    private void broadcastConnect(boolean isReconnect) {
+        Intent intent = new Intent(ACTION_CONNECTED);
+        intent.putExtra(EXTRA_IS_RECONNECT, isReconnect);
+        localBroadcast(intent);
+    }
+
     /**
      * Broadcast an an intent for device connected/disconnected
+     *
      * @param action
      */
     private void broadcastUpdate(final String action) {
@@ -142,6 +134,7 @@ public class BLEService extends Service {
 
     /**
      * Broadcast an intent for device RSSI update
+     *
      * @param action
      * @param rssi
      */
@@ -155,11 +148,10 @@ public class BLEService extends Service {
      * Connects to the GATT server hosted on the Bluetooth LE device.
      *
      * @param address The device address of the destination device.
-     *
      * @return Return true if the connection is initiated successfully. The connection result
-     *         is reported asynchronously through the
-     *         {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
-     *         callback.
+     * is reported asynchronously through the
+     * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
+     * callback.
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
@@ -183,6 +175,9 @@ public class BLEService extends Service {
         // Release resources for a previously instantiated mBluetoothGatt.
         close();
 
+        mPreviousConnectAddress = mCurrentConnectAddress;
+        mCurrentConnectAddress = address;
+
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
@@ -202,5 +197,24 @@ public class BLEService extends Service {
         }
         mBluetoothGatt.close();
         mBluetoothGatt = null;
+        mConnectionState = STATE_DISCONNECTED;
+    }
+
+    public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
+        mBluetoothAdapter.startLeScan(scanCallback);
+    }
+
+    public void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
+        mBluetoothAdapter.stopLeScan(scanCallback);
+    }
+
+    public int getConnectionState() {
+        return mConnectionState;
+    }
+
+    public class LocalBinder extends Binder {
+        public BLEComm getService() {
+            return BLEComm.this;
+        }
     }
 }

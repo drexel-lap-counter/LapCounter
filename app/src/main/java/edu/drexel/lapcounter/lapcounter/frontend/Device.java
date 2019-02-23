@@ -1,5 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import java.util.Objects;
+
 public class Device
 {
 
@@ -53,5 +55,22 @@ public class Device
         this.rssi = rssi;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
 
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Device device = (Device) o;
+        return Objects.equals(name, device.name) && Objects.equals(mac, device.mac);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, mac);
+    }
 }

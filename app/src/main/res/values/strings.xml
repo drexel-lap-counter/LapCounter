@@ -10,4 +10,12 @@
     <string name="i_device_name">DEVICE_NAME</string>
     <string name="i_device_mac">DEVICE_MAC</string>
     <string name="i_device_rssi">DEVICE_RSSI</string>
+
+    <string name="label_calibrate_instructions">Move your device to the threshold and press \"Calibrate\".</string>
+    <string name="label_calibrate">Calibrate</string>
+    <string name="label_connecting">Connecting.</string>
+    <string name="label_device_disconnected_try_reconnect">Device disconnected. Trying to reconnect.</string>
+    <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
+    <string name="label_stop">Stop</string>
+    <string name="label_done">Done</string>
 </resources>

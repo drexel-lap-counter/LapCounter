@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-import edu.drexel.lapcounter.lapcounter.backend.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
 public class DisconnectManager {
     /**
@@ -50,6 +50,12 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            boolean isReconnect = message.getBooleanExtra(BLEComm.EXTRA_IS_RECONNECT, false);
+
+            if (!isReconnect) {
+                return;
+            }
+
             // We want the timestamp of reconnection, even though we are not done with the
             // logic for a second or two while the RSSIManager refills the buffer. So save it
             // in a member variable.
@@ -110,11 +116,10 @@ public class DisconnectManager {
      *      of a reconnection,
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
-        receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
-        receiver.registerHandler(BLEService.ACTION_DEVICE_DISCONNECTED, onDisconnect);
-        //TODO: This should be reconnect events only.
-        receiver.registerHandler(BLEService.ACTION_DEVICE_CONNECTED, onReconnect);
+        receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
+        receiver.registerHandler(BLEComm.ACTION_CONNECTED, onReconnect);
         receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
+        receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
     }
     /**
      * Publish a missed lap

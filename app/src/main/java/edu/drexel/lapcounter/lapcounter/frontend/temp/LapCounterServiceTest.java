@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 
 public class LapCounterServiceTest extends AppCompatActivity {
@@ -35,15 +35,15 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mBleService = ((BLEService.LocalBinder) service).getService();
-
-            if (!mBleService.initialize()) {
-                Log.e(TAG, "Unable to initialize Bluetooth");
-                return;
-            }
-
-            // Automatically connects to the device upon successful start-up initialization.
-            mBleService.connect(getStringExtra(EXTRA_DEVICE_ADDRESS));
+//            mBleService = ((BLEService.LocalBinder) service).getService();
+//
+//            if (!mBleService.initialize()) {
+//                Log.e(TAG, "Unable to initialize Bluetooth");
+//                return;
+//            }
+//
+//            // Automatically connects to the device upon successful start-up initialization.
+//            mBleService.connect(getStringExtra(EXTRA_DEVICE_ADDRESS));
         }
 
         @Override

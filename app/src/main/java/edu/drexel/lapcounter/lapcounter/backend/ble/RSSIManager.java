@@ -1,16 +1,24 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-public class RSSIManager {
-    public final static String ACTION_RSSI_AND_DIR_AVAILABLE =
-            "edu.drexel.lapcounter.lapcounter.backend.ACTION_RSSI_AND_DIR_AVAILABLE";
+import edu.drexel.lapcounter.lapcounter.backend.MovingAverage;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.SlidingWindow;
 
-    public final static String EXTRA_RSSI = "edu.drexel.lapcounter.lapcounter.backend.EXTRA_RSSI";
-    public final static String EXTRA_DIRECTION =
-            "edu.drexel.lapcounter.lapcounter.backend.EXTRA_DIRECTION";
+public class RSSIManager {
+    private static String qualify(String s) {
+        return RSSIManager.class.getPackage().getName() + "." + s;
+    }
+
+    public final static String ACTION_RSSI_AND_DIR_AVAILABLE =
+            qualify("ACTION_RSSI_AND_DIR_AVAILABLE");
+
+    public final static String EXTRA_RSSI = qualify("EXTRA_RSSI");
+    public final static String EXTRA_DIRECTION = qualify("EXTRA_DIRECTION");
 
     public static final int DIRECTION_OUT = 1;
     public static final int DIRECTION_IN = -1;
@@ -26,14 +34,19 @@ public class RSSIManager {
     private double mPreviousRssi;
     private double mCurrentRssi;
 
-    // TODO: Schedule RSSI Request.
     private static final int NORMAL_RSSI_PERIOD_MS = 300;
-    private int mPollFrequencyMs = NORMAL_RSSI_PERIOD_MS;
+    private static final int RECONNECT_RSSI_PERIOD_MS = 100;
+
+    private int mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
+
+    private final BLEComm mBleComm;
+
+    private final Handler mHandler = new Handler();
 
     private SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            int rssi = Math.abs(message.getIntExtra(BLEService.EXTRA_RAW_RSSI, 0));
+            int rssi = Math.abs(message.getIntExtra(BLEComm.EXTRA_RAW_RSSI, 0));
 
             if (rssi == 0) {
                 return;
@@ -50,13 +63,48 @@ public class RSSIManager {
         }
     };
 
+    private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
+            scheduleRssiRequest();
+        }
+    };
 
-    public RSSIManager(Context context) {
+
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            clear();
+            mHandler.removeCallbacks(mRequestRssi);
+        }
+    };
+
+    private final Runnable mRequestRssi = new Runnable() {
+        @Override
+        public void run() {
+            if (mBleComm.getConnectionState() != BLEComm.STATE_CONNECTED) {
+                return;
+            }
+
+            mBleComm.requestRssi();
+            scheduleRssiRequest();
+        }
+    };
+
+    private void scheduleRssiRequest() {
+        mHandler.postDelayed(mRequestRssi, mPollFrequencyMs);
+    }
+
+    public RSSIManager(Context context, BLEComm bleComm) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        mBleComm = bleComm;
     }
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
-        receiver.registerHandler(BLEService.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
+        receiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
+        receiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
     }
 
     public double getRssi() {
@@ -84,10 +132,6 @@ public class RSSIManager {
 
     private boolean windowsAreFull() {
         return mFilter.windowIsFull() && mRssiDeltas.isFull();
-    }
-
-    public void setPollFrequency(int frequencyMs) {
-        mPollFrequencyMs = frequencyMs;
     }
 
     public void clear() {
