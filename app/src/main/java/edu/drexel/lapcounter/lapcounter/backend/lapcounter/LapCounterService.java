@@ -10,7 +10,13 @@ import android.os.IBinder;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
+/**
+ * This Service is the main interface to every part of the lap counting process. It owns
+ * a few smaller components. These components are self-sufficient, however, the Service tells
+ * them when is the appropriate time to start subscribing to Intents.
+ */
 public class LapCounterService extends Service {
+    // For debugging
     private final static String TAG = LapCounterService.class.getSimpleName();
 
     // TODO: Load from calibration.
@@ -38,11 +44,25 @@ public class LapCounterService extends Service {
      */
     private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
+    /**
+     * Reference to the BLE Service
+     * TODO: Is this needed anymore?
+     */
     private BLEService mBleService;
 
+    /**
+     * a binder for this service
+     */
     private final IBinder mBinder = new LocalBinder();
 
+    /**
+     * Binder implementation for LapCounterService
+     */
     public class LocalBinder extends Binder {
+        /**
+         * Get a reference to this LapCounterService
+         * @return this Service
+         */
         public LapCounterService getService() {
             return LapCounterService.this;
         }
@@ -59,6 +79,9 @@ public class LapCounterService extends Service {
         bindToBleService();
     }
 
+    /**
+     * When the BLE service connect, subscribe to events so we can start the lapcounting
+     */
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -74,6 +97,9 @@ public class LapCounterService extends Service {
         }
     };
 
+    /**
+     * Bind to the BLE service so we can get bluetooth device events as needed.
+     */
     private void bindToBleService() {
         Intent intent = new Intent(this, BLEService.class);
         bindService(intent, mBleServiceConnection, BIND_AUTO_CREATE);

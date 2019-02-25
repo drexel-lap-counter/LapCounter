@@ -49,32 +49,60 @@ public class LocationStateMachine {
     public static final String EXTRA_STATE_AFTER =
             "edu.drexel.lapcounter.lapcounter.EXTRA_STATE_AFTER";
 
-    // Used to publish events
+    /**
+     * Utility object for broadcasting intents
+     */
     private LocalBroadcastManager mBroadcastManager;
 
-    // Current state
+    /**
+     * Current state
+     */
     private State mState;
 
-    // RSSI threshold that separates State.NEAR and State.FAR.
+    /**
+     * RSSI threshold that separates State.NEAR and State.FAR.
+     */
     private double mThreshold;
 
+    /**
+     * Constructor
+     * @param context the parent LapCounterService
+     * @param threshold Threshold to use from the device callibration settings
+     */
     public LocationStateMachine(Context context, double threshold) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
         mThreshold = threshold;
     }
 
+    /**
+     * Check for the Near -> Far transition
+     * @param rssi the current RSSI value
+     * @param direction the current direction of travel (sign of the RSSI delta)
+     * @return true if this is a Near -> Far transition
+     */
     private boolean crossedAndMovingAwayFromThreshold(double rssi, int direction) {
         return mState == State.NEAR &&     // We were previously within the threshold,
                rssi > mThreshold    &&     // and then we crossed it,
                direction == DIRECTION_OUT; // by moving away from it.
     }
 
+    /**
+     * Check for the Far -> Near transition
+     * @param rssi the current RSSI value
+     * @param direction the current direction of travel (sign of the RSSI delta)
+     * @return true if this is a Far -> Near transition
+     */
     private boolean crossedAndWithinThreshold(double rssi, int direction) {
         return mState == State.FAR &&
                rssi <= mThreshold  &&
                direction == DIRECTION_IN;
     }
 
+    // Intent handling callbacks ===============================================================
+
+    /**
+     * Whenever we get a filtered RSSI value, update the state
+     */
     private SimpleMessageReceiver.MessageHandler onRssiAndDirection = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -82,17 +110,24 @@ public class LocationStateMachine {
             int direction = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
 
             if (mState == State.UNKNOWN) {
+                // On the first valid RSSI when we're in an unknown state, determine whether
+                // we are now in the NEAR or FAR zone
                 pickZone(rssi);
             } else if (crossedAndMovingAwayFromThreshold(rssi, direction)) {
+                // Publish a Near -> Far transition
                 mState = State.FAR;
                 publishStateTransition(State.NEAR, mState);
             } else if (crossedAndWithinThreshold(rssi, direction)) {
+                // Publish a Far -> Near transition
                 mState = State.NEAR;
                 publishStateTransition(State.FAR, mState);
             }
         }
     };
 
+    /**
+     * if a device disconnects, go back to the UNKNOWN state
+     */
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -103,6 +138,13 @@ public class LocationStateMachine {
         }
     };
 
+    // =========================================================================================
+
+    /**
+     * Publish an Intent giving information about what transition was made
+     * @param before state before the transition
+     * @param after state after the transition
+     */
     private void publishStateTransition(State before, State after) {
         Intent intent = new Intent(ACTION_STATE_TRANSITION);
         intent.putExtra(EXTRA_STATE_BEFORE, before);
@@ -110,6 +152,14 @@ public class LocationStateMachine {
         mBroadcastManager.sendBroadcast(intent);
     }
 
+    /**
+     * Subscribe to the following events:
+     *
+     * RSSI_AVAILABLE -> update the current state
+     *
+     * DISCONNECTED -> switch to the UNKNOWN State
+     * @param receiver helper object for subscribing to events
+     */
     public void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssiAndDirection);
         receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);

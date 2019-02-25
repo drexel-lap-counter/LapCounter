@@ -15,8 +15,6 @@ import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateM
  * when to increment the counter. It also publishes an event whenever the counter changes.
  */
 public class LapCounter {
-
-    // IDs for intents
     public static final String ACTION_LAP_COUNT_UPDATED =
             "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT_UPDATED";
     public static final String EXTRA_LAP_COUNT =
@@ -66,10 +64,17 @@ public class LapCounter {
         }
     };
 
+    /**
+     * Constructor
+     * @param context the parent Service for setting up callbacks
+     */
     public LapCounter(Context context) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
+    /**
+     * Add to the lap counter and publish the change.
+     */
     private void incrementCounter() {
         mLapCount += LAP_INCREMENT;
         publishLapCount();
@@ -90,7 +95,7 @@ public class LapCounter {
      *
      * STATE_TRANSITION -> if we get a state transition from FAR -> NEAR, count laps
      *
-     * RECONNECT_LAPS -> If we reconnected and it is determined that the athlete went from
+     * MISSED_LAPS -> If we reconnected and it is determined that the athlete went from
      *      FAR -> NEAR in the meantime, count laps
      */
     public void initCallbacks(SimpleMessageReceiver mReceiver) {

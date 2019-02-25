@@ -22,6 +22,10 @@ public class AthleteState{
      */
     public long timestamp;
 
+    /**
+     * Make a copy of the athlete state
+     * @return a new Athlete state with the same data
+     */
     public AthleteState copy() {
         AthleteState other = new AthleteState();
         other.zone = zone;
