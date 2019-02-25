@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.RssiCollector;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RssiCollector;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;

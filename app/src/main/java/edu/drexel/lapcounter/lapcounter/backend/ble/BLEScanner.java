@@ -10,8 +10,6 @@ import android.os.IBinder;
 
 import java.util.List;
 
-import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
-
 public class BLEScanner implements DeviceScanner {
     private List<String> mWhitelist;
     private BLEService mBleService;

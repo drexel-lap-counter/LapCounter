@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;

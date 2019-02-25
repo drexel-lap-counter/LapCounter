@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
-import edu.drexel.lapcounter.lapcounter.backend.MovingAverage;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
-import edu.drexel.lapcounter.lapcounter.backend.SlidingWindow;
 
 public class RSSIManager {
     private static String qualify(String s) {

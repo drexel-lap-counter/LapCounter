@@ -1,4 +1,4 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import java.util.ArrayDeque;
 

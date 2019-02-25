@@ -5,7 +5,7 @@ import android.os.Handler;
 import java.util.List;
 import java.util.Random;
 
-import edu.drexel.lapcounter.lapcounter.backend.DeviceScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 
 public class DummyDeviceScanner implements DeviceScanner {
 
