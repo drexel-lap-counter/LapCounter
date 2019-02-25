@@ -21,27 +21,46 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
     private static final String TAG = NavBar.class.getSimpleName();
     private static final int TOGGLE_NONE = -1;
 
-    // A reference to the parent activity that owns this Listener object.
-    // We use a weak reference to break any reference cycle between the parent activity and this
-    // object.
+    /**
+     * A reference to the parent activity that owns this Listener object.
+     * <p>
+     *     We use a weak reference to break any reference cycle between the parent activity and this
+     *     object.
+     * </p>
+     */
     private WeakReference<AppCompatActivity> mParent;
 
-    // Which menu option should appear toggled in the UI.
-    // IDs can be found in res/menu/navigation.xml
-    // If this field is TOGGLE_NONE, then no items will be toggled.
+    /**
+     * Which menu option should appear toggled in the UI.
+     * <p>
+     * IDs can be found in res/menu/navigation.xml
+     * If this field is TOGGLE_NONE, then no items will be toggled.
+     * </p>
+     */
     private int mMenuOptionIdToToggle;
 
+    /**
+     * Constructor for activities reached directly from the navbar
+     * @param parent
+     * @param menuOptionIdToToggle
+     */
     public NavBar(AppCompatActivity parent, int menuOptionIdToToggle) {
         mParent = new WeakReference<>(parent);
         mMenuOptionIdToToggle = menuOptionIdToToggle;
     }
 
+    /**
+     * Constructor for activities not reached directly from the navbar
+     * @param parent
+     */
     public NavBar(AppCompatActivity parent) {
         this(parent, TOGGLE_NONE);
     }
 
-    // Attach eventhandlers for the menu bar, and toggle the checked state for the menu option
-    // with id == mMenuOptionIdToToggle.
+    /**
+     * Attach eventhandlers for the menu bar, and toggle the checked state for the menu option
+     * with id == mMenuOptionIdToToggle.
+     */
     public void init() {
         BottomNavigationView view = getBottomNavigationView();
 
@@ -53,6 +72,10 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
         adjustToggledStates(view);
     }
 
+    /**
+     * a helper method for init
+     * @param view
+     */
     private void adjustToggledStates(BottomNavigationView view) {
         Menu menu = view.getMenu();
 
@@ -77,6 +100,9 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
         itemToToggle.setChecked(true);
     }
 
+    /**
+     * @return BottomNavigationView
+     */
     private BottomNavigationView getBottomNavigationView() {
         AppCompatActivity parent = getParent("getBottomNavigationView");
 
@@ -93,6 +119,11 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
         return view;
     }
 
+    /**
+     * provides error handling when retrieving the context
+     * @param description
+     * @return AppCompatActivity
+     */
     private AppCompatActivity getParent(String description) {
         AppCompatActivity context = mParent.get();
 
@@ -105,6 +136,11 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
         return context;
     }
 
+    /**
+     * method to handle menu selections
+     * @param menuItem
+     * @return boolean
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         Context context = getParent("onNavigationItemSelected");

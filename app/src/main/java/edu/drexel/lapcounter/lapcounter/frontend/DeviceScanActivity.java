@@ -18,19 +18,49 @@ import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * a class for scanning devices that have not yet been registered with the app
+ */
 public class DeviceScanActivity extends AppCompatActivity {
 
+    /**
+     * a list of device MACs that have been registered and should not appear in the new device list
+     */
     private List<String> whitelist;
+    /**
+     * the confirm device button
+     */
     private Button mButton;
+    /**
+     * a device selected from the available list
+     */
     private Device mDevice;
+    /**
+     * the list view of currently available devices
+     */
     private RecyclerView mRecyclerView;
+    /**
+     * adapter that serves as an interface between code and recycler view
+     */
     private RecyclerAdapter mAdapter;
+    /**
+     * a property of Recycler view that manages the layout
+     */
     private RecyclerView.LayoutManager mLayoutManager;
 
+    /**
+     * a string referring to this class for logging purposes
+     */
     private static final String TAG = DeviceScanActivity.class.getSimpleName();
+    /**
+     * the bottom navigation bar
+     */
     private final NavBar mNavBar = new NavBar(this);
 
     // Sample device scanner
+    /**
+     * the scanner used to find devices
+     */
     private BLEScanner mDeviceScanner = new DummyDeviceScanner();
 
     /**
@@ -52,6 +82,10 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * initialization method sets up views in screen and pulls necessary stored data
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,6 +170,10 @@ public class DeviceScanActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
+    /**
+     * method sets up intent and navigates to CalibrateDeviceActivity
+     * @param view
+     */
     public void selectDevice(View view) {
         // TODO: Register the device before transitioning
         //Pass device object to intent

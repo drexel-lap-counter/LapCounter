@@ -7,6 +7,9 @@ import android.view.View;
 
 import edu.drexel.lapcounter.lapcounter.R;
 
+/**
+ * activity for the splach/logo screen
+ */
 public class LoadingActivity extends AppCompatActivity {
 
     @Override

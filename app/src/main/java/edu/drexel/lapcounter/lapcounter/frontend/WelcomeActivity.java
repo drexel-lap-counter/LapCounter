@@ -8,6 +8,9 @@ import android.view.View;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * activity for the initial welcome screen
+ */
 public class WelcomeActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
 

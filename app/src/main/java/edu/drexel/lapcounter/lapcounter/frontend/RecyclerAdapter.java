@@ -10,8 +10,14 @@ import java.util.ArrayList;
 
 import edu.drexel.lapcounter.lapcounter.R;
 
+/**
+ * adapts a list of devices into a recycler view
+ */
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder>
 {
+    /**
+     * the devices being displayed
+     */
     private ArrayList<Device> mDataset;
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -24,11 +30,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     }
 
+    /**
+     * constructor taking the data to be displayed
+     * @param myDataset
+     */
     public RecyclerAdapter(ArrayList<Device> myDataset)
     {
         mDataset = myDataset;
     }
 
+    /**
+     * @param item
+     */
     public void addItem(Device item)
     {
 
@@ -48,6 +61,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     }
 
+    /**
+     * @param name
+     * @return Device by name
+     */
     public Device getDevice(String name)
     {
         for(int i = 0; i < mDataset.size(); i++)
@@ -60,6 +77,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         }
         return null;
     }
+
+    /**
+     * @param positon
+     * @return Device at position N
+     */
     public Device getDevice(int positon)
     {
         if(positon < 0 || positon >= mDataset.size())

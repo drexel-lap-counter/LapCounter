@@ -14,6 +14,9 @@ import android.widget.RadioButton;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * setting screen for setting the size of the pool
+ */
 public class PoolSizeActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_settings);
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
@@ -59,7 +62,9 @@ public class PoolSizeActivity extends AppCompatActivity {
         loadPoolData();
     }
 
-    //Load the saved pool data and setup our two radio groups
+    /**
+     * Load the saved pool data and setup our two radio groups
+     */
     private void loadPoolData()
     {
         poolSize = pref.getInt(poolSizeKey,defPoolSize);
@@ -120,6 +125,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         loadPoolData();
     }
 
+    /**
+     * selects the clicked radio button
+     * @param view
+     */
     public void onPoolSizeRadioButtonClicked(View view)
     {
 
@@ -159,6 +168,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * set units for the pool length
+     * @param view
+     */
     public void onPoolUnitsRadioButtonClicked(View view)
     {
         boolean checked = ((RadioButton) view).isChecked();
@@ -179,6 +192,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * retrieve custom length from number field
+     * @param s
+     */
     private void tryGetCustomPoolSize(String s)
     {
         int val = 0;

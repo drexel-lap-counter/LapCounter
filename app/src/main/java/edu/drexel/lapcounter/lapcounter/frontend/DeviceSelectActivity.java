@@ -25,16 +25,37 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
     //TODO: Finalize Device Code.  This will be used with on clicks to create a device object
     //that can be passed to view device OR we get that from the bluetooth adapter/settings itself
+    /**
+     * the view device button
+     */
     private Button mInfoButton;
+    /**
+     * the device that has been selected from the list
+     */
     private Device mDevice;
+    /**
+     * the list view for the registered devices
+     */
     private RecyclerView mRecyclerView;
+    /**
+     * the interface for feeding items to the list view
+     */
     private RecyclerAdapter mAdapter;
+    /**
+     * a property of Recycler view that manages the layout
+     */
     private RecyclerView.LayoutManager mLayoutManager;
     private final NavBar mNavBar = new NavBar(this);
 
+    /**
+     * a string referring to this class for logging purposes
+     */
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
     // Sample device scanner
+    /**
+     * the scanner used to find devices
+     */
     private BLEScanner mDeviceScanner = new DummyDeviceScanner();
 
     /**
@@ -139,7 +160,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
     }
 
 
-
+    /**
+     * method to move to device info screen
+     * @param view
+     */
     // NOTE: there should be a second action for selecting a device as the active one to use
     // for lap counting. However, that should not require transitioning to a new activity
     // so I omit it for now
@@ -153,6 +177,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * navigate to device scan activity
+     * @param view
+     */
     // This goes to DeviceScanActivity to select a new device to register
     public void scanForDevices(View view) {
         Intent intent = new Intent(this, DeviceScanActivity.class);

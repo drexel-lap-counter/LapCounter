@@ -11,6 +11,9 @@ import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 public class CurrentWorkoutActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
+    /**
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,22 +25,34 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
+    /**
+     * @param view
+     */
     // TODO: Maybe rename WorkoutHistory -> Analytics so it's less confusing?
     public void viewWorkoutHistory(View view) {
         Intent intent = new Intent(this, WorkoutHistoryActivity.class);
         startActivity(intent);
     }
 
+    /**
+     * @param view
+     */
     public void goHome(View view) {
         Intent intent = new Intent(this, WelcomeActivity.class);
         startActivity(intent);
     }
 
+    /**
+     * @param view
+     */
     public void viewPastWorkouts(View view) {
         Intent intent = new Intent(this, PastWorkoutsActivity.class);
         startActivity(intent);
     }
 
+    /**
+     * @param view
+     */
     public void configureSettings(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);

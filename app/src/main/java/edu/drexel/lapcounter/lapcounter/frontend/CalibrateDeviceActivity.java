@@ -15,6 +15,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     private final String mDeviceRSSI = "DEVICE_RSSI";
 
 
+    /**
+     * @param savedInstanceState data for the current page
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +29,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
+    /**
+     * @param view
+     */
     public void finishCalibration(View view) {
         // TODO: Not sure if it's best to go back to the device selection or
         // device info page.

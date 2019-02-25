@@ -11,9 +11,16 @@ import android.util.Log;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * this activity controls a screen that shows the details of a selected BLE device
+ */
 public class DeviceInfoActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
 
+    /**
+     * @param savedInstanceState
+     * gets the intent from the preceding screen and sets the values for textViews
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +48,10 @@ public class DeviceInfoActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
+    /**
+     * @param view
+     * button action for the calibrate button; navigates to calibration for the current device
+     */
     public void calibrate(View view) {
         Intent intent = new Intent(this, CalibrateDeviceActivity.class);
         startActivity(intent);
