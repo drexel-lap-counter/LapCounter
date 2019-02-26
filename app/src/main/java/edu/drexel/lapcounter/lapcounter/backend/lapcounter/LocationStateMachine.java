@@ -57,7 +57,7 @@ public class LocationStateMachine {
     /**
      * Current state
      */
-    private State mState;
+    private State mState = State.UNKNOWN;
 
     /**
      * RSSI threshold that separates State.NEAR and State.FAR.

@@ -86,6 +86,11 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onTransition = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (mReconnectFunc == null) {
+                // This state transition happened without a prior disconnect.
+                return;
+            }
+
             LocationStateMachine.State beforeState = (LocationStateMachine.State)
                     message.getSerializableExtra(LocationStateMachine.EXTRA_STATE_BEFORE);
             LocationStateMachine.State afterState = (LocationStateMachine.State)
@@ -105,6 +110,8 @@ public class DisconnectManager {
             boolean countLap = mReconnectFunc.computeLapsMissed(mCurrentState.copy());
             if (countLap)
                 publishMissedLap();
+
+            mReconnectFunc = null;
         }
     };
 
