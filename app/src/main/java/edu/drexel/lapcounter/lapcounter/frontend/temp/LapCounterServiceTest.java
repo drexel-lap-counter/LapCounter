@@ -10,8 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -24,7 +22,6 @@ import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_CONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_DISCONNECTED;
-import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_RAW_RSSI_AVAILABLE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_DIRECTION;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_RSSI;
@@ -89,6 +86,12 @@ public class LapCounterServiceTest extends AppCompatActivity {
             mState.setText(String.format("before: %s, after: %s", before, after));
         }
     };
+    private SimpleMessageReceiver.MessageHandler mOnDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mBleService.connect(PUCK_ADDRESS);
+        }
+    };
 
 
     private String getLast(String s, String delimiter) {
@@ -105,27 +108,28 @@ public class LapCounterServiceTest extends AppCompatActivity {
         return getLast(s, ".");
     }
 
-    private void log(String action, String extra, Object value) {
-        log(String.format("%s, %s, %s", getLast(action), getLast(extra), value));
+    private void log(String extra, Object value) {
+        log(String.format("%s, %s", getLast(extra), value), false);
     }
 
-    private void log(String extra, Object value) {
-        log(String.format("%s, %s", getLast(extra), value));
+    private void logExtras(Intent message) {
+        Bundle bundle = message.getExtras();
+
+        if (bundle == null) {
+            return;
+        }
+
+        for (String extra : bundle.keySet()) {
+            log(extra, bundle.get(extra));
+        }
     }
 
     private final SimpleMessageReceiver.MessageHandler mDump = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            Bundle bundle = message.getExtras();
-
-            if (bundle == null)
-                return;
-
-//            String action = getLast(message.getAction());
-
-            for (String extra : bundle.keySet()) {
-                log(extra, bundle.get(extra));
-            }
+            log(getLast(message.getAction()));
+            logExtras(message);
+            log("", false);
         }
     };
 
@@ -176,10 +180,10 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     public void onClickStartOrStop(View view) {
         if (mStartOrStop.getText().equals("Start")) {
-//            start();
+            mBleService.startRssiRequests();
             mStartOrStop.setText("Stop");
         } else {
-//            stop();
+            mBleService.stopRssiRequests();
             mStartOrStop.setText("Start");
         }
     }
@@ -199,6 +203,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
         mReceiver.registerHandler(ACTION_RSSI_AND_DIR_AVAILABLE, mOnRssiAndDir);
         mReceiver.registerHandler(ACTION_STATE_TRANSITION, mOnStateTransition);
+        mReceiver.registerHandler(ACTION_DISCONNECTED, mOnDisconnect);
     }
 
     @Override
@@ -211,9 +216,17 @@ public class LapCounterServiceTest extends AppCompatActivity {
         mLapCounterService = null;
     }
 
+    private void log(String message, boolean addTimestamp) {
+        if (addTimestamp) {
+            String now = TIME_FORMATTER.format(new Date());
+            mLog.append(String.format("[%s] %s\n", now, message));
+        } else {
+            mLog.append(message + "\n");
+        }
+    }
+
     private void log(String message) {
-        String now = TIME_FORMATTER.format(new Date());
-        mLog.append(String.format("[%s] %s\n", now, message));
+        log(message, true);
     }
 
     @Override

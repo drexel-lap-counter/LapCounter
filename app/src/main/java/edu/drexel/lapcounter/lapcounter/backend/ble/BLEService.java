@@ -91,9 +91,9 @@ public class BLEService extends Service {
     }
 
     public void connect(String deviceAddress) {
+        mDeviceAddress = deviceAddress;
         if (mBleComm == null) {
             mShouldConnect = true;
-            mDeviceAddress = deviceAddress;
         } else {
             connect();
         }
@@ -107,5 +107,13 @@ public class BLEService extends Service {
 
     public void disconnect() {
         mBleComm.close();
+    }
+
+    public void startRssiRequests() {
+        mRssiManager.scheduleRssiRequest();
+    }
+
+    public void stopRssiRequests() {
+        mRssiManager.stopRssiRequests();
     }
 }

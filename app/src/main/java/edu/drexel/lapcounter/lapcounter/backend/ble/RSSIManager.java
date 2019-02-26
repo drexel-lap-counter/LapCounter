@@ -41,6 +41,8 @@ public class RSSIManager {
 
     private final Handler mHandler = new Handler();
 
+    private boolean mShouldScheduleRssi = false;
+
     private SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -65,7 +67,10 @@ public class RSSIManager {
         @Override
         public void onMessage(Intent message) {
             mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
-            scheduleRssiRequest();
+
+            if (mShouldScheduleRssi) {
+                scheduleRssiRequest();
+            }
         }
     };
 
@@ -90,7 +95,9 @@ public class RSSIManager {
         }
     };
 
-    private void scheduleRssiRequest() {
+    public void scheduleRssiRequest() {
+        stopRssiRequests();
+        mShouldScheduleRssi = true;
         mHandler.postDelayed(mRequestRssi, mPollFrequencyMs);
     }
 
@@ -135,5 +142,10 @@ public class RSSIManager {
     public void clear() {
         mRssiDeltas.clear();
         mFilter.clear();
+    }
+
+    public void stopRssiRequests() {
+        mShouldScheduleRssi = false;
+        mHandler.removeCallbacks(mRequestRssi);
     }
 }
