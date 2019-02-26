@@ -18,6 +18,9 @@ public class BLEService extends Service {
     private boolean mShouldScan = false;
     private BluetoothAdapter.LeScanCallback mScanCallback;
 
+    private boolean mShouldConnect = false;
+    private String mDeviceAddress;
+
     public class LocalBinder extends Binder {
         public BLEService getService() {
             return BLEService.this;
@@ -38,6 +41,8 @@ public class BLEService extends Service {
 
             if (mShouldScan) {
                 mBleComm.startScan(mScanCallback);
+            } else if (mShouldConnect) {
+                connect();
             }
         }
 
@@ -77,8 +82,19 @@ public class BLEService extends Service {
         mScanCallback = null;
     }
 
-    public boolean connect(String deviceAddress) {
-        return mBleComm.connect(deviceAddress);
+    public void connect(String deviceAddress) {
+        if (mBleComm == null) {
+            mShouldConnect = true;
+            mDeviceAddress = deviceAddress;
+        } else {
+            connect();
+        }
+    }
+
+    private void connect() {
+        mBleComm.connect(mDeviceAddress);
+        mShouldConnect = false;
+        mDeviceAddress = null;
     }
 
     public void disconnect() {

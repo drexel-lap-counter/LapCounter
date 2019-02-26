@@ -132,8 +132,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         mReceiver.attach(this);
 
         if (mBleService != null) {
-            final boolean result = mBleService.connect(mDeviceAddress);
-            Log.d(TAG, "Connect request result=" + result);
+            mBleService.connect(mDeviceAddress);
         }
     }
 
