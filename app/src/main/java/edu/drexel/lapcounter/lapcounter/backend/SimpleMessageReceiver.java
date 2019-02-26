@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +29,9 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Map of intent action -> callback function
+     * Map of intent action -> collection of callback functions
      */
-    private Map<String, MessageHandler> mHandlerTable = new HashMap<>();
+    private Map<String, Collection<MessageHandler>> mHandlerTable = new HashMap<>();
 
     /**
      * The intent filter needed to register the receiver
@@ -45,8 +47,16 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
         // Record the action in the intent filter
         mIntentFilter.addAction(action);
 
-        // Store the callback
-        mHandlerTable.put(action, handler);
+        Collection<MessageHandler> handlers = mHandlerTable.get(action);
+
+        if (handlers != null) {
+            handlers.add(handler);
+            return;
+        }
+
+        handlers = new ArrayList<>();
+        handlers.add(handler);
+        mHandlerTable.put(action, handlers);
     }
 
     /**
@@ -70,8 +80,13 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        MessageHandler handler = mHandlerTable.get(action);
-        if (handler != null) {
+        Collection<MessageHandler> handlers = mHandlerTable.get(action);
+
+        if (handlers == null) {
+            return;
+        }
+
+        for (MessageHandler handler : handlers) {
             handler.onMessage(intent);
         }
     }

@@ -87,7 +87,6 @@ public class LapCounterServiceTest extends AppCompatActivity {
             LocationStateMachine.State after = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_AFTER);
 
             mState.setText(String.format("before: %s, after: %s", before, after));
-            mDump.onMessage(message);
         }
     };
 
