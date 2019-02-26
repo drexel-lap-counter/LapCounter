@@ -6,7 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".frontend.temp.LapCounterServiceTest">
 
+    <Button
+        android:id="@+id/start_or_stop_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:onClick="onClickStartOrStop"
+        android:text="Start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ScrollView
+        android:id="@+id/scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

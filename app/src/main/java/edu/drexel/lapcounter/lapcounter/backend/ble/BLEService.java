@@ -9,6 +9,8 @@ import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+
 public class BLEService extends Service {
     private BLEComm mBleComm;
     private RSSIManager mRssiManager;
@@ -20,6 +22,8 @@ public class BLEService extends Service {
 
     private boolean mShouldConnect = false;
     private String mDeviceAddress;
+
+    private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
     public class LocalBinder extends Binder {
         public BLEService getService() {
@@ -37,7 +41,10 @@ public class BLEService extends Service {
         public void onServiceConnected(ComponentName className, IBinder service) {
             BLEComm.LocalBinder binder = (BLEComm.LocalBinder) service;
             mBleComm = binder.getService();
+
             mRssiManager = new RSSIManager(BLEService.this, mBleComm);
+            mRssiManager.initCallbacks(mReceiver);
+            mReceiver.attach(BLEService.this);
 
             if (mShouldScan) {
                 mBleComm.startScan(mScanCallback);
@@ -47,6 +54,7 @@ public class BLEService extends Service {
         }
 
         public void onServiceDisconnected(ComponentName arg0) {
+            mReceiver.detach(BLEService.this);
             mBleComm = null;
         }
     };
@@ -60,8 +68,8 @@ public class BLEService extends Service {
 
     @Override
     public void onDestroy() {
-        unbindService(mBleCommConnection);
         super.onDestroy();
+        unbindService(mBleCommConnection);
     }
 
     public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {

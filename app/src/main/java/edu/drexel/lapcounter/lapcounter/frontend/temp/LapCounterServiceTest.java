@@ -6,6 +6,9 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -35,6 +38,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
             "edu.drexel.lapcounter.lapcounter.frontend.temp.EXTRA_DEVICE_ADDRESS";
 
     private TextView mLog = null;
+    private Button mStartOrStop;
 
     private final static SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("HH:mm:ss");
 
@@ -86,6 +90,10 @@ public class LapCounterServiceTest extends AppCompatActivity {
         log(String.format("%s, %s, %s", getLast(action), getLast(extra), value));
     }
 
+    private void log(String extra, Object value) {
+        log(String.format("%s, %s", getLast(extra), value));
+    }
+
     private final SimpleMessageReceiver.MessageHandler mDump = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
@@ -94,10 +102,10 @@ public class LapCounterServiceTest extends AppCompatActivity {
             if (bundle == null)
                 return;
 
-            String action = getLast(message.getAction());
+//            String action = getLast(message.getAction());
 
             for (String extra : bundle.keySet()) {
-                log(action, extra, bundle.get(extra));
+                log(extra, bundle.get(extra));
             }
         }
     };
@@ -125,10 +133,22 @@ public class LapCounterServiceTest extends AppCompatActivity {
         setContentView(R.layout.activity_lap_counter_service_test);
 
         mLog = findViewById(R.id.log);
+        mStartOrStop = findViewById(R.id.start_or_stop_btn);
+
         log("onCreate");
         bindServices();
         registerHandlers();
         mReceiver.attach(this);
+    }
+
+    public void onClickStartOrStop(View view) {
+        if (mStartOrStop.getText().equals("Start")) {
+//            start();
+            mStartOrStop.setText("Stop");
+        } else {
+//            stop();
+            mStartOrStop.setText("Start");
+        }
     }
 
     private void register(String action) {
@@ -138,7 +158,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private void registerHandlers() {
         register(ACTION_CONNECTED);
         register(ACTION_DISCONNECTED);
-        register(ACTION_RAW_RSSI_AVAILABLE);
+//        register(ACTION_RAW_RSSI_AVAILABLE);
         register(ACTION_RSSI_AND_DIR_AVAILABLE);
         register(ACTION_MISSED_LAPS);
         register(ACTION_LAP_COUNT_UPDATED);
@@ -157,8 +177,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     private void log(String message) {
         String now = TIME_FORMATTER.format(new Date());
-        String newLog = String.format("[%s] %s\n%s", now, message, mLog.getText());
-        mLog.setText(newLog);
+        mLog.append(String.format("[%s] %s\n", now, message));
     }
 
     @Override
