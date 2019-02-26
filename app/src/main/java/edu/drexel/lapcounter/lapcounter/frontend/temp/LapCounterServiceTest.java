@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 
@@ -63,6 +64,25 @@ public class LapCounterServiceTest extends AppCompatActivity {
         }
     };
 
+    private final SimpleMessageReceiver.MessageHandler mDump = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            Bundle bundle = message.getExtras();
+            if (bundle == null)
+                return;
+
+            for (String key : bundle.keySet()) {
+                Object value = bundle.get(key);
+                String[] packages = key.split(".");
+                String shortKey = packages[packages.length - 1];
+                String msg = String.format("%s: %s", shortKey, value.toString());
+                log(msg);
+            }
+        }
+    };
+
+    private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
+
     private String getStringExtra(String extra) {
         return getIntent().getStringExtra(extra);
     }
@@ -88,20 +108,15 @@ public class LapCounterServiceTest extends AppCompatActivity {
         setContentView(R.layout.activity_lap_counter_service_test);
 
         mLog = findViewById(R.id.log);
-        log("Hi there");
+        bindServices();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        //bindServices();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //unbindServices();
-        //mBleService = null;
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindServices();
+        mBleService = null;
+        mLapCounterService = null;
     }
 
     private void log(String message) {

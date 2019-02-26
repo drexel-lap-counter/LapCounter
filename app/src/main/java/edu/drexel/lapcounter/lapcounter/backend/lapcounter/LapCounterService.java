@@ -24,18 +24,18 @@ public class LapCounterService extends Service {
     /**
      * The location state machine tracks the state of the athlete.
      */
-    private LocationStateMachine mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
+    private LocationStateMachine mStateMachine;
 
     /**
      * This component monitors the bluetooth service for disconnects/reconnects and
      * orchestrates changes to the state across components
      */
-    private DisconnectManager mDisconnectManager = new DisconnectManager(this);
+    private DisconnectManager mDisconnectManager;
 
     /**
      * This component simply counts laps (including publishing an event whenever a lap is counted.
      */
-    private LapCounter mLapCounter = new LapCounter(this);
+    private LapCounter mLapCounter;
 
     /**
      * This Service owns this simplified BroadcastReceiver so we only have one for the entire
@@ -43,12 +43,6 @@ public class LapCounterService extends Service {
      * object as needed.
      */
     private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
-
-    /**
-     * Reference to the BLE Service
-     * TODO: Is this needed anymore?
-     */
-    private BLEService mBleService;
 
     /**
      * a binder for this service
@@ -76,40 +70,17 @@ public class LapCounterService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        bindToBleService();
-    }
 
-    /**
-     * When the BLE service connect, subscribe to events so we can start the lapcounting
-     */
-    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
-            mBleService = binder.getService();
-
-            initCallbacks();
-            mReceiver.attach(LapCounterService.this);
-        }
-
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBleService = null;
-        }
-    };
-
-    /**
-     * Bind to the BLE service so we can get bluetooth device events as needed.
-     */
-    private void bindToBleService() {
-        Intent intent = new Intent(this, BLEService.class);
-        bindService(intent, mBleServiceConnection, BIND_AUTO_CREATE);
+        mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
+        mDisconnectManager = new DisconnectManager(this);
+        mLapCounter = new LapCounter(this);
+        initCallbacks();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mReceiver.detach(this);
-        unbindService(mBleServiceConnection);
     }
 
     /**
