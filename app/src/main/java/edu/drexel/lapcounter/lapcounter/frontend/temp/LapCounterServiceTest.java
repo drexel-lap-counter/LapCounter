@@ -8,8 +8,9 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ScrollView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,14 +20,19 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_CONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_DISCONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_RAW_RSSI_AVAILABLE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_DIRECTION;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_RSSI;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.DisconnectManager.ACTION_MISSED_LAPS;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter.ACTION_LAP_COUNT_UPDATED;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.ACTION_STATE_TRANSITION;
+import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_AFTER;
+import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_BEFORE;
 
 public class LapCounterServiceTest extends AppCompatActivity {
     private static final String TAG = LapCounterServiceTest.class.getSimpleName();
@@ -39,6 +45,9 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     private TextView mLog = null;
     private Button mStartOrStop;
+    private TextView mRssi;
+    private TextView mDir;
+    private TextView mState;
 
     private final static SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("HH:mm:ss");
 
@@ -63,11 +72,22 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private ServiceConnection mLapCounterServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            mLapCounterService = ((LapCounterService.LocalBinder) service).getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mLapCounterService = null;
+        }
+    };
+    private SimpleMessageReceiver.MessageHandler mOnStateTransition = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            LocationStateMachine.State before = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_BEFORE);
+            LocationStateMachine.State after = (LocationStateMachine.State) message.getSerializableExtra(EXTRA_STATE_AFTER);
+
+            mState.setText(String.format("before: %s, after: %s", before, after));
+            mDump.onMessage(message);
         }
     };
 
@@ -110,6 +130,17 @@ public class LapCounterServiceTest extends AppCompatActivity {
         }
     };
 
+    private final SimpleMessageReceiver.MessageHandler mOnRssiAndDir = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            double rssi = message.getDoubleExtra(EXTRA_RSSI, 0.0);
+            int dir = message.getIntExtra(EXTRA_DIRECTION, 0);
+
+            mRssi.setText(Double.toString(rssi));
+            mDir.setText(Integer.toString(dir));
+        }
+    };
+
     private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
     private void bindService(Class serviceClass, ServiceConnection connection) {
@@ -134,6 +165,9 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
         mLog = findViewById(R.id.log);
         mStartOrStop = findViewById(R.id.start_or_stop_btn);
+        mRssi = findViewById(R.id.filtered_rssi);
+        mDir = findViewById(R.id.dir);
+        mState = findViewById(R.id.state);
 
         log("onCreate");
         bindServices();
@@ -159,10 +193,13 @@ public class LapCounterServiceTest extends AppCompatActivity {
         register(ACTION_CONNECTED);
         register(ACTION_DISCONNECTED);
 //        register(ACTION_RAW_RSSI_AVAILABLE);
-        register(ACTION_RSSI_AND_DIR_AVAILABLE);
+//        register(ACTION_RSSI_AND_DIR_AVAILABLE);
         register(ACTION_MISSED_LAPS);
         register(ACTION_LAP_COUNT_UPDATED);
         register(ACTION_STATE_TRANSITION);
+
+        mReceiver.registerHandler(ACTION_RSSI_AND_DIR_AVAILABLE, mOnRssiAndDir);
+        mReceiver.registerHandler(ACTION_STATE_TRANSITION, mOnStateTransition);
     }
 
     @Override

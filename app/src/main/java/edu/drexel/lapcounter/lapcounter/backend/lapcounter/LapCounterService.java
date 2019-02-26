@@ -75,6 +75,7 @@ public class LapCounterService extends Service {
         mDisconnectManager = new DisconnectManager(this);
         mLapCounter = new LapCounter(this);
         initCallbacks();
+        mReceiver.attach(this);
     }
 
     @Override
