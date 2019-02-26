@@ -7,22 +7,16 @@
     tools:context=".frontend.temp.LapCounterServiceTest">
 
     <TextView
-        android:id="@+id/DeviceName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:id="@+id/log"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Name of Device"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="blah"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/DeviceAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:text="MAC Address of Device"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DeviceName" />
 </android.support.constraint.ConstraintLayout>

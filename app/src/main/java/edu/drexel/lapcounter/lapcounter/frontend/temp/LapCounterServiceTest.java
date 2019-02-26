@@ -26,9 +26,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
     public final static String EXTRA_DEVICE_ADDRESS =
             "edu.drexel.lapcounter.lapcounter.frontend.temp.EXTRA_DEVICE_ADDRESS";
 
-    private final Map<Integer, TextView> mTextViews = new HashMap<>();
-
-    private final Map<String, Service> mServices = new HashMap<>();
+    private TextView mLog = null;
 
     private BLEService mBleService;
 
@@ -65,22 +63,8 @@ public class LapCounterServiceTest extends AppCompatActivity {
         }
     };
 
-    private void storeTextView(int id) {
-        mTextViews.put(id, (TextView) findViewById(id));
-    }
-
-    private void storeTextViews() {
-        storeTextView(R.id.DeviceName);
-        storeTextView(R.id.DeviceAddress);
-    }
-
     private String getStringExtra(String extra) {
         return getIntent().getStringExtra(extra);
-    }
-
-    private void displayDeviceNameAddress() {
-        mTextViews.get(R.id.DeviceName).setText(getStringExtra(EXTRA_DEVICE_NAME));
-        mTextViews.get(R.id.DeviceAddress).setText(getStringExtra(EXTRA_DEVICE_ADDRESS));
     }
 
     private void bindService(Class serviceClass, ServiceConnection connection) {
@@ -103,20 +87,25 @@ public class LapCounterServiceTest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lap_counter_service_test);
 
-        storeTextViews();
-        displayDeviceNameAddress();
+        mLog = findViewById(R.id.log);
+        log("Hi there");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        bindServices();
+        //bindServices();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        unbindServices();
-        mBleService = null;
+        //unbindServices();
+        //mBleService = null;
+    }
+
+    private void log(String message) {
+        String newLog = message + "\n" + mLog.getText();
+        mLog.setText(newLog);
     }
 }
