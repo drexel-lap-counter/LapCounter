@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.os.Handler;
@@ -134,7 +135,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
 
             updatedTime = timeSwapBuff + timeInMilliseconds;
-            System.out.println("00000 "+ timeInMilliseconds);
             int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
             secs = secs % 60;
@@ -286,6 +286,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
         // can broadcast intents
-        sendBroadcast(intent);
+        //sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
