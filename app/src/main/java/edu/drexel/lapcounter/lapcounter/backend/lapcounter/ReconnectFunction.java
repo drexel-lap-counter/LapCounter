@@ -58,8 +58,14 @@ public class ReconnectFunction {
 
         // Since the far zone is very large, after a long delay it's hard to tell whether
         // we need to count a lap. use other information to get a better picture
-        if (wasFar && isFar && isLongDelay)
-            return doubleCheckFarFar();
+        if (wasFar && isFar && isLongDelay) {
+            // TODO: Revisit.
+            // Since direction data is not reliable shortly before and after disconnects,
+            // the current implementation of this algorithm will not receive good data.
+            // For now, we'll say a FAR->FAR transition with a long delay will NOT count a lap.
+            return false;
+//            return doubleCheckFarFar();
+        }
 
         // In all other cases, we do not count a lap
         return false;
