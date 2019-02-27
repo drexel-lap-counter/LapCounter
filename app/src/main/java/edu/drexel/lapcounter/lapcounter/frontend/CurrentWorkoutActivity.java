@@ -257,7 +257,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         isPaused = true;
         // Unsubscribe from events
         // This is shorthand for unregisterReceiver()
-        mReceiver.detatch(this);
+        mReceiver.detach(this);
     }
 
     /**
