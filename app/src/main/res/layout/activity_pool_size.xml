@@ -7,27 +7,111 @@
     tools:context=".frontend.PoolSizeActivity">
 
 
+    <TextView
+        android:id="@+id/unitText"
+        android:layout_width="171dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="20dp"
+        android:ems="10"
+        android:text="@string/units"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/SizeText"
+        android:layout_width="171dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="20dp"
+        android:ems="10"
+        android:text="@string/size"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
     <RadioGroup
         android:id="@+id/pool_size_radio_group"
-        android:layout_width="96dp"
-        android:layout_height="64dp"
-        tools:layout_editor_absoluteX="128dp"
-        tools:layout_editor_absoluteY="69dp" >
+        android:layout_width="171dp"
+        android:layout_height="310dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
             android:id="@+id/pool_size_25"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="25"
-            android:checked="true"
-            android:onClick="onRadioButtonClicked"/>
+            android:layout_width="137dp"
+            android:layout_height="75dp"
+            android:onClick="onPoolSizeRadioButtonClicked"
+            android:text="@string/num_25"
+            android:textSize="30sp" />
 
         <RadioButton
             android:id="@+id/pool_size_50"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="50"
-            android:onClick="onRadioButtonClicked"/>
+            android:layout_width="137dp"
+            android:layout_height="75dp"
+            android:onClick="onPoolSizeRadioButtonClicked"
+            android:text="@string/num_50"
+            android:textSize="30sp" />
+
+        <RadioButton
+            android:id="@+id/pool_size_custom"
+            android:layout_width="137dp"
+            android:layout_height="75dp"
+            android:onClick="onPoolSizeRadioButtonClicked"
+            android:text="@string/custom"
+            android:textSize="29sp" />
+
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/pool_size_custom_text"
+        android:layout_width="42dp"
+        android:layout_height="61dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="196dp"
+        android:layout_marginEnd="8dp"
+        android:enabled="false"
+        android:inputType="number"
+        android:text="@string/num_35"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/pool_units_radio_group"
+        android:layout_width="171dp"
+        android:layout_height="310dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/pool_size_radio_group"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/pool_units_yards"
+            android:layout_width="137dp"
+            android:layout_height="75dp"
+            android:onClick="onPoolUnitsRadioButtonClicked"
+            android:text="@string/yards"
+            android:textSize="30sp" />
+
+        <RadioButton
+            android:id="@+id/pool_units_meters"
+            android:layout_width="137dp"
+            android:layout_height="75dp"
+            android:onClick="onPoolUnitsRadioButtonClicked"
+            android:text="@string/meters"
+            android:textSize="30sp" />
     </RadioGroup>
 
     <android.support.design.widget.BottomNavigationView
@@ -42,7 +126,5 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation"
         app:labelVisibilityMode="labeled" />
-
-
 
 </android.support.constraint.ConstraintLayout>
