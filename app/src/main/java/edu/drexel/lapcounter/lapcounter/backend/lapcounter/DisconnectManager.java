@@ -45,6 +45,21 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (mReconnectFunc != null) {
+                // When a device first disconnects, this method will get called.
+                // Approximately 30 seconds later, if the device does not connect, then the
+                // BLEComm will send out another disconnect event (not explicitly; this
+                // 30 second timeout for connection attempts appears to be baked into the
+                // Android BLE libraries).
+
+                // Thus, we may get more disconnect events AFTER the FIRST disconnect but BEFORE
+                // a successful reconnect.
+
+                // We only care about setting the before state for the first disconnect, so we can
+                // return now if we already set it.
+                return;
+            }
+
             mReconnectFunc = new ReconnectFunction();
 
             // Save the current time
@@ -86,11 +101,6 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onTransition = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            if (mReconnectFunc == null) {
-                // This state transition happened without a prior disconnect.
-                return;
-            }
-
             LocationStateMachine.State beforeState = (LocationStateMachine.State)
                     message.getSerializableExtra(LocationStateMachine.EXTRA_STATE_BEFORE);
             LocationStateMachine.State afterState = (LocationStateMachine.State)
@@ -101,8 +111,13 @@ public class DisconnectManager {
                 mCurrentState.zone = afterState;
             }
 
-            // We only care about Unknown -> any other state. Filter out irrelevant transitions here
-            if (beforeState != LocationStateMachine.State.UNKNOWN)
+            if (mReconnectFunc == null) {
+                // This state transition happened without a prior disconnect.
+                return;
+            }
+
+            // We only care about Unknown -> Near/Far. Filter out irrelevant transitions here
+            if (beforeState != LocationStateMachine.State.UNKNOWN || afterState == LocationStateMachine.State.UNKNOWN)
                 return;
 
             // Use the reconnection function to examine the state and determine if we
@@ -125,7 +140,18 @@ public class DisconnectManager {
         public void onMessage(Intent message) {
             // Store the current RSSI value in the state snapshot
             mCurrentState.distRssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0.0);
-            mCurrentState.travelDirection = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
+
+            // When the device disconnects, BLEComm will publish duplicates of the last RSSI. Thus,
+            // the travel direction shortly before the disconnect event will be 0.
+            // We'll preserve the last non-zero direction as our travel direction.
+            int prevTravelDir = mCurrentState.travelDirection;
+            int newTravelDir = message.getIntExtra(RSSIManager.EXTRA_DIRECTION, 0);
+
+            if (newTravelDir == 0) {
+                newTravelDir = prevTravelDir;
+            }
+
+            mCurrentState.travelDirection = newTravelDir;
         }
     };
 
