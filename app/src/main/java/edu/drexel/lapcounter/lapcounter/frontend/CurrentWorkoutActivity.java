@@ -134,7 +134,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
 
             updatedTime = timeSwapBuff + timeInMilliseconds;
-
+            System.out.println("00000 "+ timeInMilliseconds);
             int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
             secs = secs % 60;
@@ -197,8 +197,24 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         yesButton = (Button) popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                startTime = 0;
+                startTime = SystemClock.uptimeMillis();
+                updatedTime = 0L;
+                timeSwapBuff = 0L;
+                timeInMilliseconds = 0L;
+                mFakeLapCount = 0;  //we need to have a design talk about notifying the counter
+                mCounter.setText("0");
                 customHandler.postDelayed(updateTimerThread, 0);
+                customHandler.removeCallbacks(updateTimerThread);
+                resumeButton.setEnabled(true);
+                pauseButton.setEnabled(false);
+                popupWindow.dismiss();
+            }
+        } );
+
+        noButton = (Button) popupView.findViewById(R.id.noButton);
+        noButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                popupWindow.dismiss();
             }
         } );
     }
