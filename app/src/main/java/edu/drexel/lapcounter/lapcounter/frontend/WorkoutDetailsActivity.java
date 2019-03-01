@@ -46,6 +46,8 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         workout.setEndDateTime(TimestampConverter.fromTimestamp("2018-4-20 14:00:00.000"));
         workout.setLaps(34);
         workout.setPoolUnits("Yards");
+        //While we are in development phase, use this to insert a workout that you wish to view.
+        //Uncomment line to add to db
         //mWorkoutViewModel.insert(workout);
 
         workout = mWorkoutViewModel.getWorkoutByID(id);
