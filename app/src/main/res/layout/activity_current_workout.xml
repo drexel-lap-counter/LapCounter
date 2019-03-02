@@ -8,27 +8,26 @@
 
     <TextView
         android:id="@+id/timerValue"
-        android:layout_width="243dp"
+        android:layout_width="300dp"
         android:layout_height="99dp"
         android:layout_above="@+id/pauseButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="69dp"
         android:layout_marginTop="188dp"
-        android:layout_marginEnd="22dp"
         android:layout_marginBottom="473dp"
         android:text="@string/timerVal"
+        android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="60sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.311"
+        app:layout_constraintHorizontal_bias=".5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.5" />
 
     <TextView
         android:id="@+id/lapCount"
-        android:layout_width="100dp"
+        android:layout_width="200dp"
         android:layout_height="99dp"
         android:layout_centerHorizontal="true"
         android:text="0"
@@ -39,7 +38,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.408" />
+        app:layout_constraintVertical_bias="0.5" />
 
     <Button
         android:id="@+id/startButton"
