@@ -123,6 +123,6 @@ public class ReceiverTest extends AppCompatActivity {
 
         // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
         // can broadcast intents
-        BroadcastHelper.sendBroadcast(this, intent)
+        BroadcastHelper.sendBroadcast(this, intent);
     }
 }
