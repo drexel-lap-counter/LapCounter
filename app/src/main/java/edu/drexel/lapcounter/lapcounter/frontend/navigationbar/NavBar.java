@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.CurrentWorkoutActivity;
-import edu.drexel.lapcounter.lapcounter.frontend.PastWorkoutsActivity;
+import edu.drexel.lapcounter.lapcounter.frontend.PastWorkOutsActivities.PastWorkoutsActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.SettingsActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.WorkoutHistoryActivity;
 

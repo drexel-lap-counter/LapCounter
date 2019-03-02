@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 
 import edu.drexel.lapcounter.lapcounter.R;
@@ -42,6 +40,9 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
     //DATABASE VARIABLES
     //
     public static WorkoutDatabase WorkoutDatabase;
+    Workouts workout = new Workouts();
+    List <Workouts> workoutsBetweenDateRange;
+
 
     private TextView setTotalDistanceTraveledText;
     private TextView setAvgWorkoutDistanceText;
@@ -69,26 +70,30 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener DateSetListener_Start;
     private DatePickerDialog.OnDateSetListener DateSetListener_End;
 
-    //
+    private String tempMonth;
+    private String tempDay;
+
     //
     //
     BarChart barChart;
     ArrayList<String> dates;
-    Random random;
     ArrayList<BarEntry> barEntries;
 
 
     //
     //TESTER VARIABLES
     //
-    private String startDate;
-    private String endDate;
+    private String dbStartDate;
+    private String dbEndDate;
+    private String chartStartDate;
+    private String chartEndDate;
 
-    private int count;
+
+//    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-super.onCreate(savedInstanceState);
+     super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_history);
         //
         //NAV BAR  onCreate
@@ -106,9 +111,6 @@ super.onCreate(savedInstanceState);
         //
         barChart = (BarChart) findViewById(R.id.bargraph);
 
-        createRandomBarGraph("2016/05/05", "2016/06/01");
-
-
 
         //
         //DATABASE onCreate Stuff
@@ -120,16 +122,16 @@ super.onCreate(savedInstanceState);
         //
         //TEST DATA
         //
-        Workouts workout = new Workouts();
+
         workout.setmStartDate(20190215);
         workout.setEndDate(20190215);
         workout.setPoolLength(50);
-        workout.setTotalDistanceTraveled(100);
+        workout.setTotalDistanceTraveled(300);
         workout.setAvgWorkoutDistance(100);
         WorkoutDatabase.workoutDao().addWorkout(workout);
 
-        workout.setmStartDate(20190216);
-        workout.setEndDate(20190216);
+        workout.setmStartDate(20190215);
+        workout.setEndDate(20190215);
         workout.setPoolLength(25);
         workout.setTotalDistanceTraveled(75);
         workout.setAvgWorkoutDistance(75);
@@ -158,9 +160,10 @@ super.onCreate(savedInstanceState);
         WorkoutDatabase.workoutDao().addWorkout(workout);
 
 
+        setAvgWorkoutTimeText = findViewById(R.id.AVGWT_Data);
         setTotalDistanceTraveledText = findViewById(R.id.TDT_Data);
         setAvgWorkoutDistanceText = findViewById(R.id.AVG_WD_Data);
-
+        setTimeDurationText = findViewById(R.id.DUR_Data);
 
 
         //
@@ -171,6 +174,7 @@ super.onCreate(savedInstanceState);
 
 
 
+//region implements View.OnClickListener
 
 
 
@@ -194,7 +198,6 @@ super.onCreate(savedInstanceState);
                 int day = cal.get(Calendar.DAY_OF_MONTH);
 
 
-
                 DatePickerDialog dialog = new DatePickerDialog(WorkoutHistoryActivity.this, android.R.style.Theme_Holo_Light_Dialog_MinWidth, DateSetListener_Start, year, month, day);
 
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -208,33 +211,30 @@ super.onCreate(savedInstanceState);
         DateSetListener_Start = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+
+
                 month = month + 1;
 
-
-                Log.d(TAG, "onDateSet: Date: mm/dd/yyyy" + month + "/" + dayOfMonth + "/" + year);
-
-
-                    String date = month + "/" + dayOfMonth + "/" + year;
-
-                Workout_History_Start_Date.setText(date);
-
-
-
-                //
-                //TESTING STARTDATE
-                //
-
                 if (month <10){
-                    startDate = String.valueOf(year)+"0"+String.valueOf(month)+String.valueOf(dayOfMonth);
+                    tempMonth = "0"+ String.valueOf(month);
                 }
                 else {
-                    startDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(dayOfMonth);
+                    tempMonth= String.valueOf(month);
                 }
-//                startDate = String.valueOf(year)+String.valueOf(month)+String.valueOf(dayOfMonth);
 
-                setTimeDurationText = findViewById(R.id.DUR_Data);
-                setTimeDurationText.setText(String.valueOf(startDate));
+                if (dayOfMonth <10){
+                    tempDay = "0"+ String.valueOf(dayOfMonth);
+                }
+                else {
+                    tempDay= String.valueOf(dayOfMonth);
+                }
 
+
+                chartStartDate = tempMonth + "/" + tempDay + "/" + year;
+                dbStartDate = String.valueOf(year)+tempMonth+tempDay;
+
+                Workout_History_Start_Date.setText(chartStartDate);
                 DateChecker();
             }
         };
@@ -270,21 +270,31 @@ super.onCreate(savedInstanceState);
         DateSetListener_End = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
                 month = month + 1;
-                Log.d(TAG, "onDateSet: Date: mm/dd/yyyy" + month + "/" + dayOfMonth + "/" + year);
-                String date = month + "/" + dayOfMonth + "/" + year;
-                Workout_History_End_Date.setText(date);
 
-
-                //
-                //TESTING ENDDATE
-                //
                 if (month <10){
-                    endDate = String.valueOf(year)+"0"+String.valueOf(month)+String.valueOf(dayOfMonth);
+                    tempMonth = "0"+ String.valueOf(month);
                 }
                 else {
-                    endDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(dayOfMonth);
+                    tempMonth= String.valueOf(month);
                 }
+
+                if (dayOfMonth <10){
+                    tempDay = "0"+ String.valueOf(dayOfMonth);
+                }
+                else {
+                    tempDay= String.valueOf(dayOfMonth);
+                }
+
+
+                //
+                //TESTING END DATE
+                //
+                chartEndDate = tempMonth + "/" + tempDay + "/" + year;
+                dbEndDate = String.valueOf(year)+tempMonth+tempDay;
+
+                Workout_History_End_Date.setText(chartEndDate);
                 DateChecker();
             }
         };
@@ -293,6 +303,7 @@ super.onCreate(savedInstanceState);
         //END OF End_Date Picker
         //
 
+//endregion implements View.OnClickListener
     }
 
 
@@ -301,24 +312,26 @@ super.onCreate(savedInstanceState);
     public void DateChecker(){
         if ((!Workout_History_Start_Date.getText().toString().equals("Start Date"))&&(!Workout_History_End_Date.getText().toString().equals("End Date")))
         {
-            count = WorkoutDatabase.workoutDao().findWorkoutsBetweenDates(Integer.parseInt(startDate), Integer.parseInt(endDate)).size();
-            setAvgWorkoutTimeText = findViewById(R.id.AVGWT_Data);
-            setAvgWorkoutTimeText.setText(String.valueOf(count));
-            if (count > 0)
-                valueCalulations(count);
+            workoutsBetweenDateRange= WorkoutDatabase.workoutDao().findWorkoutsBetweenDates(Integer.parseInt(dbStartDate), Integer.parseInt(dbEndDate));
+            if (workoutsBetweenDateRange.size() > 0) {
+                createBarGraph(chartStartDate,chartEndDate);
+                valueCalulations();
+
+            }
         }
+
     }
 
-    public void valueCalulations(int count){
+    public void valueCalulations(){
         int TotalDistance = 0;
-        int AVGWORK = 0;
+        int AVGWORKDIST = 0;
+//        int AVGWORKTIME= 0;
+//        int DURATION = 0;
 
-
-        List<Workouts> workouts = WorkoutDatabase.workoutDao().getAllWorkouts();
-        for (Workouts wrkout : workouts) {
+        for (Workouts wrkout : workoutsBetweenDateRange) {
 
             TotalDistance += wrkout.getTotalDistanceTraveled();
-            AVGWORK += wrkout.getAvgWorkoutDistance();
+            AVGWORKDIST += wrkout.getAvgWorkoutDistance();
         }
 
             //
@@ -331,22 +344,45 @@ super.onCreate(savedInstanceState);
             //
             //AVERAGE WORKOUT DISTANCE
             //
-            AVGWORK= AVGWORK/count;
-            setAvgWorkoutDistanceText.setText(String.valueOf(AVGWORK));
+
+
+            AVGWORKDIST= AVGWORKDIST/workoutsBetweenDateRange.size();
+            setAvgWorkoutDistanceText.setText(String.valueOf(AVGWORKDIST));
+
+
             //
-            //AVERAGE WORKOUT
+            //AVERAGE WORKOUT TIME
             //
+
+            //
+            //NEED INFO ON HOW CURRENT WORKOUT SCREEN SAVES TIME BEFORE I CAN SET THIS.
+            //
+
+
+//            setAvgWorkoutTimeText.setText(String.valueOf(AVGWORKTIME));
 
             //
             //DURATION
             //
 
+        //
+        //NEED INFO ON HOW CURRENT WORKOUT SCREEN SAVES TIME BEFORE I CAN SET THIS.
+        //
+
+
+//            setTimeDurationText.setText(String.valueOf(DURATION));
+
+
     }
 
-    public void createRandomBarGraph(String Date1, String Date2){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+    public void createBarGraph(String Date1, String Date2){
 
-        try {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        int count;
+        int totaldistance;
+
+            try {
             Date date1 = simpleDateFormat.parse(Date1);
             Date date2 = simpleDateFormat.parse(Date2);
 
@@ -362,13 +398,39 @@ super.onCreate(savedInstanceState);
             dates = getList(mDate1,mDate2);
 
             barEntries = new ArrayList<>();
-            float max = 0f;
-            float value = 0f;
-            random = new Random();
-            for(int j = 0; j< dates.size();j++){
-                max = 100f;
-                value = random.nextFloat()*max;
-                barEntries.add(new BarEntry(value,j));
+
+
+            String tempStartDate ;
+
+            List<Workouts> workouts = WorkoutDatabase.workoutDao().findWorkoutsBetweenDates(Integer.parseInt(dbStartDate), Integer.parseInt(dbEndDate));
+
+            for(int j = 0; j< dates.size();j++) {
+                count =0;
+                totaldistance = 0;
+
+                for(int i =0; i<workouts.size()-1;i++) {
+
+
+                    tempStartDate = String.valueOf(workouts.get(i).getStartDate());
+                    tempStartDate =  tempStartDate.substring(4, 6) + "/" +tempStartDate.substring(6, 8) + "/" + tempStartDate.substring(0, 4) ;
+
+
+                    if (dates.get(j).equals(tempStartDate)) {
+
+                        totaldistance += workouts.get(i).getTotalDistanceTraveled();
+                        count++;
+                    }
+                }
+
+
+                if (count == 0) {
+                    count = 1;
+                }
+
+                totaldistance = totaldistance / count;
+
+                barEntries.add(new BarEntry(totaldistance, j));
+
             }
 
         }catch(ParseException e){
@@ -378,28 +440,36 @@ super.onCreate(savedInstanceState);
         BarDataSet barDataSet = new BarDataSet(barEntries,"Dates");
         BarData barData = new BarData(dates,barDataSet);
         barChart.setData(barData);
-        barChart.setDescription("My First Bar Graph!");
-    }
+        barChart.setDescription("");
+        barChart.notifyDataSetChanged();
 
-    public ArrayList<String> getList(Calendar startDate, Calendar endDate){
+}
+
+
+
+
+    public ArrayList<String> getList(Calendar  startDate, Calendar  endDate){
         ArrayList<String> list = new ArrayList<String>();
         while(startDate.compareTo(endDate)<=0){
             list.add(getDate(startDate));
+
             startDate.add(Calendar.DAY_OF_MONTH,1);
         }
         return list;
     }
 
     public String getDate(Calendar cld){
-        String curDate = cld.get(Calendar.YEAR) + "/" + (cld.get(Calendar.MONTH) + 1) + "/"
-                +cld.get(Calendar.DAY_OF_MONTH);
+        String curDate =  (cld.get(Calendar.MONTH) + 1)+ "/" +cld.get(Calendar.DAY_OF_MONTH)  + "/"
+                +cld.get(Calendar.YEAR);
         try{
-            Date date = new SimpleDateFormat("yyyy/MM/dd").parse(curDate);
-            curDate =  new SimpleDateFormat("yyy/MM/dd").format(date);
+            Date date = new SimpleDateFormat("MM/dd/yyyy").parse(curDate);
+            curDate =  new SimpleDateFormat("MM/dd/yyyy").format(date);
         }catch(ParseException e){
             e.printStackTrace();
         }
         return curDate;
     }
+
+
 
 }

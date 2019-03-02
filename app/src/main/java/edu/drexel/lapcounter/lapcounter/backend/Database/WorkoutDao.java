@@ -16,7 +16,7 @@ public interface WorkoutDao {
     @Insert
     public void addWorkout(Workouts workout);
 
-    @Query("SELECT * FROM workouts_table")
+    @Query("SELECT * FROM workouts_table ORDER BY Start_Date ASC")
     public List<Workouts> getAllWorkouts();
 
 
@@ -33,7 +33,7 @@ public interface WorkoutDao {
 //    public abstract List<User> findUsersByNameAndLastNames(int item1Id, int item2ID);
 
 //        public List<Workouts> numberofWorkouts();
-    @Query("SELECT * FROM workouts_table WHERE Start_Date BETWEEN :item1Id AND :item2ID")
+    @Query("SELECT * FROM workouts_table WHERE Start_Date BETWEEN :item1Id AND :item2ID ORDER BY Start_Date ASC")
     public abstract List<Workouts> findWorkoutsBetweenDates(int item1Id, int item2ID);
 
 

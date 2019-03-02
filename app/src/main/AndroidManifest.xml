@@ -9,6 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".frontend.LoadingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,14 +20,14 @@
         <activity android:name=".frontend.WelcomeActivity" />
         <activity android:name=".frontend.CurrentWorkoutActivity" />
         <activity android:name=".frontend.WorkoutHistoryActivity" />
-        <activity android:name=".frontend.PastWorkoutsActivity" />
+        <activity android:name=".frontend.PastWorkOutsActivities.PastWorkoutsActivity" />
         <activity android:name=".frontend.SettingsActivity" />
         <activity android:name=".frontend.PoolSizeActivity" />
         <activity android:name=".frontend.DeviceSelectActivity" />
         <activity android:name=".frontend.WorkoutDetailsActivity" />
         <activity android:name=".frontend.CalibrateDeviceActivity" />
         <activity android:name=".frontend.DeviceScanActivity" />
-        <activity android:name=".frontend.DeviceInfoActivity"></activity>
+        <activity android:name=".frontend.DeviceInfoActivity" />
     </application>
 
 </manifest>
