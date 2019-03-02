@@ -75,8 +75,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mAdapter = new RecyclerAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
 
-        final Context thisContext = this;
-
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getBaseContext(), mRecyclerView, new RecyclerTouchListener.ClickListener() {
 
             @Override
@@ -94,7 +92,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
                     mInfoButton.setEnabled(true);
 
                     // TODO: Replace with the appropriate post-device selection Activity.
-                    launchLapCounterServiceTest(mDevice);
             }
 
             @Override
@@ -122,12 +119,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
         // stop the scan on pause and start it on resume in both this aand DeviceScanActivity.
     }
 
-    private void launchLapCounterServiceTest(Device device) {
-        Intent intent = new Intent(this, LapCounterServiceTest.class);
-        intent.putExtra(LapCounterServiceTest.EXTRA_DEVICE_NAME, device.getName());
-        intent.putExtra(LapCounterServiceTest.EXTRA_DEVICE_ADDRESS, device.getMac());
-        startActivity(intent);
-    }
 
     @Override
     protected void onPause()

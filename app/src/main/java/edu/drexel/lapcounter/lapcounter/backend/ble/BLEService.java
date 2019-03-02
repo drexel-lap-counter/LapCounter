@@ -2,10 +2,7 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -43,6 +40,7 @@ public class BLEService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        disconnectDevice();
         mReceiver.detach(this);
     }
 
@@ -54,12 +52,12 @@ public class BLEService extends Service {
         mBleComm.stopScan(scanCallback);
     }
 
-    public void connect(String deviceAddress) {
+    public void connectToDevice(String deviceAddress) {
         mBleComm.connect(deviceAddress);
     }
 
-    public void disconnect() {
-        mBleComm.close();
+    public void disconnectDevice() {
+        mBleComm.disconnect();
     }
 
     public void startRssiRequests() {
@@ -68,5 +66,10 @@ public class BLEService extends Service {
 
     public void stopRssiRequests() {
         mRssiManager.stopRssiRequests();
+    }
+
+    public void setRssiManagerWindowSizes(int deltasSize, int filterSize) {
+        mRssiManager.setDeltasSize(deltasSize);
+        mRssiManager.setFilterSize(filterSize);
     }
 }

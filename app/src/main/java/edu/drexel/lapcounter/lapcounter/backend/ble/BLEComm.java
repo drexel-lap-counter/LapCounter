@@ -155,7 +155,7 @@ public class BLEComm {
         }
 
         // Release resources for a previously instantiated mBluetoothGatt.
-        close();
+        disconnect();
 
         mPreviousConnectAddress = mCurrentConnectAddress;
         mCurrentConnectAddress = address;
@@ -173,7 +173,7 @@ public class BLEComm {
      * After using a given BLE device, the app must call this method to ensure resources are
      * released properly.
      */
-    void close() {
+    void disconnect() {
         if (mBluetoothGatt == null) {
             return;
         }

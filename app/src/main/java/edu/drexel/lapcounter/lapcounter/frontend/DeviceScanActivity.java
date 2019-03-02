@@ -183,14 +183,15 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     }
 
-    public void selectDevice(View view) {
-        // TODO: Register the device before transitioning
-        //Pass device object to intent
-        // Go directly to calibration
-        Intent intent = new Intent(this, DummyCalibrateDeviceActivity.class);
-        intent.putExtra("DEVICE_NAME",mDevice.getName());
-        intent.putExtra("DEVICE_MAC",mDevice.getMac());
-        intent.putExtra("DEVICE_RSSI",mDevice.getRssi());
+    public void calibrateSelectedDevice(View view) {
+        boolean shouldLaunchDummyCalibrate = mDeviceScanner instanceof DummyDeviceScanner;
+
+        Class activityToLaunch = shouldLaunchDummyCalibrate ?
+                                 DummyCalibrateDeviceActivity.class :
+                                 CalibrateDeviceActivity.class;
+
+        Intent intent = new Intent(this, activityToLaunch);
+        intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMac());
         startActivity(intent);
     }
 }

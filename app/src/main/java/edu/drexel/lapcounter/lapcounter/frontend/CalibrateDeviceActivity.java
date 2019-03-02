@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RssiCollector;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
@@ -25,7 +26,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         return CalibrateDeviceActivity.class.getPackage().getName() + "." + s;
     }
 
-    public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
     public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
     public static final String EXTRAS_CALIBRATED_THRESHOLD = qualify("CALIBRATED_THRESHOLD");
 
@@ -43,12 +43,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mBleServiceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
             mBleService = binder.getService();
-            mBleService.connect(mDeviceAddress);
+            mBleService.setRssiManagerWindowSizes(1, 1);
+            mBleService.connectToDevice(mDeviceAddress);
         }
 
         @Override
@@ -70,8 +71,8 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
-        Intent gattServiceIntent = new Intent(this, BLEService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        Intent bleServiceIntent = new Intent(this, BLEService.class);
+        bindService(bleServiceIntent, mBleServiceConn, BIND_AUTO_CREATE);
 
         registerHandlers();
     }
@@ -80,7 +81,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
         mReceiver.registerHandler(BLEComm.ACTION_RECONNECTED, onConnect);
         mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
-        mReceiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRssi);
+        mReceiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
     }
 
 
@@ -99,7 +100,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             mRssiCollector.disable();
             mRssiCollector.clear();
             mCalibrateInfo.setText(R.string.label_device_disconnected_try_reconnect);
-            mBleService.connect(mDeviceAddress);
+            mBleService.connectToDevice(mDeviceAddress);
             mCalibrate.setEnabled(false);
             mDone.setEnabled(false);
         }
@@ -108,13 +109,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     private final SimpleMessageReceiver.MessageHandler onRssi = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            int rssi = message.getIntExtra(BLEComm.EXTRA_RAW_RSSI, 0);
+            double rssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0.0);
 
-            if (rssi == 0 || !mRssiCollector.isEnabled()) {
+            if (rssi == 0.0 || !mRssiCollector.isEnabled()) {
                 return;
             }
 
-            mRssiCollector.collect(rssi);
+            mRssiCollector.collect((int)rssi);
 
             long currentMillis = System.currentTimeMillis();
             long timeSinceLastPrint = currentMillis - mLastPrintMillis;
@@ -133,7 +134,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         mReceiver.attach(this);
 
         if (mBleService != null) {
-            mBleService.connect(mDeviceAddress);
+            mBleService.connectToDevice(mDeviceAddress);
         }
     }
 
@@ -147,12 +148,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mReceiver.detach(this);
-        unbindService(mServiceConnection);
+        unbindService(mBleServiceConn);
         mBleService = null;
     }
 
     public void calibrate(View view) {
         if (mRssiCollector.isEnabled()) {
+            mBleService.stopRssiRequests();
             mRssiCollector.disable();
             mDone.setEnabled(true);
             mCalibrate.setText(R.string.label_calibrate);
@@ -160,12 +162,15 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             return;
         }
 
+        mBleService.startRssiRequests();
         mDone.setEnabled(false);
         mRssiCollector.enable();
         mCalibrate.setText(getString(R.string.label_stop));
     }
 
     public void done(View view) {
+        mBleService.disconnectDevice();
+
         double threshold = mRssiCollector.median();
         Intent result = getIntent();
         result.putExtra(EXTRAS_CALIBRATED_THRESHOLD, threshold);

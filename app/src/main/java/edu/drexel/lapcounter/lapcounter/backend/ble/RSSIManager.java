@@ -23,11 +23,11 @@ public class RSSIManager {
 
     private LocalBroadcastManager mBroadcastManager;
 
-    private static final int DELTAS_WINDOW_SIZE = 3;
-    private final SlidingWindow<Double> mRssiDeltas = new SlidingWindow<>(DELTAS_WINDOW_SIZE);
+    private static final int DEFAULT_DELTAS_WINDOW_SIZE = 3;
+    private SlidingWindow<Double> mRssiDeltas = new SlidingWindow<>(DEFAULT_DELTAS_WINDOW_SIZE);
 
-    private static final int MOVING_AVERAGE_SIZE = 10;
-    private final MovingAverage mFilter = new MovingAverage(MOVING_AVERAGE_SIZE);
+    private static final int DEFAULT_MOVING_AVERAGE_SIZE = 10;
+    private MovingAverage mFilter = new MovingAverage(DEFAULT_MOVING_AVERAGE_SIZE);
 
     private double mPreviousRssi;
     private double mCurrentRssi;
@@ -148,5 +148,13 @@ public class RSSIManager {
     public void stopRssiRequests() {
         mShouldScheduleRssi = false;
         mHandler.removeCallbacks(mRequestRssi);
+    }
+
+    public void setDeltasSize(int size) {
+        mRssiDeltas = new SlidingWindow<>(size);
+    }
+
+    public void setFilterSize(int size) {
+        mFilter = new MovingAverage(size);
     }
 }

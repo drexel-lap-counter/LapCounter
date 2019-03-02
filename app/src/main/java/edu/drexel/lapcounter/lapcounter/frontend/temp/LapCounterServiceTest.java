@@ -56,7 +56,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBleService = ((BLEService.LocalBinder) service).getService();
-            mBleService.connect(PUCK_ADDRESS);
+            mBleService.connectToDevice(PUCK_ADDRESS);
         }
 
         @Override
@@ -90,7 +90,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler mOnDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            mBleService.connect(PUCK_ADDRESS);
+            mBleService.connectToDevice(PUCK_ADDRESS);
         }
     };
 
