@@ -22,6 +22,7 @@ import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_CONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_DISCONNECTED;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_RECONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_DIRECTION;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_RSSI;
@@ -194,6 +195,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     private void registerHandlers() {
         register(ACTION_CONNECTED);
+        register(ACTION_RECONNECTED);
         register(ACTION_DISCONNECTED);
 //        register(ACTION_RAW_RSSI_AVAILABLE);
 //        register(ACTION_RSSI_AND_DIR_AVAILABLE);

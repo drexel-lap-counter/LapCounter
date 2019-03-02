@@ -78,6 +78,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     private void registerHandlers() {
         mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        mReceiver.registerHandler(BLEComm.ACTION_RECONNECTED, onConnect);
         mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
         mReceiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRssi);
     }

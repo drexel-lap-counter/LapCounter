@@ -77,12 +77,6 @@ public class DisconnectManager {
     private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            boolean isReconnect = message.getBooleanExtra(BLEComm.EXTRA_IS_RECONNECT, false);
-
-            if (!isReconnect) {
-                return;
-            }
-
             // We want the timestamp of reconnection, even though we are not done with the
             // logic for a second or two while the RSSIManager refills the buffer. So save it
             // in a member variable.
@@ -181,7 +175,7 @@ public class DisconnectManager {
      */
     void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
-        receiver.registerHandler(BLEComm.ACTION_CONNECTED, onReconnect);
+        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
         receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, onTransition);
         receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
     }

@@ -17,12 +17,6 @@ public class BLEService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    private boolean mShouldScan = false;
-    private BluetoothAdapter.LeScanCallback mScanCallback;
-
-    private boolean mShouldConnect = false;
-    private String mDeviceAddress;
-
     private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
     public class LocalBinder extends Binder {
@@ -36,73 +30,32 @@ public class BLEService extends Service {
         return mBinder;
     }
 
-    private ServiceConnection mBleCommConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            BLEComm.LocalBinder binder = (BLEComm.LocalBinder) service;
-            mBleComm = binder.getService();
-
-            mRssiManager = new RSSIManager(BLEService.this, mBleComm);
-            mRssiManager.initCallbacks(mReceiver);
-            mReceiver.attach(BLEService.this);
-
-            if (mShouldScan) {
-                mBleComm.startScan(mScanCallback);
-            } else if (mShouldConnect) {
-                connect();
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName arg0) {
-            mReceiver.detach(BLEService.this);
-            mBleComm = null;
-        }
-    };
-
     @Override
     public void onCreate() {
         super.onCreate();
-        Intent intent = new Intent(this, BLEComm.class);
-        bindService(intent, mBleCommConnection, Context.BIND_AUTO_CREATE);
+
+        mBleComm = new BLEComm(this);
+        mRssiManager = new RSSIManager(this, mBleComm);
+        mRssiManager.initCallbacks(mReceiver);
+        mReceiver.attach(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unbindService(mBleCommConnection);
+        mReceiver.detach(this);
     }
 
     public void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        if (mBleComm == null) {
-            mShouldScan = true;
-            mScanCallback = scanCallback;
-        } else {
-            mBleComm.startScan(scanCallback);
-        }
+        mBleComm.startScan(scanCallback);
     }
 
     public void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        if (mBleComm != null) {
-            mBleComm.stopScan(scanCallback);
-        }
-
-        mShouldScan = false;
-        mScanCallback = null;
+        mBleComm.stopScan(scanCallback);
     }
 
     public void connect(String deviceAddress) {
-        mDeviceAddress = deviceAddress;
-        if (mBleComm == null) {
-            mShouldConnect = true;
-        } else {
-            connect();
-        }
-    }
-
-    private void connect() {
-        mBleComm.connect(mDeviceAddress);
-        mShouldConnect = false;
-        mDeviceAddress = null;
+        mBleComm.connect(deviceAddress);
     }
 
     public void disconnect() {

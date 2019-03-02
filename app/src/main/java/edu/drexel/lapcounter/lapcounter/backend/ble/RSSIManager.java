@@ -108,6 +108,7 @@ public class RSSIManager {
 
     public void initCallbacks(SimpleMessageReceiver receiver) {
         receiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        receiver.registerHandler(BLEComm.ACTION_RECONNECTED, onConnect);
         receiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
         receiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
     }
