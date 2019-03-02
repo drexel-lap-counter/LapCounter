@@ -64,7 +64,6 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
      * @param context the Activity/Service that owns the receiver
      */
     public void attach(Context context) {
-//        context.registerReceiver(this, this.mIntentFilter);
         LocalBroadcastManager.getInstance(context).registerReceiver(this, this.mIntentFilter);
     }
 
@@ -73,7 +72,6 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
      * @param context the parent Activity/Service that owns this receiver
      */
     public void detach(Context context) {
-//        context.unregisterReceiver(this);
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
     }
 
