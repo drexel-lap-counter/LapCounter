@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +16,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
@@ -118,19 +120,21 @@ public class DeviceScanActivity extends AppCompatActivity {
         }));
 
         requestBluetoothPermission();
+
     }
 
-    private boolean getLocationPermission() {
-        String permission = Manifest.permission.ACCESS_COARSE_LOCATION;
-        int currentPermission = ActivityCompat.checkSelfPermission(this, permission);
-        boolean canRequest = currentPermission == PackageManager.PERMISSION_GRANTED;
+    private void initScanner(DeviceScanner scanner) {
+        mDeviceScanner = scanner;
+        mDeviceScanner.setCallback(mDeviceCallback);
+        mDeviceScanner.startScan();
+    }
 
-        if (canRequest) {
-            ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_LOCATION);
-            return true;
-        }
+    private void initBleScanner() {
+        initScanner(new BLEScanner(this));
+    }
 
-        return false;
+    private void initDummyScanner() {
+        initScanner(new DummyDeviceScanner());
     }
 
     private void requestBluetoothPermission() {
@@ -140,29 +144,53 @@ public class DeviceScanActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        // User chose not to enable Bluetooth. Exit gracefully.
         if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_OK /*&& getLocationPermission()*/) {
-                mDeviceScanner = new BLEScanner(this);
+            if (resultCode == Activity.RESULT_OK) {
+                requestLocationPermission();
             } else {
-                mDeviceScanner = new DummyDeviceScanner();
+                initDummyScanner();
             }
-
-            // Set a callback for whenever we find a bluetooth device
-            mDeviceScanner.setCallback(mDeviceCallback);
-
-            // NOTE: Unlike DeviceSelectActivity, we do NOT add a whitelist here.
-
-            // Start the scan. This will call the callback a bunch of times.
-            mDeviceScanner.startScan();
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void requestLocationPermission() {
+        String permission = Manifest.permission.ACCESS_COARSE_LOCATION;
+        boolean isAlreadyGranted = ActivityCompat.checkSelfPermission(this, permission) ==
+                                   PackageManager.PERMISSION_GRANTED;
+
+        if (isAlreadyGranted) {
+            Log.i(TAG, "Location permission already granted.");
+            initBleScanner();
+            return;
+        }
+
+        Log.i(TAG, "Requesting location permission.");
+        ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_LOCATION);
+    }
+
     @Override
-    protected void onPause()
-    {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode != REQUEST_LOCATION) {
+            return;
+        }
+
+        boolean didUserCancelRequest = grantResults.length == 0 ||
+                grantResults[0] != PackageManager.PERMISSION_GRANTED;
+
+        if (didUserCancelRequest) {
+            Toast.makeText(this, R.string.request_location_rationale, Toast.LENGTH_LONG).show();
+            initDummyScanner();
+        } else {
+            initBleScanner();
+        }
+    }
+
+    @Override
+    protected void onPause() {
         super.onPause();
 
         if (mDeviceScanner != null) {
@@ -174,8 +202,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
 
         if (mDeviceScanner != null) {

@@ -23,10 +23,10 @@ public class RSSIManager {
 
     private LocalBroadcastManager mBroadcastManager;
 
-    private static final int DEFAULT_DELTAS_WINDOW_SIZE = 3;
+    public static final int DEFAULT_DELTAS_WINDOW_SIZE = 3;
     private SlidingWindow<Double> mRssiDeltas = new SlidingWindow<>(DEFAULT_DELTAS_WINDOW_SIZE);
 
-    private static final int DEFAULT_MOVING_AVERAGE_SIZE = 10;
+    public static final int DEFAULT_MOVING_AVERAGE_SIZE = 10;
     private MovingAverage mFilter = new MovingAverage(DEFAULT_MOVING_AVERAGE_SIZE);
 
     private double mPreviousRssi;

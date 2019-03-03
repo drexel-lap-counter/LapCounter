@@ -1,5 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.text.TextUtils;
+
 import java.util.Objects;
 
 public class Device
@@ -16,7 +18,7 @@ public class Device
 
     public Device(String name,String mac,int rssi)
     {
-        this.name = name;
+        this.name = TextUtils.isEmpty(name) ? "Unnamed Device" : name;
         this.mac = mac;
         this.rssi = rssi;
         Selected = false;

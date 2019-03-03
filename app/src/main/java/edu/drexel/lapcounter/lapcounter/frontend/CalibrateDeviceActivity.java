@@ -130,12 +130,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         mReceiver.attach(this);
-
-        if (mBleService != null) {
-            mBleService.connectToDevice(mDeviceAddress);
-        }
     }
 
     @Override
@@ -148,6 +143,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mReceiver.detach(this);
+        mBleService.disconnectDevice();
         unbindService(mBleServiceConn);
         mBleService = null;
     }

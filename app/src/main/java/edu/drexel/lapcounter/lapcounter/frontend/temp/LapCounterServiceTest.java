@@ -24,6 +24,8 @@ import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_CONNEC
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_DISCONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm.ACTION_RECONNECTED;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_DELTAS_WINDOW_SIZE;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_MOVING_AVERAGE_SIZE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_DIRECTION;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.EXTRA_RSSI;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.DisconnectManager.ACTION_MISSED_LAPS;
@@ -56,6 +58,8 @@ public class LapCounterServiceTest extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBleService = ((BLEService.LocalBinder) service).getService();
+            mBleService.setRssiManagerWindowSizes(DEFAULT_DELTAS_WINDOW_SIZE,
+                                                  DEFAULT_MOVING_AVERAGE_SIZE);
             mBleService.connectToDevice(PUCK_ADDRESS);
         }
 
@@ -213,6 +217,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
         super.onDestroy();
         log("onDestroy");
         mReceiver.detach(this);
+        mBleService.disconnectDevice();
         unbindServices();
         mBleService = null;
         mLapCounterService = null;
