@@ -21,7 +21,7 @@
 
     <TextView
         android:id="@+id/poolLengthTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -37,7 +37,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
@@ -48,7 +48,7 @@
 
     <TextView
         android:id="@+id/workoutDurationTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -64,7 +64,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="@+id/workoutDurationTextView"
@@ -74,7 +74,7 @@
 
     <TextView
         android:id="@+id/avgLapTimeTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -90,7 +90,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="@+id/avgLapTimeTextView"
@@ -100,7 +100,7 @@
 
     <TextView
         android:id="@+id/averageSpeedTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -116,7 +116,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="@+id/averageSpeedTextView"
@@ -126,7 +126,7 @@
 
     <TextView
         android:id="@+id/lapsTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -142,7 +142,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="@+id/lapsTextView"
@@ -152,7 +152,7 @@
 
     <TextView
         android:id="@+id/totalDistanceTextView"
-        android:layout_width="240dp"
+        android:layout_width="210dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -168,7 +168,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:textAlignment="textEnd"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="@+id/totalDistanceTextView"
