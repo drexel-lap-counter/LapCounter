@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
@@ -78,18 +79,19 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         mNavBar.init();
 
-        timerValue = (TextView) findViewById(R.id.timerValue);
+        timerValue = findViewById(R.id.timerValue);
 
-        startButton = (Button) findViewById(R.id.startButton);
+        startButton = findViewById(R.id.startButton);
+        startButton.setEnabled(false);
 
-        resumeButton = (Button) findViewById(R.id.resumeButton);
+        resumeButton = findViewById(R.id.resumeButton);
+        resumeButton.setEnabled(false);
 
-        mCounter = findViewById(R.id.lapCount);
-        mCounter.setText("0");
-        // Register callbacks with the receiver
-        mReceiver.registerHandler(ACTION_LAP_COUNT, updateUI);
+        pauseButton = findViewById(R.id.pauseButton);
+        pauseButton.setEnabled(false);
 
-
+        restartButton = findViewById(R.id.restartButton);
+        restartButton.setEnabled(false);
 
         startButton.setOnClickListener(new View.OnClickListener() {
 
@@ -106,6 +108,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             }
         });
 
+
         resumeButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -118,9 +121,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 //TODO: Unpause the BLEService
             }
         });
-
-        pauseButton = (Button) findViewById(R.id.pauseButton);
-        pauseButton.setEnabled(false);
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
@@ -136,7 +136,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             }
         });
 
-        restartButton = (Button) findViewById(R.id.restartButton);
+
 
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -145,6 +145,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 onButtonShowPopupWindowClick(view);
             }
         });
+
+        mCounter = findViewById(R.id.lapCount);
+        mCounter.setText("0");
+        // Register callbacks with the receiver
+        mReceiver.registerHandler(LapCounter.ACTION_LAP_COUNT_UPDATED, updateUI);
+        mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        // TODO: Failed to connect event and somehow alert user?
 
         requestBluetoothPermission();
     }
@@ -173,7 +180,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
-                bindServices();
+                bindService(BLEService.class, mBleServiceConnection);
                 mReceiver.attach(this);
             }
             return;
@@ -184,11 +191,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private void bindService(Class serviceClass, ServiceConnection connection) {
         Intent serviceIntent = new Intent(this, serviceClass);
         bindService(serviceIntent, connection, BIND_AUTO_CREATE);
-    }
-
-    private void bindServices() {
-        bindService(BLEService.class, mBleServiceConnection);
-        bindService(LapCounterService.class, mLapCounterServiceConnection);
     }
 
     private void unbindServices() {
@@ -205,7 +207,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             mBleService.setRssiManagerWindowSizes(DEFAULT_DELTAS_WINDOW_SIZE,
                     DEFAULT_MOVING_AVERAGE_SIZE);
 
-            connect();
+            bindService(LapCounterService.class, mLapCounterServiceConnection);
         }
 
         @Override
@@ -220,6 +222,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mLapCounterService = ((LapCounterService.LocalBinder) service).getService();
+
+            connect();
         }
 
         @Override
@@ -325,6 +329,14 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
             //Update the TextView
             mCounter.setText(Integer.toString(lapCount));
+        }
+    };
+
+    private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            startButton.setEnabled(true);
+            restartButton.setEnabled(true);
         }
     };
 
