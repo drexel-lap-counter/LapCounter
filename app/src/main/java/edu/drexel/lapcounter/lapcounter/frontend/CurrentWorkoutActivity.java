@@ -104,7 +104,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 resumeButton.setEnabled(false);
                 pauseButton.setEnabled(true);
 
-                // TODO: Start the BLEService
+                mBleService.startRssiRequests();
             }
         });
 
