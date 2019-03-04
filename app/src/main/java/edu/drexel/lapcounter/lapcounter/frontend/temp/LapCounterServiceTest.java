@@ -1,10 +1,13 @@
 package edu.drexel.lapcounter.lapcounter.frontend.temp;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -54,13 +57,16 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private final static String PUCK_ADDRESS = "D1:AA:19:79:8A:18";
     private BLEService mBleService;
 
+    private static final int REQUEST_ENABLE_BT = 2;
+
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBleService = ((BLEService.LocalBinder) service).getService();
             mBleService.setRssiManagerWindowSizes(DEFAULT_DELTAS_WINDOW_SIZE,
                                                   DEFAULT_MOVING_AVERAGE_SIZE);
-            mBleService.connectToDevice(PUCK_ADDRESS);
+
+            connect();
         }
 
         @Override
@@ -68,6 +74,11 @@ public class LapCounterServiceTest extends AppCompatActivity {
             mBleService = null;
         }
     };
+
+    private void connect() {
+        log("Connecting...");
+        mBleService.connectToDevice(PUCK_ADDRESS);
+    }
 
     private LapCounterService mLapCounterService;
 
@@ -91,13 +102,21 @@ public class LapCounterServiceTest extends AppCompatActivity {
             mState.setText(String.format("before: %s, after: %s", before, after));
         }
     };
-    private SimpleMessageReceiver.MessageHandler mOnDisconnect = new SimpleMessageReceiver.MessageHandler() {
+
+    private SimpleMessageReceiver.MessageHandler mOnConnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            mBleService.connectToDevice(PUCK_ADDRESS);
+            mStartOrStop.setEnabled(true);
         }
     };
 
+    private SimpleMessageReceiver.MessageHandler mOnDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mStartOrStop.setEnabled(false);
+            connect();
+        }
+    };
 
     private String getLast(String s, String delimiter) {
         String[] pieces = s.split(Pattern.quote(delimiter));
@@ -151,6 +170,40 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_lap_counter_service_test);
+
+        mLog = findViewById(R.id.log);
+        log("onCreate");
+
+        mStartOrStop = findViewById(R.id.start_or_stop_btn);
+        mRssi = findViewById(R.id.filtered_rssi);
+        mDir = findViewById(R.id.dir);
+        mState = findViewById(R.id.state);
+
+        requestBluetoothPermission();
+    }
+
+    private void requestBluetoothPermission() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bindServices();
+                registerHandlers();
+                mReceiver.attach(this);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private void bindService(Class serviceClass, ServiceConnection connection) {
         Intent serviceIntent = new Intent(this, serviceClass);
         bindService(serviceIntent, connection, BIND_AUTO_CREATE);
@@ -164,23 +217,6 @@ public class LapCounterServiceTest extends AppCompatActivity {
     private void unbindServices() {
         unbindService(mBleServiceConnection);
         unbindService(mLapCounterServiceConnection);
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lap_counter_service_test);
-
-        mLog = findViewById(R.id.log);
-        mStartOrStop = findViewById(R.id.start_or_stop_btn);
-        mRssi = findViewById(R.id.filtered_rssi);
-        mDir = findViewById(R.id.dir);
-        mState = findViewById(R.id.state);
-
-        log("onCreate");
-        bindServices();
-        registerHandlers();
-        mReceiver.attach(this);
     }
 
     public void onClickStartOrStop(View view) {
@@ -201,14 +237,13 @@ public class LapCounterServiceTest extends AppCompatActivity {
         register(ACTION_CONNECTED);
         register(ACTION_RECONNECTED);
         register(ACTION_DISCONNECTED);
-//        register(ACTION_RAW_RSSI_AVAILABLE);
-//        register(ACTION_RSSI_AND_DIR_AVAILABLE);
         register(ACTION_MISSED_LAPS);
         register(ACTION_LAP_COUNT_UPDATED);
         register(ACTION_STATE_TRANSITION);
 
         mReceiver.registerHandler(ACTION_RSSI_AND_DIR_AVAILABLE, mOnRssiAndDir);
         mReceiver.registerHandler(ACTION_STATE_TRANSITION, mOnStateTransition);
+        mReceiver.registerHandler(ACTION_CONNECTED, mOnConnect);
         mReceiver.registerHandler(ACTION_DISCONNECTED, mOnDisconnect);
     }
 
@@ -217,8 +252,12 @@ public class LapCounterServiceTest extends AppCompatActivity {
         super.onDestroy();
         log("onDestroy");
         mReceiver.detach(this);
-        mBleService.disconnectDevice();
-        unbindServices();
+
+        if (mBleService != null) {
+            mBleService.disconnectDevice();
+            unbindServices();
+        }
+
         mBleService = null;
         mLapCounterService = null;
     }

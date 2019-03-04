@@ -15,7 +15,8 @@
         android:onClick="onClickStartOrStop"
         android:text="Start"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:enabled="false" />
 
     <TextView
         android:id="@+id/filtered_rssi"
