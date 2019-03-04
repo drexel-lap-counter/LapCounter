@@ -118,7 +118,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 pauseButton.setEnabled(true);
 
                 isPaused = false;
-                //TODO: Unpause the BLEService
+                mBleService.startRssiRequests();
             }
         });
 
@@ -132,7 +132,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 pauseButton.setEnabled(false);
 
                 isPaused = true;
-                //TODO: Pause the BLEService
+                mBleService.stopRssiRequests();
             }
         });
 
@@ -300,7 +300,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             }
         } );
 
-        noButton = (Button) popupView.findViewById(R.id.noButton);
+        noButton = popupView.findViewById(R.id.noButton);
         noButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 popupWindow.dismiss();
