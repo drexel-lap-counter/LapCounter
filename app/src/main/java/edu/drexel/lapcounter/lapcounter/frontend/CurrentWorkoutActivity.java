@@ -147,27 +147,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
     };
 
-    // TODO: Maybe rename WorkoutHistory -> Analytics so it's less confusing?
-    public void viewWorkoutHistory(View view) {
-        Intent intent = new Intent(this, WorkoutHistoryActivity.class);
-        startActivity(intent);
-    }
-
-    public void goHome(View view) {
-        Intent intent = new Intent(this, WelcomeActivity.class);
-        startActivity(intent);
-    }
-
-    public void viewPastWorkouts(View view) {
-        Intent intent = new Intent(this, PastWorkoutsActivity.class);
-        startActivity(intent);
-    }
-
-    public void configureSettings(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-    }
-
     public void onButtonShowPopupWindowClick(View view) {
 
         // inflate the layout of the popup window
