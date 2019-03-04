@@ -93,6 +93,7 @@ public class LapCounterServiceTest extends AppCompatActivity {
             mLapCounterService = null;
         }
     };
+
     private SimpleMessageReceiver.MessageHandler mOnStateTransition = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {

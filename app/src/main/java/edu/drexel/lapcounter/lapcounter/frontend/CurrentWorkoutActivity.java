@@ -1,9 +1,15 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -20,7 +26,13 @@ import android.view.MotionEvent;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_DELTAS_WINDOW_SIZE;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_MOVING_AVERAGE_SIZE;
 
 public class CurrentWorkoutActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
@@ -36,6 +48,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
     public static final String EXTRA_CURRENT_LAP_COUNT =
             "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
+
+    // Unique ID for the Bluetooth request Intent
+    private static final int REQUEST_ENABLE_BT = 2;
 
     private int mFakeLapCount = 0;
     private TextView timerValue;
@@ -87,7 +102,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 resumeButton.setEnabled(false);
                 pauseButton.setEnabled(true);
 
-                simulateLaps();
+                // TODO: Start the BLEService
             }
         });
 
@@ -98,7 +113,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 customHandler.postDelayed(updateTimerThread, 0);
                 resumeButton.setEnabled(false);
                 pauseButton.setEnabled(true);
-                onResume();
+
+                isPaused = false;
+                //TODO: Unpause the BLEService
             }
         });
 
@@ -113,7 +130,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 customHandler.removeCallbacks(updateTimerThread);
                 resumeButton.setEnabled(true);
                 pauseButton.setEnabled(false);
-                onPause();
+
+                isPaused = true;
+                //TODO: Pause the BLEService
             }
         });
 
@@ -126,6 +145,93 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 onButtonShowPopupWindowClick(view);
             }
         });
+
+        requestBluetoothPermission();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mReceiver.detach(this);
+
+        if (mBleService != null) {
+            mBleService.disconnectDevice();
+            unbindServices();
+        }
+
+        mBleService = null;
+        mLapCounterService = null;
+    }
+
+    private void requestBluetoothPermission() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bindServices();
+                mReceiver.attach(this);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void bindService(Class serviceClass, ServiceConnection connection) {
+        Intent serviceIntent = new Intent(this, serviceClass);
+        bindService(serviceIntent, connection, BIND_AUTO_CREATE);
+    }
+
+    private void bindServices() {
+        bindService(BLEService.class, mBleServiceConnection);
+        bindService(LapCounterService.class, mLapCounterServiceConnection);
+    }
+
+    private void unbindServices() {
+        unbindService(mBleServiceConnection);
+        unbindService(mLapCounterServiceConnection);
+    }
+
+    private BLEService mBleService;
+
+    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBleService = ((BLEService.LocalBinder) service).getService();
+            mBleService.setRssiManagerWindowSizes(DEFAULT_DELTAS_WINDOW_SIZE,
+                    DEFAULT_MOVING_AVERAGE_SIZE);
+
+            connect();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBleService = null;
+        }
+    };
+
+    private LapCounterService mLapCounterService;
+
+    private ServiceConnection mLapCounterServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mLapCounterService = ((LapCounterService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mLapCounterService = null;
+        }
+    };
+
+    private void connect() {
+        // TODO: Pull this from somewhere in the scary land of Android Room?
+        final String PUCK_ADDRESS = "D1:AA:19:79:8A:18";
+        mBleService.connectToDevice(PUCK_ADDRESS);
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -214,30 +320,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             // Extract info from the Intent
-            int lapCount = message.getIntExtra(EXTRA_CURRENT_LAP_COUNT, 0);
+            // TODO: Get the actual constant from LapCounter(Service?)
+            int lapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
             //Update the TextView
             mCounter.setText(Integer.toString(lapCount));
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isPaused = false;
-        // Enable the callbacks by registering the receiver
-        // This is shorthand for registerReceiver()
-        mReceiver.attach(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isPaused = true;
-        // Unsubscribe from events
-        // This is shorthand for unregisterReceiver()
-        mReceiver.detach(this);
-    }
 
     /**
      * Simulate counting laps. This just increments the counter once a second
