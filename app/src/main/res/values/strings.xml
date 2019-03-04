@@ -27,4 +27,10 @@
     <string name="custom">"Custom"</string>
     <string name="units">"Units</string>
     <string name="size">"Size"</string>
+    <string name="pool_length">"Pool Length"</string>
+    <string name="workout_duration">"Workout Duration"</string>
+    <string name="avg_lap_time">"Avg Lap Time"</string>
+    <string name="average_speed">"Average Speed"</string>
+    <string name="laps">"Laps"</string>
+    <string name="total_distance">"Total Distance"</string>
 </resources>
