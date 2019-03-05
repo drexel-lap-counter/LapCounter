@@ -25,6 +25,7 @@ public class BLEComm {
 
     // Tag for the RSSI data in the Intent payload
     public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
+    public final static String EXTRA_DISCONNECT_IS_INTENTIONAL = qualify("EXTRA_DISCONNECT_IS_INTENTIONAL");
 
     // States of connection
     private static final int STATE_DISCONNECTED = 0;
@@ -41,7 +42,9 @@ public class BLEComm {
 
     private final Context mParent;
 
-    // Callback for GATT serverevents.
+    private boolean mIntentionalDisconnect = false;
+
+    // Callback for GATT server events.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -55,7 +58,9 @@ public class BLEComm {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
                 Log.d(TAG, "Disconnected from GATT server. status = " + status);
-                broadcastUpdate(ACTION_DISCONNECTED);
+                broadcastDisconnect(ACTION_DISCONNECTED);
+
+                mIntentionalDisconnect = false;
             }
         }
 
@@ -109,8 +114,9 @@ public class BLEComm {
      *
      * @param action
      */
-    private void broadcastUpdate(final String action) {
+    private void broadcastDisconnect(final String action) {
         final Intent intent = new Intent(action);
+        intent.putExtra(EXTRA_DISCONNECT_IS_INTENTIONAL, mIntentionalDisconnect);
         localBroadcast(intent);
     }
 
@@ -180,6 +186,7 @@ public class BLEComm {
         mBluetoothGatt.close();
         mBluetoothGatt = null;
         mConnectionState = STATE_DISCONNECTED;
+        mIntentionalDisconnect = true;
     }
 
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {

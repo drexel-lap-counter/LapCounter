@@ -14,7 +14,7 @@ public class BLEService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
+    private SimpleMessageReceiver mReceiver;
 
     public class LocalBinder extends Binder {
         public BLEService getService() {
@@ -31,10 +31,7 @@ public class BLEService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mBleComm = new BLEComm(this);
-        mRssiManager = new RSSIManager(this, mBleComm);
-        mRssiManager.initCallbacks(mReceiver);
-        mReceiver.attach(this);
+        reset();
     }
 
     @Override
@@ -71,5 +68,22 @@ public class BLEService extends Service {
     public void setRssiManagerWindowSizes(int deltasSize, int filterSize) {
         mRssiManager.setDeltasSize(deltasSize);
         mRssiManager.setFilterSize(filterSize);
+    }
+
+    /**
+     * Throw away the old components
+     */
+    public void reset() {
+        // Avoid potential race conditions before garbage collection
+        if (mReceiver != null) {
+            mReceiver.detach(this);
+            //mBleComm.disconnect();
+        }
+
+        mReceiver = new SimpleMessageReceiver();
+        mBleComm = new BLEComm(this);
+        mRssiManager = new RSSIManager(this, mBleComm);
+        mRssiManager.initCallbacks(mReceiver);
+        mReceiver.attach(this);
     }
 }

@@ -151,6 +151,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         // Register callbacks with the receiver
         mReceiver.registerHandler(LapCounter.ACTION_LAP_COUNT_UPDATED, updateUI);
         mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        //mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
         // TODO: Failed to connect event and somehow alert user?
 
         requestBluetoothPermission();
@@ -283,7 +284,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             }
         });
 
-        yesButton = (Button) popupView.findViewById(R.id.yesButton);
+        yesButton = popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 startTime = SystemClock.uptimeMillis();
@@ -296,6 +297,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 customHandler.removeCallbacks(updateTimerThread);
                 resumeButton.setEnabled(true);
                 pauseButton.setEnabled(false);
+
+                mBleService.reset();
+                mLapCounterService.reset();
+
                 popupWindow.dismiss();
             }
         } );
@@ -337,6 +342,14 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         public void onMessage(Intent message) {
             startButton.setEnabled(true);
             restartButton.setEnabled(true);
+        }
+    };
+
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            if (message.getBooleanExtra(BLEComm.EXTRA_DISCONNECT_IS_INTENTIONAL, false))
+                connect();
         }
     };
 

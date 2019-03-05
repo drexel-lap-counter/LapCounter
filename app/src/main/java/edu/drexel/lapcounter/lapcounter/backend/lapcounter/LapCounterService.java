@@ -42,7 +42,7 @@ public class LapCounterService extends Service {
      * service. The sub-components of the lap counting system will register callbacks with this
      * object as needed.
      */
-    private SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
+    private SimpleMessageReceiver mReceiver;
 
     /**
      * a binder for this service
@@ -71,11 +71,7 @@ public class LapCounterService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
-        mDisconnectManager = new DisconnectManager(this);
-        mLapCounter = new LapCounter(this);
-        initCallbacks();
-        mReceiver.attach(this);
+        reset();
     }
 
     @Override
@@ -92,5 +88,17 @@ public class LapCounterService extends Service {
         mLapCounter.initCallbacks(mReceiver);
         mDisconnectManager.initCallbacks(mReceiver);
         mStateMachine.initCallbacks(mReceiver);
+    }
+
+    public void reset() {
+        if (mReceiver != null)
+            mReceiver.detach(this);
+
+        mReceiver = new SimpleMessageReceiver();
+        mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
+        mDisconnectManager = new DisconnectManager(this);
+        mLapCounter = new LapCounter(this);
+        initCallbacks();
+        mReceiver.attach(this);
     }
 }
