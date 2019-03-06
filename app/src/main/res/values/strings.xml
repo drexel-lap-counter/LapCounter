@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LapCounter</string>
-    <string name="title_activity_test_navbar">TestNavbar</string>
     <string name="title_home">Home</string>
+    <string name="title_current_workout">Current Workout</string>
     <string name="title_analytics">Analytics</string>
     <string name="title_past_workouts">History</string>
     <string name="title_settings">Settings</string>
@@ -18,6 +18,7 @@
     <string name="label_calibrate_instructions">Move your device to the threshold and press \"Calibrate\".</string>
     <string name="label_calibrate">Calibrate</string>
     <string name="label_connecting">Connecting.</string>
+    <string name="label_connected">Connected.</string>
     <string name="label_device_disconnected_try_reconnect">Device disconnected. Trying to reconnect.</string>
     <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
     <string name="label_stop">Stop</string>
@@ -41,4 +42,5 @@
     <string name="average_speed">"Average Speed"</string>
     <string name="laps">"Laps"</string>
     <string name="total_distance">"Total Distance"</string>
+    <string name="current_workout_timer_format">%d:%02d:%03d</string>
 </resources>

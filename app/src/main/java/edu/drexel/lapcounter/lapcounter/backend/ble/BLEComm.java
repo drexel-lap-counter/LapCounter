@@ -190,6 +190,7 @@ public class BLEComm {
     }
 
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
+        disconnect();
         mBluetoothAdapter.startLeScan(scanCallback);
     }
 
@@ -199,5 +200,11 @@ public class BLEComm {
 
     int getConnectionState() {
         return mConnectionState;
+    }
+
+    void reset() {
+        mPreviousConnectAddress = null;
+        mCurrentConnectAddress = null;
+        mIntentionalDisconnect = false;
     }
 }

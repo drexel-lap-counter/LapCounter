@@ -30,7 +30,7 @@ public class BLEService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        mBleComm = new BLEComm(this);
         reset();
     }
 
@@ -77,11 +77,10 @@ public class BLEService extends Service {
         // Avoid potential race conditions before garbage collection
         if (mReceiver != null) {
             mReceiver.detach(this);
-            //mBleComm.disconnect();
         }
 
+        mBleComm.reset();
         mReceiver = new SimpleMessageReceiver();
-        mBleComm = new BLEComm(this);
         mRssiManager = new RSSIManager(this, mBleComm);
         mRssiManager.initCallbacks(mReceiver);
         mReceiver.attach(this);

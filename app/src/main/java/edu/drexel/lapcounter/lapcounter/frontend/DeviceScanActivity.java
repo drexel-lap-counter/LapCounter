@@ -32,9 +32,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private List<String> whitelist;
     private Button mButton;
     private Device mDevice;
-    private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private static final String TAG = DeviceScanActivity.class.getSimpleName();
     private final NavBar mNavBar = new NavBar(this);
@@ -46,8 +44,6 @@ public class DeviceScanActivity extends AppCompatActivity {
     private DeviceScanner mDeviceScanner;
     /**
      * This callback gets called *once per device discovered*. Use it to populate
-     *
-     * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
     private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
@@ -59,7 +55,6 @@ public class DeviceScanActivity extends AppCompatActivity {
                 mAdapter.addItem(found_device);
                 mAdapter.notifyDataSetChanged();
             }
-            // TODO: Store the device information and display it in the list however you need.
         }
     };
 
@@ -81,8 +76,8 @@ public class DeviceScanActivity extends AppCompatActivity {
         whitelist.add("FF:FF:FF:FF:FF:01");
         mButton = findViewById(R.id.button13);
         //RecyclerView
-        mRecyclerView = findViewById(R.id.device_scan_recycler_view);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView mRecyclerView = findViewById(R.id.device_scan_recycler_view);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         ArrayList<Device> myDataset = new ArrayList<Device>();
         mAdapter = new RecyclerAdapter(myDataset);
@@ -105,17 +100,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
             @Override
             public void onLongClick(View view, int position) {
-                //TODO: This is where you select which item we wish to connect to via bluetooth
-                //Get the data needed from the view, and do bluetooth connection stuff
-                //if we successfully connect, change text in the selected text box
-                TextView selected_view = (TextView) view;
-                Log.i(TAG,String.format("What was longclicked?: %s",selected_view.getText()));
-                TextView connected_view= findViewById(R.id.scan_device_selected);
-                String device_name = (String) selected_view.getText();
-                mButton.setAlpha(1);
-                mButton.setEnabled(true);
-                connected_view.setText(device_name);
-                mDevice = mAdapter.getDevice(device_name);
+                onClick(view, position);
             }
         }));
 
@@ -207,6 +192,15 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         if (mDeviceScanner != null) {
             mDeviceScanner.startScan();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mDeviceScanner != null) {
+            mDeviceScanner.stopScan();
         }
     }
 
