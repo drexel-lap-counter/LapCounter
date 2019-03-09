@@ -6,18 +6,186 @@
     android:layout_height="match_parent"
     tools:context=".frontend.WorkoutDetailsActivity">
 
+    <TextView
+        android:id="@+id/dateOfWorkoutTextView"
+        android:layout_width="410dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="center"
+        android:textSize="40sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/poolLengthTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/pool_length"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dateOfWorkoutTextView" />
+
+    <TextView
+        android:id="@+id/poolLengthValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/workoutDurationTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/poolLengthTextView"
+        app:layout_constraintTop_toBottomOf="@+id/dateOfWorkoutTextView" />
+
+    <TextView
+        android:id="@+id/workoutDurationTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/workout_duration"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/poolLengthTextView" />
+
+    <TextView
+        android:id="@+id/workoutDurationValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/workoutDurationTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/workoutDurationTextView"
+        app:layout_constraintTop_toBottomOf="@+id/poolLengthValueTextView" />
+
+    <TextView
+        android:id="@+id/avgLapTimeTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/avg_lap_time"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/workoutDurationTextView" />
+
+    <TextView
+        android:id="@+id/avgLapTimeValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/avgLapTimeTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/avgLapTimeTextView"
+        app:layout_constraintTop_toBottomOf="@+id/workoutDurationValueTextView" />
+
+    <TextView
+        android:id="@+id/averageSpeedTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/average_speed"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/avgLapTimeTextView" />
+
+    <TextView
+        android:id="@+id/averageSpeedValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/averageSpeedTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/averageSpeedTextView"
+        app:layout_constraintTop_toBottomOf="@+id/avgLapTimeValueTextView" />
+
+    <TextView
+        android:id="@+id/lapsTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/laps"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/averageSpeedTextView" />
+
+    <TextView
+        android:id="@+id/lapsValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/lapsTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lapsTextView"
+        app:layout_constraintTop_toBottomOf="@+id/averageSpeedValueTextView" />
+
+    <TextView
+        android:id="@+id/totalDistanceTextView"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/total_distance"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lapsTextView" />
+
+    <TextView
+        android:id="@+id/totalDistanceValueTextView"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="textEnd"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/totalDistanceTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/totalDistanceTextView"
+        app:layout_constraintTop_toBottomOf="@+id/lapsValueTextView" />
+
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
         android:background="?android:attr/windowBackground"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/navigation"
-        app:labelVisibilityMode="labeled" />
+        app:menu="@menu/navigation" />
 
 
 </android.support.constraint.ConstraintLayout>

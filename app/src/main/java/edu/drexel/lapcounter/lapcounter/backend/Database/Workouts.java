@@ -1,26 +1,26 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database;
 
-
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
+
+import java.util.Date;
+
+import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 
 @Entity(tableName = "workouts_table")
 public class Workouts {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name ="Start_Date")
-    public int mStartDate;
+    @ColumnInfo(name ="Start_DateTime")
+    @TypeConverters({TimestampConverter.class})
+    public Date mStartDateTime;
 
-    @ColumnInfo(name ="Start_Time")
-    public int mStartTime;
-
-    @ColumnInfo(name ="End_Date")
-    public int mEndDate;
-
-    @ColumnInfo(name ="End_Time")
-    public int mEndTime;
+    @ColumnInfo(name ="End_DateTime")
+    @TypeConverters({TimestampConverter.class})
+    public Date mEndDateTime;
 
     @ColumnInfo(name = "Pool_length")
     public int mPoolLength;
@@ -28,8 +28,11 @@ public class Workouts {
     @ColumnInfo(name = "Total_Distance_Traveled")
     public int mTotalDistanceTraveled;
 
-    @ColumnInfo(name = "Average Workout Distance")
-    public int mAvgWorkoutDistance;
+    @ColumnInfo(name="Pool_Units")
+    public String mPoolUnits;
+
+    @ColumnInfo(name = "Laps")
+    public int mLaps;
 
 
     //
@@ -41,21 +44,12 @@ public class Workouts {
         return id;
     }
 
-    public int getStartDate() {
-        return mStartDate;
+    public Date getStartDateTime() {
+        return mStartDateTime;
     }
 
-
-    public int getStartTime() {
-        return mStartTime;
-    }
-
-    public int getEndDate() {
-        return mEndDate;
-    }
-
-    public int getEndTime() {
-        return mEndTime;
+    public Date getEndDateTime() {
+        return mEndDateTime;
     }
 
     public int getTotalDistanceTraveled(){
@@ -66,8 +60,13 @@ public class Workouts {
         return mPoolLength;
     }
 
-    public int getAvgWorkoutDistance(){
-        return mAvgWorkoutDistance;
+    public String getPoolUnits()
+    {
+        return mPoolUnits;
+    }
+    public int getLaps()
+    {
+        return mLaps;
     }
 
 
@@ -78,22 +77,12 @@ public class Workouts {
         this.id = id;
     }
 
-    public void setmStartDate(int startDate) {
-        this.mStartDate = startDate;
+    public void setStartDateTime(Date startDateTime) {
+        this.mStartDateTime = startDateTime;
     }
 
-
-    public void setStartTime(int startTime) {
-        this.mStartTime = startTime;
-    }
-
-
-    public void setEndDate(int endDate) {
-        this.mEndDate = endDate;
-    }
-
-    public void setEndTime(int endTime) {
-        this.mEndTime = endTime;
+    public void setEndDateTime(Date endDateTime) {
+        this.mEndDateTime = endDateTime;
     }
 
     public void setTotalDistanceTraveled(int totalDistanceTraveled){
@@ -104,8 +93,13 @@ public class Workouts {
         this.mPoolLength = poolLength;
     }
 
-    public void setAvgWorkoutDistance(int avgWorkoutDistance){
-        this.mAvgWorkoutDistance = avgWorkoutDistance;
+    public void setPoolUnits(String poolUnits)
+    {
+        this.mPoolUnits = poolUnits;
+    }
+    public void setLaps(int laps)
+    {
+        this.mLaps = laps;
     }
 
 }

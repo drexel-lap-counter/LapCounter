@@ -2,46 +2,62 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 
 import android.app.DatePickerDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.arch.persistence.room.Room;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+
 import java.util.List;
 
-
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.Database.WorkoutDatabase;
+import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
+import edu.drexel.lapcounter.lapcounter.backend.Database.WorkoutViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workouts;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+import edu.drexel.lapcounter.lapcounter.backend.Database.WorkoutDatabase;
+
 
 
 // In the final version, use R.string.<string id> for titles
 
 public class WorkoutHistoryActivity extends AppCompatActivity {
 
+    //
+    //WORKOUT DETAILS ACTIVITY INFO
+    //
+    private WorkoutViewModel mWorkoutViewModel;
+    private final static int MILLISECONDS_IN_SECOND = 1000;
 
     //
     //DATABASE VARIABLES
     //
-    public static WorkoutDatabase WorkoutDatabase;
-    Workouts workout = new Workouts();
+//    public static WorkoutDatabase WorkoutDatabase;
+
+
     List <Workouts> workoutsBetweenDateRange;
+    int id = 10;
+    Workouts workout = new Workouts();
 
 
     private TextView setTotalDistanceTraveledText;
@@ -83,8 +99,10 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
     //
     //TESTER VARIABLES
     //
-    private String dbStartDate;
-    private String dbEndDate;
+    private Date dbStartDate;
+    private Date dbEndDate;
+
+
     private String chartStartDate;
     private String chartEndDate;
 
@@ -93,8 +111,14 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-     super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_history);
+
+        mWorkoutViewModel = ViewModelProviders.of(this).get(WorkoutViewModel.class);
+
+
+
+
         //
         //NAV BAR  onCreate
         //
@@ -102,62 +126,25 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
         mNavBar.init();
 
-        //
-        //END OF NAVBAR
-        //
 
         //
-        //Chart Stuff
-        //
-        barChart = (BarChart) findViewById(R.id.bargraph);
-
-
-        //
-        //DATABASE onCreate Stuff
+        //NEW DATABASE LAYOUT
         //
 
-        WorkoutDatabase = Room.databaseBuilder(getApplicationContext(), WorkoutDatabase.class, "workoutsdb").allowMainThreadQueries().build();
-        WorkoutDatabase.workoutDao().deleteAll();
-
-        //
-        //TEST DATA
-        //
-
-        workout.setmStartDate(20190215);
-        workout.setEndDate(20190215);
-        workout.setPoolLength(50);
-        workout.setTotalDistanceTraveled(300);
-        workout.setAvgWorkoutDistance(100);
-        WorkoutDatabase.workoutDao().addWorkout(workout);
-
-        workout.setmStartDate(20190215);
-        workout.setEndDate(20190215);
-        workout.setPoolLength(25);
-        workout.setTotalDistanceTraveled(75);
-        workout.setAvgWorkoutDistance(75);
-        WorkoutDatabase.workoutDao().addWorkout(workout);
 
 
-        workout.setmStartDate(20190220);
-        workout.setEndDate(20190220);
-        workout.setPoolLength(25);
-        workout.setTotalDistanceTraveled(100);
-        workout.setAvgWorkoutDistance(100);
-        WorkoutDatabase.workoutDao().addWorkout(workout);
+//        workout.setID(10);
+//        workout.setPoolLength(25);
+//        workout.setTotalDistanceTraveled(1200);
+//        workout.setStartDateTime(TimestampConverter.fromTimestamp("2018-4-25 12:00:00.000"));
+//        workout.setEndDateTime(TimestampConverter.fromTimestamp("2018-4-25 14:00:00.000"));
+//        workout.setLaps(34);
+//        workout.setPoolUnits("Yards");
+//        mWorkoutViewModel.insert(workout);
+        workout = mWorkoutViewModel.getWorkoutByID(id);
 
-        workout.setmStartDate(20190221);
-        workout.setEndDate(20190221);
-        workout.setPoolLength(50);
-        workout.setTotalDistanceTraveled(200);
-        workout.setAvgWorkoutDistance(200);
-        WorkoutDatabase.workoutDao().addWorkout(workout);
 
-        workout.setmStartDate(20190222);
-        workout.setEndDate(20190222);
-        workout.setPoolLength(25);
-        workout.setTotalDistanceTraveled(100);
-        workout.setAvgWorkoutDistance(100);
-        WorkoutDatabase.workoutDao().addWorkout(workout);
+
 
 
         setAvgWorkoutTimeText = findViewById(R.id.AVGWT_Data);
@@ -212,8 +199,6 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
-
-
                 month = month + 1;
 
                 if (month <10){
@@ -231,8 +216,16 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                 }
 
 
+
                 chartStartDate = tempMonth + "/" + tempDay + "/" + year;
-                dbStartDate = String.valueOf(year)+tempMonth+tempDay;
+                Log.d(TAG,"DateStartListener: "+chartStartDate);
+
+                dbStartDate= TimestampConverter.fromTimestamp(year + "-" + tempMonth +  "-" + tempDay+ " 00:00:00.000");
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                Log.d(TAG,"DateStartListener: "+dbStartDate);
+//                dbStartDate = String.valueOf(year)+tempMonth+tempDay;
 
                 Workout_History_Start_Date.setText(chartStartDate);
                 DateChecker();
@@ -292,7 +285,9 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                 //TESTING END DATE
                 //
                 chartEndDate = tempMonth + "/" + tempDay + "/" + year;
-                dbEndDate = String.valueOf(year)+tempMonth+tempDay;
+
+                dbEndDate= TimestampConverter.fromTimestamp( year + "-" + tempMonth +  "-" + tempDay+ " 00:00:00.000");
+//               dbEndDate = String.valueOf(year)+tempMonth+tempDay;
 
                 Workout_History_End_Date.setText(chartEndDate);
                 DateChecker();
@@ -310,68 +305,67 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
 
     public void DateChecker(){
+
+
         if ((!Workout_History_Start_Date.getText().toString().equals("Start Date"))&&(!Workout_History_End_Date.getText().toString().equals("End Date")))
         {
-            workoutsBetweenDateRange= WorkoutDatabase.workoutDao().findWorkoutsBetweenDates(Integer.parseInt(dbStartDate), Integer.parseInt(dbEndDate));
-            if (workoutsBetweenDateRange.size() > 0) {
-                createBarGraph(chartStartDate,chartEndDate);
-                valueCalulations();
+                workout = mWorkoutViewModel.getWorkoutByID(id);
+//            workoutsBetweenDateRange =  mWorkoutViewModel.findWorkoutsBetweenDates(dbStartDate,dbEndDate);
+//            if (workoutsBetweenDateRange.size() < 0) {
+//                createBarGraph(chartStartDate,chartEndDate);
 
-            }
+                valueCalulations(workout);
+//            }
         }
-
     }
 
-    public void valueCalulations(){
+    public void valueCalulations(Workouts Workout){
         int TotalDistance = 0;
-        int AVGWORKDIST = 0;
-//        int AVGWORKTIME= 0;
-//        int DURATION = 0;
+        int AVGWORKDIST;
+        long difference=0;
+        String unit_abbrev = ((workout.getPoolUnits().compareTo("Meters") == 0) ? " m": " yd");
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 
-        for (Workouts wrkout : workoutsBetweenDateRange) {
+//        for (Workouts wrkout : workoutsBetweenDateRange) {
 
-            TotalDistance += wrkout.getTotalDistanceTraveled();
-            AVGWORKDIST += wrkout.getAvgWorkoutDistance();
-        }
-
-            //
-            //TOTAL DISTANCE TRAVELED
-            //
-
-            setTotalDistanceTraveledText.setText(String.valueOf(TotalDistance));
-
-
-            //
-            //AVERAGE WORKOUT DISTANCE
-            //
-
-
-            AVGWORKDIST= AVGWORKDIST/workoutsBetweenDateRange.size();
-            setAvgWorkoutDistanceText.setText(String.valueOf(AVGWORKDIST));
-
-
-            //
-            //AVERAGE WORKOUT TIME
-            //
-
-            //
-            //NEED INFO ON HOW CURRENT WORKOUT SCREEN SAVES TIME BEFORE I CAN SET THIS.
-            //
-
-
-//            setAvgWorkoutTimeText.setText(String.valueOf(AVGWORKTIME));
-
-            //
-            //DURATION
-            //
+           TotalDistance += Workout.getTotalDistanceTraveled();
+           difference += Workout.getEndDateTime().getTime() - workout.getStartDateTime().getTime();
+//        }
 
         //
-        //NEED INFO ON HOW CURRENT WORKOUT SCREEN SAVES TIME BEFORE I CAN SET THIS.
+        //TOTAL DISTANCE TRAVELED
         //
 
+        String distance = Integer.toString(TotalDistance) + unit_abbrev;
+        setTotalDistanceTraveledText.setText(distance);
 
-//            setTimeDurationText.setText(String.valueOf(DURATION));
 
+        //
+        //AVERAGE WORKOUT DISTANCE
+        //
+
+        AVGWORKDIST = TotalDistance;
+        String averageDistance = Integer.toString(AVGWORKDIST) + unit_abbrev;
+
+        setAvgWorkoutDistanceText.setText(averageDistance);
+
+        //
+        //DURATION
+        //
+
+        Date d = new Date(difference);
+        df = new SimpleDateFormat("HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String time_formatted = df.format(d);
+        setTimeDurationText.setText(time_formatted);
+
+        //
+        //AVERAGE WORKOUT TIME
+        //
+
+        float avg_lap_time = ((float)difference / Float.valueOf(1))/MILLISECONDS_IN_SECOND;
+        String avg_time_str = String.format("%.2f sec",avg_lap_time);
+        setAvgWorkoutTimeText.setText(avg_time_str);
 
     }
 
@@ -382,7 +376,7 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
         int count;
         int totaldistance;
 
-            try {
+        try {
             Date date1 = simpleDateFormat.parse(Date1);
             Date date2 = simpleDateFormat.parse(Date2);
 
@@ -402,7 +396,7 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
             String tempStartDate ;
 
-            List<Workouts> workouts = WorkoutDatabase.workoutDao().findWorkoutsBetweenDates(Integer.parseInt(dbStartDate), Integer.parseInt(dbEndDate));
+            List<Workouts> workouts = mWorkoutViewModel.findWorkoutsBetweenDates(dbStartDate, dbEndDate);
 
             for(int j = 0; j< dates.size();j++) {
                 count =0;
@@ -411,7 +405,7 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                 for(int i =0; i<workouts.size()-1;i++) {
 
 
-                    tempStartDate = String.valueOf(workouts.get(i).getStartDate());
+                    tempStartDate = String.valueOf(workouts.get(i).getStartDateTime());
                     tempStartDate =  tempStartDate.substring(4, 6) + "/" +tempStartDate.substring(6, 8) + "/" + tempStartDate.substring(0, 4) ;
 
 
@@ -421,7 +415,6 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                         count++;
                     }
                 }
-
 
                 if (count == 0) {
                     count = 1;
@@ -443,7 +436,7 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
         barChart.setDescription("");
         barChart.notifyDataSetChanged();
 
-}
+    }
 
 
 
