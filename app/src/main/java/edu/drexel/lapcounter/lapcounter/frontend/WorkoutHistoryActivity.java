@@ -101,7 +101,8 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
     //
     private Date dbStartDate;
     private Date dbEndDate;
-
+//    private String dbStartDate;
+//    private String dbEndDatee;
 
     private String chartStartDate;
     private String chartEndDate;
@@ -133,14 +134,14 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
 
 
-//        workout.setID(10);
-//        workout.setPoolLength(25);
-//        workout.setTotalDistanceTraveled(1200);
-//        workout.setStartDateTime(TimestampConverter.fromTimestamp("2018-4-25 12:00:00.000"));
-//        workout.setEndDateTime(TimestampConverter.fromTimestamp("2018-4-25 14:00:00.000"));
-//        workout.setLaps(34);
-//        workout.setPoolUnits("Yards");
-//        mWorkoutViewModel.insert(workout);
+        workout.setID(10);
+        workout.setPoolLength(25);
+        workout.setTotalDistanceTraveled(1200);
+        workout.setStartDateTime(TimestampConverter.fromTimestamp("2018-4-25 12:00:00.000"));
+        workout.setEndDateTime(TimestampConverter.fromTimestamp("2018-4-25 14:00:00.000"));
+        workout.setLaps(34);
+        workout.setPoolUnits("Yards");
+        mWorkoutViewModel.insert(workout);
         workout = mWorkoutViewModel.getWorkoutByID(id);
 
 
@@ -223,6 +224,7 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                 dbStartDate= TimestampConverter.fromTimestamp(year + "-" + tempMonth +  "-" + tempDay+ " 00:00:00.000");
                 DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
                 df.setTimeZone(TimeZone.getTimeZone("UTC"));
+//                dbStartDate= df.format(dbStartDate);
 
                 Log.d(TAG,"DateStartListener: "+dbStartDate);
 //                dbStartDate = String.valueOf(year)+tempMonth+tempDay;
@@ -285,10 +287,10 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
                 //TESTING END DATE
                 //
                 chartEndDate = tempMonth + "/" + tempDay + "/" + year;
-
+                Log.d(TAG,"DateEndListener: "+chartEndDate);
                 dbEndDate= TimestampConverter.fromTimestamp( year + "-" + tempMonth +  "-" + tempDay+ " 00:00:00.000");
 //               dbEndDate = String.valueOf(year)+tempMonth+tempDay;
-
+                Log.d(TAG,"DateEndListener: "+dbEndDate);
                 Workout_History_End_Date.setText(chartEndDate);
                 DateChecker();
             }
@@ -369,100 +371,100 @@ public class WorkoutHistoryActivity extends AppCompatActivity {
 
     }
 
-    public void createBarGraph(String Date1, String Date2){
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-        int count;
-        int totaldistance;
-
-        try {
-            Date date1 = simpleDateFormat.parse(Date1);
-            Date date2 = simpleDateFormat.parse(Date2);
-
-            Calendar mDate1 = Calendar.getInstance();
-            Calendar mDate2 = Calendar.getInstance();
-            mDate1.clear();
-            mDate2.clear();
-
-            mDate1.setTime(date1);
-            mDate2.setTime(date2);
-
-            dates = new ArrayList<>();
-            dates = getList(mDate1,mDate2);
-
-            barEntries = new ArrayList<>();
-
-
-            String tempStartDate ;
-
-            List<Workouts> workouts = mWorkoutViewModel.findWorkoutsBetweenDates(dbStartDate, dbEndDate);
-
-            for(int j = 0; j< dates.size();j++) {
-                count =0;
-                totaldistance = 0;
-
-                for(int i =0; i<workouts.size()-1;i++) {
-
-
-                    tempStartDate = String.valueOf(workouts.get(i).getStartDateTime());
-                    tempStartDate =  tempStartDate.substring(4, 6) + "/" +tempStartDate.substring(6, 8) + "/" + tempStartDate.substring(0, 4) ;
-
-
-                    if (dates.get(j).equals(tempStartDate)) {
-
-                        totaldistance += workouts.get(i).getTotalDistanceTraveled();
-                        count++;
-                    }
-                }
-
-                if (count == 0) {
-                    count = 1;
-                }
-
-                totaldistance = totaldistance / count;
-
-                barEntries.add(new BarEntry(totaldistance, j));
-
-            }
-
-        }catch(ParseException e){
-            e.printStackTrace();
-        }
-
-        BarDataSet barDataSet = new BarDataSet(barEntries,"Dates");
-        BarData barData = new BarData(dates,barDataSet);
-        barChart.setData(barData);
-        barChart.setDescription("");
-        barChart.notifyDataSetChanged();
-
-    }
-
-
-
-
-    public ArrayList<String> getList(Calendar  startDate, Calendar  endDate){
-        ArrayList<String> list = new ArrayList<String>();
-        while(startDate.compareTo(endDate)<=0){
-            list.add(getDate(startDate));
-
-            startDate.add(Calendar.DAY_OF_MONTH,1);
-        }
-        return list;
-    }
-
-    public String getDate(Calendar cld){
-        String curDate =  (cld.get(Calendar.MONTH) + 1)+ "/" +cld.get(Calendar.DAY_OF_MONTH)  + "/"
-                +cld.get(Calendar.YEAR);
-        try{
-            Date date = new SimpleDateFormat("MM/dd/yyyy").parse(curDate);
-            curDate =  new SimpleDateFormat("MM/dd/yyyy").format(date);
-        }catch(ParseException e){
-            e.printStackTrace();
-        }
-        return curDate;
-    }
-
+//    public void createBarGraph(String Date1, String Date2){
+//
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+////        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+//        int count;
+//        int totaldistance;
+//
+//        try {
+//            Date date1 = simpleDateFormat.parse(Date1);
+//            Date date2 = simpleDateFormat.parse(Date2);
+//
+//            Calendar mDate1 = Calendar.getInstance();
+//            Calendar mDate2 = Calendar.getInstance();
+//            mDate1.clear();
+//            mDate2.clear();
+//
+//            mDate1.setTime(date1);
+//            mDate2.setTime(date2);
+//
+//            dates = new ArrayList<>();
+//            dates = getList(mDate1,mDate2);
+//
+//            barEntries = new ArrayList<>();
+//
+//
+//            String tempStartDate ;
+//
+//            List<Workouts> workouts = mWorkoutViewModel.findWorkoutsBetweenDates(dbStartDate, dbEndDate);
+//
+//            for(int j = 0; j< dates.size();j++) {
+//                count =0;
+//                totaldistance = 0;
+//
+//                for(int i =0; i<workouts.size()-1;i++) {
+//
+//
+//                    tempStartDate = String.valueOf(workouts.get(i).getStartDateTime());
+//                    tempStartDate =  tempStartDate.substring(4, 6) + "/" +tempStartDate.substring(6, 8) + "/" + tempStartDate.substring(0, 4) ;
+//
+//
+//                    if (dates.get(j).equals(tempStartDate)) {
+//
+//                        totaldistance += workouts.get(i).getTotalDistanceTraveled();
+//                        count++;
+//                    }
+//                }
+//
+//                if (count == 0) {
+//                    count = 1;
+//                }
+//
+//                totaldistance = totaldistance / count;
+//
+//                barEntries.add(new BarEntry(totaldistance, j));
+//
+//            }
+//
+//        }catch(ParseException e){
+//            e.printStackTrace();
+//        }
+//
+//        BarDataSet barDataSet = new BarDataSet(barEntries,"Dates");
+//        BarData barData = new BarData(dates,barDataSet);
+//        barChart.setData(barData);
+//        barChart.setDescription("");
+//        barChart.notifyDataSetChanged();
+//
+//    }
+//
+//
+//
+//
+//    public ArrayList<String> getList(Calendar  startDate, Calendar  endDate){
+//        ArrayList<String> list = new ArrayList<String>();
+//        while(startDate.compareTo(endDate)<=0){
+//            list.add(getDate(startDate));
+//
+//            startDate.add(Calendar.DAY_OF_MONTH,1);
+//        }
+//        return list;
+//    }
+//
+//    public String getDate(Calendar cld){
+//        String curDate =  (cld.get(Calendar.MONTH) + 1)+ "/" +cld.get(Calendar.DAY_OF_MONTH)  + "/"
+//                +cld.get(Calendar.YEAR);
+//        try{
+//            Date date = new SimpleDateFormat("MM/dd/yyyy").parse(curDate);
+//            curDate =  new SimpleDateFormat("MM/dd/yyyy").format(date);
+//        }catch(ParseException e){
+//            e.printStackTrace();
+//        }
+//        return curDate;
+//    }
+//
 
 
 }
