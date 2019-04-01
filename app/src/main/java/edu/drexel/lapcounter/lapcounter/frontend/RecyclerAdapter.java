@@ -36,7 +36,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         for(int i = 0; i < mDataset.size(); i++)
         {
             Device iDevice = mDataset.get(i);
-            if(item.getName() ==iDevice.getName() && item.getMac() == iDevice.getMac())
+            if(item.getName().equals(iDevice.getName()) && item.getMac().equals(iDevice.getMac()))
             {
                 return;
             }
@@ -53,7 +53,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         for(int i = 0; i < mDataset.size(); i++)
         {
             Device device = mDataset.get(i);
-            if(device.getName() == name)
+            if(device.getName().equals(name))
             {
                 return device;
             }
