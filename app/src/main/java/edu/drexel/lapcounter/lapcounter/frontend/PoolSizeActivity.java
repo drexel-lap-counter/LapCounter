@@ -122,7 +122,6 @@ public class PoolSizeActivity extends AppCompatActivity {
 
     public void onPoolSizeRadioButtonClicked(View view)
     {
-
         boolean checked = ((RadioButton) view).isChecked();
         switch(view.getId())
         {
@@ -194,5 +193,11 @@ public class PoolSizeActivity extends AppCompatActivity {
         poolSize = val;
     }
 
-
+    // Methods for TESTING
+    public int getPoolSize() {
+        return poolSize;
+    }
+    public void setCustom_pool_text(EditText custom_pool_text){
+        this.custom_pool_text = custom_pool_text;
+    }
 }
