@@ -98,20 +98,12 @@ public class PoolSizeActivity extends AppCompatActivity {
     protected void onDestroy()
     {
         super.onDestroy();
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(poolSizeKey,poolSize);
-        editor.putString(poolUnitsKey,poolUnits);
-        editor.apply();
     }
 
     @Override
     protected  void onPause()
     {
         super.onPause();
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(poolSizeKey,poolSize);
-        editor.putString(poolUnitsKey,poolUnits);
-        editor.apply();
     }
 
     protected  void onResume()
@@ -177,6 +169,14 @@ public class PoolSizeActivity extends AppCompatActivity {
                     break;
                 }
         }
+    }
+
+    public void onConfirmButtonClicked(View view)
+    {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(poolSizeKey,poolSize);
+        editor.putString(poolUnitsKey,poolUnits);
+        editor.apply();
     }
 
     private void tryGetCustomPoolSize(String s)

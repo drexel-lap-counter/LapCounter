@@ -33,4 +33,5 @@
     <string name="average_speed">"Average Speed"</string>
     <string name="laps">"Laps"</string>
     <string name="total_distance">"Total Distance"</string>
+    <string name="save">"Save"</string>
 </resources>
