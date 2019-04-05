@@ -26,6 +26,7 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.dummy.DevicePresets;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
@@ -225,8 +226,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             Intent requestDevice = new Intent(DeviceScanActivity.class);
             startActivityForResult(requestDevice, REQUEST_DEVICE);
          */
-        final String PUCK_ADDRESS = "D1:AA:19:79:8A:18";
-        mBleService.connectToDevice(PUCK_ADDRESS);
+        final String address = DevicePresets.getAddress(this);
+        mBleService.connectToDevice(address);
     }
 
     private Runnable updateTimerThread = new Runnable() {
