@@ -2,6 +2,7 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.Manifest;
 import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,10 +19,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
@@ -32,6 +36,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     private List<String> whitelist;
     private Button mButton;
     private Device mDevice;
+    private DeviceViewModel mDeviceViewModel;
     private RecyclerAdapter mAdapter;
 
     private static final String TAG = DeviceScanActivity.class.getSimpleName();
@@ -50,7 +55,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Discovered '%s' '%s' %s", deviceName, deviceAddress, rssi));
             Device found_device = new Device(deviceName,deviceAddress,rssi);
-            if(!whitelist.contains(found_device.getMac()))
+            if(!whitelist.contains(found_device.getMacAddress()))
             {
                 mAdapter.addItem(found_device);
                 mAdapter.notifyDataSetChanged();
@@ -71,9 +76,13 @@ public class DeviceScanActivity extends AppCompatActivity {
         //Once data storge implementation is complete, load whitelist from storage
         //It is either that, or get it from DeviceSelect, but i think loading again
         //might be better then passing all data to this activity,
+        mDeviceViewModel = ViewModelProviders.of(this).get(DeviceViewModel.class);
+        ArrayList<Device> registered_devices = mDeviceViewModel.getAllDevices();
         whitelist = new ArrayList<String>();
-        whitelist.add("FF:FF:FF:FF:FF:00");
-        whitelist.add("FF:FF:FF:FF:FF:01");
+        for(Device device: registered_devices)
+        {
+            whitelist.add(device.getMacAddress());
+        }
         mButton = findViewById(R.id.button13);
         //RecyclerView
         RecyclerView mRecyclerView = findViewById(R.id.device_scan_recycler_view);
@@ -205,6 +214,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     public void calibrateSelectedDevice(View view) {
+        mDeviceViewModel.insert(mDevice);
         boolean shouldLaunchDummyCalibrate = mDeviceScanner instanceof DummyDeviceScanner;
 
         Class activityToLaunch = shouldLaunchDummyCalibrate ?
@@ -212,7 +222,7 @@ public class DeviceScanActivity extends AppCompatActivity {
                                  CalibrateDeviceActivity.class;
 
         Intent intent = new Intent(this, activityToLaunch);
-        intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMac());
+        intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
         startActivity(intent);
     }
 }

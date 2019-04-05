@@ -1,6 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
-import android.content.Context;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
-import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
 
 /**
  * It's a bit confusing at this point, but this class is for scanning for *registered*
@@ -33,6 +35,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private DeviceViewModel mDeviceViewModel;
     private final NavBar mNavBar = new NavBar(this);
 
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
@@ -49,7 +52,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
         @Override
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Found Registered Device '%s' '%s' %s", deviceName, deviceAddress, rssi));
-            Device found_device = new Device(deviceName,deviceAddress,rssi);
+            Device found_device = mDeviceViewModel.getDeviceByMacAddress(deviceAddress);
             mAdapter.addItem(found_device);
             mAdapter.notifyDataSetChanged();
             // TODO: Store the device information and display it in the list however you need.
@@ -71,6 +74,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.device_select_recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mDeviceViewModel = ViewModelProviders.of(this).get(DeviceViewModel.class);
         ArrayList<Device> myDataset = new ArrayList<Device>();
         mAdapter = new RecyclerAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
@@ -107,13 +111,19 @@ public class DeviceSelectActivity extends AppCompatActivity {
         // Will need to store this info somewhere
         // Example of setting a whitelist. This is so only registered devices show up.
         List<String> whitelist = new ArrayList<>();
-        whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
-        whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
+        ArrayList<Device> registered_devices = mDeviceViewModel.getAllDevices();
+        for(Device d : registered_devices)
+        {
+            whitelist.add(d.getMacAddress());
+        }
+        //whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
+        //whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
 
         mDeviceScanner.setAddressWhitelist(whitelist);
 
         // Start the scan. This will call the callback a bunch of times.
         mDeviceScanner.startScan();
+
 
         // NOTE: I did not implement the onPause() and onResume() logic. Ideally you should
         // stop the scan on pause and start it on resume in both this aand DeviceScanActivity.
@@ -145,8 +155,8 @@ public class DeviceSelectActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
         // TODO: use intent.putExtra() to pass information to the next activity
         intent.putExtra("DEVICE_NAME",mDevice.getName());
-        intent.putExtra("DEVICE_MAC",mDevice.getMac());
-        intent.putExtra("DEVICE_RSSI",mDevice.getRssi());
+        intent.putExtra("DEVICE_MAC",mDevice.getMacAddress());
+        intent.putExtra("DEVICE_RSSI",mDevice.getThreshold());
         // See the prototype app for an example of this.
         startActivity(intent);
     }
