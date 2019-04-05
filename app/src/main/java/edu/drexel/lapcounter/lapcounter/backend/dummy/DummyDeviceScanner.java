@@ -5,9 +5,9 @@ import android.os.Handler;
 import java.util.List;
 import java.util.Random;
 
-import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 
-public class DummyDeviceScanner implements BLEScanner {
+public class DummyDeviceScanner implements DeviceScanner {
 
     private Callback mCallback = null;
     private Handler mHandler = new Handler();

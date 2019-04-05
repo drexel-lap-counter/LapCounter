@@ -7,6 +7,7 @@ import android.view.View;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
 import edu.drexel.lapcounter.lapcounter.frontend.temp.ReceiverTest;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -40,6 +41,11 @@ public class SettingsActivity extends AppCompatActivity {
      */
     public void testReciever(View view) {
         Intent intent = new Intent(this, ReceiverTest.class);
+        startActivity(intent);
+    }
+
+    public void testLapCounterService(View view) {
+        Intent intent = new Intent(this, LapCounterServiceTest.class);
         startActivity(intent);
     }
 }
