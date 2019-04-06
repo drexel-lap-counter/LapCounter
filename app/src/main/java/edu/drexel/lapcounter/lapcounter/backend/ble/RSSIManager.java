@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 
 public class RSSIManager {
@@ -23,17 +24,18 @@ public class RSSIManager {
 
     private LocalBroadcastManager mBroadcastManager;
 
-    public static final int DEFAULT_DELTAS_WINDOW_SIZE = 3;
+    public static final int DEFAULT_DELTAS_WINDOW_SIZE = Hyperparameters.RSSI_DELTA_WINDOW_SIZE;
     private SlidingWindow<Double> mRssiDeltas = new SlidingWindow<>(DEFAULT_DELTAS_WINDOW_SIZE);
 
-    public static final int DEFAULT_MOVING_AVERAGE_SIZE = 10;
+    public static final int DEFAULT_MOVING_AVERAGE_SIZE = Hyperparameters.RSSI_FILTER_WINDOW_SIZE;
     private MovingAverage mFilter = new MovingAverage(DEFAULT_MOVING_AVERAGE_SIZE);
 
     private double mPreviousRssi;
     private double mCurrentRssi;
 
-    private static final int NORMAL_RSSI_PERIOD_MS = 300;
-    private static final int RECONNECT_RSSI_PERIOD_MS = 100;
+    private static final int NORMAL_RSSI_PERIOD_MS = Hyperparameters.RSSI_POLL_PERIOD_MS;
+    private static final int RECONNECT_RSSI_PERIOD_MS =
+            Hyperparameters.RECONNECT_RSSI_POLL_PERIOD_MS;
 
     private int mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
 
