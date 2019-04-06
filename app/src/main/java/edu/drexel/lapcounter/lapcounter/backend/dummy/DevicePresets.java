@@ -47,21 +47,19 @@ public class DevicePresets {
     private static void setSelectedIndex(Context context, int newIndex) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
+
+        final int n = MAC_ADDRESSES.length;
+        newIndex = (newIndex % n + n) % n;
+
         editor.putInt(KEY_SELECTED_DEVICE, newIndex);
         editor.commit();
     }
 
     public static void incrementSelectedDevice(Context context) {
-        int index = getSelectedIndex(context);
-        Log.e("index_before", Integer.toString(index));
-        index = (index + 1) % MAC_ADDRESSES.length;
-        Log.e("index_after", Integer.toString(index));
-        setSelectedIndex(context, index);
+        setSelectedIndex(context, getSelectedIndex(context) + 1);
     }
 
     public static void decrementSelectedDevice(Context context) {
-        int index = getSelectedIndex(context);
-        index = (index - 1) % MAC_ADDRESSES.length;
-        setSelectedIndex(context, index);
+        setSelectedIndex(context, getSelectedIndex(context) - 1);
     }
 }
