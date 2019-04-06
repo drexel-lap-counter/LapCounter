@@ -124,7 +124,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             long timeSinceLastPrint = currentMillis - mLastPrintMillis;
 
             if (timeSinceLastPrint >= PRINT_COLLECTOR_STATS_FREQ_MS) {
-                mCalibrateInfo.setText(mRssiCollector.toString());
+                CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
+                String collectorState = mRssiCollector.toString(rewardFunc);
+                mCalibrateInfo.setText(collectorState);
                 mLastPrintMillis = currentMillis;
             }
         }

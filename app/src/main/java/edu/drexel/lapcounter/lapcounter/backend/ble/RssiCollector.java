@@ -69,7 +69,6 @@ public class RssiCollector {
     }
 
     public boolean isEnabled() {
-//        log_thread("isEnabled()");
         return mIsEnabled;
     }
 
@@ -92,8 +91,6 @@ public class RssiCollector {
     }
 
     public double mean() {
-        log_thread("mean()");
-
         if (mRssiValues.isEmpty()) {
             return 0;
         }
@@ -108,8 +105,6 @@ public class RssiCollector {
     }
 
     public double stdDev(double mean) {
-        log_thread("stdDev()");
-
         int n = mRssiValues.size();
 
         if (n <= 1) {
@@ -127,8 +122,6 @@ public class RssiCollector {
     }
 
     public double median() {
-        log_thread("median()");
-
         if (mRssiValues.isEmpty()) {
             return 0;
         }
@@ -159,11 +152,48 @@ public class RssiCollector {
     @SuppressLint("DefaultLocale")
     @Override
     public String toString() {
-        log_thread("toString()");
-
         double mean = mean();
         return String.format("n=%d, mean=%.3f, median=%.3f, stdDev=%.3f, min=%d, max=%d",
                 mRssiValues.size(), mean, median(), stdDev(mean), min(), max());
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String toString(CalibrationRewardFunc rewardFunc) {
+        final BestRewardResult r = computeBestReward(rewardFunc);
+        return String.format("%s\nbest_rssi is %.3f with delta of %.3f to yield reward of %.3f",
+                             toString(), r.Rssi, r.Delta, r.Reward);
+    }
+
+    class BestRewardResult {
+        double Rssi;
+        double Delta;
+        double Reward;
+
+        BestRewardResult(double rssi, double delta, double reward) {
+            Rssi = rssi;
+            Delta = delta;
+            Reward = reward;
+        }
+    }
+
+    private BestRewardResult computeBestReward(CalibrationRewardFunc rewardFunc) {
+        double maxReward = Double.NEGATIVE_INFINITY;
+        double bestRSSI = 0.0;
+        double bestDelta = Double.POSITIVE_INFINITY;
+
+        for (int i = 0; i < mRssiValues.size(); i++) {
+            int rssi = mRssiValues.get(i);
+            int delta = mRssiAbsDeltas.get(i);
+            double reward = rewardFunc.computeReward(rssi, delta);
+
+            if (reward > maxReward) {
+                maxReward = reward;
+                bestRSSI = rssi;
+                bestDelta = delta;
+            }
+        }
+
+        return new BestRewardResult(bestRSSI, bestDelta, maxReward);
     }
 
     /**
@@ -177,18 +207,6 @@ public class RssiCollector {
      * @return the rssi with the highest reward
      */
     public double computeThreshold(CalibrationRewardFunc rewardFunc) {
-        double maxReward = Double.NEGATIVE_INFINITY;
-        double bestRSSI = 0.0;
-        for (int i = 0; i < mRssiValues.size(); i++) {
-            int rssi = mRssiValues.get(i);
-            int delta = mRssiAbsDeltas.get(i);
-            double reward = rewardFunc.computeReward(rssi, delta);
-
-            if (reward > maxReward) {
-                maxReward = reward;
-                bestRSSI = rssi;
-            }
-        }
-        return bestRSSI;
+        return computeBestReward(rewardFunc).Rssi;
     }
 }
