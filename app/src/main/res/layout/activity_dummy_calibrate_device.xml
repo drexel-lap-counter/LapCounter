@@ -4,27 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".frontend.DeviceScanActivity">
+    tools:context=".frontend.DummyCalibrateDeviceActivity">
 
     <Button
-        android:id="@+id/button13"
+        android:id="@+id/button12"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:onClick="calibrateSelectedDevice"
-        android:text="Confirm Device"
-        android:enabled="false"
-        android:alpha=".25"
+        android:onClick="finishCalibration"
+        android:text="Finished Calibration"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/device_scan_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="689dp"
-        android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@+id/button13" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -38,15 +29,4 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation"
         app:labelVisibilityMode="labeled" />
-
-    <TextView
-        android:id="@+id/scan_device_selected"
-        android:layout_width="121dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="92dp"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="@+id/button13"
-        app:layout_constraintStart_toEndOf="@+id/button13"
-        app:layout_constraintTop_toTopOf="@+id/button13" />
-
 </android.support.constraint.ConstraintLayout>

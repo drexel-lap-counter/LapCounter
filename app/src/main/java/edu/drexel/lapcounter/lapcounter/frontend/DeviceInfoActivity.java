@@ -1,7 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -42,7 +41,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
     }
 
     public void calibrate(View view) {
-        Intent intent = new Intent(this, CalibrateDeviceActivity.class);
+        Intent intent = new Intent(this, DummyCalibrateDeviceActivity.class);
         startActivity(intent);
     }
 }
