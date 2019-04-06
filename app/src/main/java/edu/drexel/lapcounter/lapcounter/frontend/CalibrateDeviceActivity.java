@@ -51,7 +51,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
             mBleService = binder.getService();
-            mBleService.setRssiManagerWindowSizes(1, 1);
             mBleService.connectToDevice(mDeviceAddress);
         }
 

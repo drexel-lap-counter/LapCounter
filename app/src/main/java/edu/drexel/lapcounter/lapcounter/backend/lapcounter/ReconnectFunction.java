@@ -1,5 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
+import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
 /**
@@ -12,7 +13,8 @@ import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
  * if a lap was missed.
  */
 public class ReconnectFunction {
-    private static final int LONG_DELAY_THRESHOLD_SEC = 30;
+    private static final int LONG_DELAY_THRESHOLD_SEC =
+            Hyperparameters.RECONNECT_LONG_DELAY_THRESHOLD_SEC;
 
     /**
      * State just before disconnecting
