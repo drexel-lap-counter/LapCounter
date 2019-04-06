@@ -20,6 +20,7 @@ public class RssiCollector {
 
     private boolean mIsEnabled = false;
     private final List<Integer> mRssiValues = new ArrayList<>();
+    private final List<Integer> mRssiAbsDeltas = new ArrayList<>();
 
     private int mMinRssi = Integer.MAX_VALUE;
     private int mMaxRssi = Integer.MIN_VALUE;
@@ -30,10 +31,34 @@ public class RssiCollector {
             return;
         }
 
+        // Compute |rssi| and delta from the previous one first before adding things to the
+        // list. (computeAbsDelta() assumes that the rssi value has not yet been added to the list)
         rssi = Math.abs(rssi);
+        int delta = computeAbsDelta(rssi);
 
         mRssiValues.add(rssi);
+        mRssiAbsDeltas.add(delta);
 
+        updateMinMax(rssi);
+
+        log_thread("collect()");
+    }
+
+    /**
+     * Compute the absolute delta of the current RSSI value and the previous value
+     * @param absRssi the absolute value of the newest RSSI value
+     */
+    private int computeAbsDelta(int absRssi) {
+        if (mRssiValues.size() == 0) {
+            return absRssi;
+        } else {
+            int lastRssi = mRssiValues.get(mRssiValues.size() - 1);
+            return Math.abs(absRssi - lastRssi);
+        }
+
+    }
+
+    private void updateMinMax(int rssi) {
         if (rssi < mMinRssi) {
             mMinRssi = rssi;
         }
@@ -41,8 +66,6 @@ public class RssiCollector {
         if (rssi > mMaxRssi) {
             mMaxRssi = rssi;
         }
-
-        log_thread("collect()");
     }
 
     public boolean isEnabled() {
@@ -53,6 +76,7 @@ public class RssiCollector {
     public void clear() {
         log_thread("clear()");
         mRssiValues.clear();
+        mRssiAbsDeltas.clear();
         mMinRssi = Integer.MAX_VALUE;
         mMaxRssi = Integer.MIN_VALUE;
     }
@@ -140,5 +164,31 @@ public class RssiCollector {
         double mean = mean();
         return String.format("n=%d, mean=%.3f, median=%.3f, stdDev=%.3f, min=%d, max=%d",
                 mRssiValues.size(), mean, median(), stdDev(mean), min(), max());
+    }
+
+    /**
+     * Once we are done collecting RSSI values and deltas, determine which has the maximum
+     * RSSI value while minimizing noise. This is done by iterating over the list of collected
+     * values/deltas, computing a reward function for each pair (rssi, delta), and take the
+     * RSSI with the maximum reward function value.
+     *
+     * @param rewardFunc the function to maximize. This is an interface so we can experiment
+     *                   with different functions.
+     * @return the rssi with the highest reward
+     */
+    public double computeThreshold(CalibrationRewardFunc rewardFunc) {
+        double maxReward = Double.NEGATIVE_INFINITY;
+        double bestRSSI = 0.0;
+        for (int i = 0; i < mRssiValues.size(); i++) {
+            int rssi = mRssiValues.get(i);
+            int delta = mRssiAbsDeltas.get(i);
+            double reward = rewardFunc.computeReward(rssi, delta);
+
+            if (reward > maxReward) {
+                maxReward = reward;
+                bestRSSI = rssi;
+            }
+        }
+        return bestRSSI;
     }
 }

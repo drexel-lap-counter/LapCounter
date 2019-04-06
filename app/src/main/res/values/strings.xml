@@ -15,7 +15,7 @@
     <string name="i_device_name">DEVICE_NAME</string>
     <string name="i_device_mac">DEVICE_MAC</string>
     <string name="i_device_rssi">DEVICE_RSSI</string>
-    <string name="label_calibrate_instructions">Move your device to the threshold and press \"Calibrate\".</string>
+    <string name="label_calibrate_instructions">Press \"Calibrate\". Swim out to the flags, pause for a moment, then swim back and press \"Done\"</string>
     <string name="label_calibrate">Calibrate</string>
     <string name="label_connecting">Connecting.</string>
     <string name="label_connected">Connected.</string>
