@@ -37,17 +37,17 @@ public class DeviceRepository {
                 return mDeviceDao.getAllDevices();
             }
         });
-        List<Device> test = new ArrayList<Device>();
+        List<Device> devices = new ArrayList<Device>();
         try
         {
-            test = res.get();
+            devices = res.get();
         }
         catch(Exception e)
         {
             Log.i("ERROR",e.toString());
         }
         ArrayList<Device> output = new ArrayList<Device>();
-        output.addAll(test);
+        output.addAll(devices);
         return output;
 
     }
@@ -67,16 +67,16 @@ public class DeviceRepository {
                 return mDeviceDao.getDeviceByMacAddress(mac);
             }
         });
-        Device test = new Device();
+        Device device = new Device();
         try
         {
-            test = res.get();
+            device = res.get();
         }
         catch(Exception e)
         {
             Log.i("ERROR",e.toString());
         }
-        return test;
+        return device;
 
     }
 
