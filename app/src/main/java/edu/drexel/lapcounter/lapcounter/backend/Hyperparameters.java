@@ -1,5 +1,8 @@
 package edu.drexel.lapcounter.lapcounter.backend;
 
+import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.LinearRewardFunc;
+
 /**
  * All the major parameters for our backend design are stored here for easy modification in
  * one place.
@@ -39,4 +42,15 @@ public class Hyperparameters {
      * @see edu.drexel.lapcounter.lapcounter.backend.lapcounter.ReconnectFunction
      */
     public static final int RECONNECT_LONG_DELAY_THRESHOLD_SEC = 30;
+    /**
+     * The second iteration of our calibration algorithm uses a reward function to pick the
+     * threshold value that is maximized while minimizing noise.
+     *
+     * Note that each reward function so far has weights that can be tweaked as needed.
+     *
+     * @see edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc
+     * @see edu.drexel.lapcounter.lapcounter.frontend.CalibrateDeviceActivity
+     */
+    public static final CalibrationRewardFunc CALIBRATION_REWARD_FUNC = new LinearRewardFunc();
+
 }

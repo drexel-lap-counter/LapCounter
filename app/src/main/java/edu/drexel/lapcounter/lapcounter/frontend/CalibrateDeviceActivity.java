@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
 import edu.drexel.lapcounter.lapcounter.backend.ble.ExponentialRewardFunc;
 import edu.drexel.lapcounter.lapcounter.backend.ble.LinearRewardFunc;
@@ -169,10 +170,8 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     public void done(View view) {
         mBleService.disconnectDevice();
 
-        // Pick one of these reward functions. Note that both have adjustable weights using
-        // the constructor.
-        CalibrationRewardFunc rewardFunc = new LinearRewardFunc();
-        //CalibrationRewardFunc rewardFunc = new ExponentialRewardFunc();
+        // The reward function can be selected in the Hyperparameters class.
+        CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
 
         double threshold = mRssiCollector.computeThreshold(rewardFunc);
         log_thread("Threshold %.3f", threshold);
