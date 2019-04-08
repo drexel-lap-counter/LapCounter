@@ -23,8 +23,8 @@
     <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
     <string name="label_stop">Stop</string>
     <string name="label_done">Done</string>
-    <string name="no">NO</string>
-    <string name="yes">YES</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
     <string name="resumeButtonLabel">RESUME</string>
     <string name="pool_size_title">"Pool Size"</string>
     <string name="meters">Meters</string>

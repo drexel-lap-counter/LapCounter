@@ -2,9 +2,11 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -67,7 +69,21 @@ public class DeviceInfoActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void deleteDevice(View view) {
+    public void confirmDelete(View view) {
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to delete this device?")
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteDevice();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
+    }
+
+
+    public void deleteDevice() {
         // Delete the current device by mac address
         DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
         dvm.deleteByMacAddress(mDeviceAddress);
