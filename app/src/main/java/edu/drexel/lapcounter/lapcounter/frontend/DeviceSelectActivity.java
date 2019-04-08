@@ -147,18 +147,14 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
-
-
-    // NOTE: there should be a second action for selecting a device as the active one to use
-    // for lap counting. However, that should not require transitioning to a new activity
-    // so I omit it for now
     public void viewDevice(View view) {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
-        // TODO: use intent.putExtra() to pass information to the next activity
-        intent.putExtra("DEVICE_NAME",mDevice.getName());
-        intent.putExtra("DEVICE_MAC",mDevice.getMacAddress());
-        intent.putExtra("DEVICE_RSSI",mDevice.getThreshold());
-        // See the prototype app for an example of this.
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_THRESHOLD, mDevice.getThreshold());
+        intent.putExtra(
+                DeviceInfoActivity.EXTRAS_USE_DUMMY_CALIBRATOR,
+                mDeviceScanner instanceof DummyDeviceScanner);
         startActivity(intent);
     }
 
