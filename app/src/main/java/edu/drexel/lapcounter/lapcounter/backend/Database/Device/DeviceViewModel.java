@@ -33,10 +33,13 @@ public class DeviceViewModel extends AndroidViewModel {
     {
         mRepository.insert(device);
     }
+
     public Device getDeviceByMacAddress(String mac)
     {
         return mRepository.getDeviceByMacAddress(mac);
     }
 
-
+    public void deleteByMacAddress(String mac) {
+        mRepository.deleteByMacAddress(mac);
+    }
 }

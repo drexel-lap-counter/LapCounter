@@ -44,4 +44,5 @@
     <string name="total_distance">"Total Distance"</string>
     <string name="current_workout_timer_format">%d:%02d:%03d</string>
     <string name="ConfirmRestart">Are you sure you want to restart your workout?</string>
+    <string name="label_delete_device">Delete Device</string>
 </resources>

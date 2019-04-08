@@ -1,5 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import android.util.Log;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class DeviceInfoActivity extends AppCompatActivity {
@@ -60,6 +62,16 @@ public class DeviceInfoActivity extends AppCompatActivity {
         Intent intent = new Intent(this, activityToLaunch);
         intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_ADDRESS, mDeviceAddress);
         intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_NAME, mDeviceName);
+        startActivity(intent);
+    }
+
+    public void deleteDevice(View view) {
+        //1. Delete the current device by mac address
+        DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
+        dvm.deleteByMacAddress(mDeviceAddress);
+
+        //2. Go to Device Selection activity.
+        Intent intent = new Intent(this, DeviceSelectActivity.class);
         startActivity(intent);
     }
 }

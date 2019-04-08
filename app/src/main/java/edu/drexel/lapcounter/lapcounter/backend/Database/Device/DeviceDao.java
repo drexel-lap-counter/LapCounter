@@ -26,5 +26,8 @@ public interface DeviceDao {
     @Query("DELETE FROM devices")
     void deleteAll();
 
+    @Query("DELETE FROM devices WHERE mac_address=:mac")
+    void deleteByMacAddress(String mac);
+
 }
 

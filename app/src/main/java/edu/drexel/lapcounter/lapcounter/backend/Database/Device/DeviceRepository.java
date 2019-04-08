@@ -57,6 +57,21 @@ public class DeviceRepository {
         new insertAsyncTask(mDeviceDao).execute(device);
     }
 
+    private static class insertAsyncTask extends AsyncTask<Device,Void,Void>
+    {
+        private DeviceDao mAsyncTaskDao;
+
+        insertAsyncTask(DeviceDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Device... params) {
+            mAsyncTaskDao.addDevice(params[0]);
+            return null;
+        }
+    }
+
     public Device getDeviceByMacAddress(final String mac)
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -80,18 +95,21 @@ public class DeviceRepository {
 
     }
 
+    public void deleteByMacAddress(String mac) {
+        new DeleteAsyncTask(mDeviceDao).execute(mac);
+    }
 
-    private static class insertAsyncTask extends AsyncTask<Device,Void,Void>
-    {
+    private static class DeleteAsyncTask extends AsyncTask<String, Void, Void> {
         private DeviceDao mAsyncTaskDao;
 
-        insertAsyncTask(DeviceDao dao) {
+        DeleteAsyncTask(DeviceDao dao) {
             mAsyncTaskDao = dao;
         }
 
+
         @Override
-        protected Void doInBackground(final Device... params) {
-            mAsyncTaskDao.addDevice(params[0]);
+        protected Void doInBackground(String... strings) {
+            mAsyncTaskDao.deleteByMacAddress(strings[0]);
             return null;
         }
     }
