@@ -1,7 +1,9 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -66,11 +68,18 @@ public class DeviceInfoActivity extends AppCompatActivity {
     }
 
     public void deleteDevice(View view) {
-        //1. Delete the current device by mac address
+        // Delete the current device by mac address
         DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
         dvm.deleteByMacAddress(mDeviceAddress);
 
-        //2. Go to Device Selection activity.
+        // Clear the selected device from shared preferences
+        SharedPreferences prefs = getSharedPreferences(
+                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(DeviceSelectActivity.KEY_DEVICE_ADDRESS);
+        editor.apply();
+
+        // Go to Device Selection activity.
         Intent intent = new Intent(this, DeviceSelectActivity.class);
         startActivity(intent);
     }
