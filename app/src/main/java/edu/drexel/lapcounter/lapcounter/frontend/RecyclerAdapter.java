@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder> {
     private ArrayList<Device> mDataset;
@@ -30,6 +31,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         //Device not in list, so we add
         mDataset.add(item);
 
+    }
+
+    public void addAllItems(ArrayList<Device> devices)
+    {
+        for(Device device: devices)
+        {
+            //Update this to check for just name and address
+            for (int i = 0; i < mDataset.size(); i++) {
+                Device iDevice = mDataset.get(i);
+                if (iDevice.equals(device)) {
+                    return;
+                }
+            }
+
+            //Device not in list, so we add
+            mDataset.add(device);
+        }
     }
 
     public Device getDevice(String name) {

@@ -1,11 +1,8 @@
-package edu.drexel.lapcounter.lapcounter.backend.Database;
+package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
-import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.*;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 
 
 @Database(entities = {Workouts.class}, version = 1)
