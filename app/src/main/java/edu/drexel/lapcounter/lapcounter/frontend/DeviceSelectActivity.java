@@ -1,5 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.BLEScanner;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
+
 /**
  * It's a bit confusing at this point, but this class is for scanning for *registered*
  * bluetooth devices. DeviceScanActivity is for scanning for *new devices*
@@ -35,14 +38,14 @@ public class DeviceSelectActivity extends AppCompatActivity {
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
     // Sample device scanner
-    private BLEScanner mDeviceScanner = new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
      *
      * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
-    private BLEScanner.Callback mDeviceCallback = new BLEScanner.Callback() {
+    private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
         public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
             Log.i(TAG, String.format("Found Registered Device '%s' '%s' %s", deviceName, deviceAddress, rssi));
@@ -71,7 +74,9 @@ public class DeviceSelectActivity extends AppCompatActivity {
         ArrayList<Device> myDataset = new ArrayList<Device>();
         mAdapter = new RecyclerAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
+
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getBaseContext(), mRecyclerView, new RecyclerTouchListener.ClickListener() {
+
             @Override
             public void onClick(View view, int position) {
                     //TODO: This is where you select which item we wish to connect to via bluetooth
@@ -85,23 +90,15 @@ public class DeviceSelectActivity extends AppCompatActivity {
                     mDevice = mAdapter.getDevice(device_name);
                     mInfoButton.setAlpha(1);
                     mInfoButton.setEnabled(true);
+
+                    // TODO: Replace with the appropriate post-device selection Activity.
             }
 
             @Override
             public void onLongClick(View view, int position) {
-                    //TODO: This is where you select which item we wish to connect to via bluetooth
-                    //Get the data needed from the view, and do bluetooth connection stuff
-                    //if we successfully connect, change text in the selected text box
-                    //Currently, we just set the name when its clicked
-                    TextView selected_view = (TextView) view;
-                    Log.i(TAG,String.format("What was longclicked?: %s",selected_view.getText()));
-                    TextView connected_view= findViewById(R.id.connected_device_view);
-                    String device_name = (String) selected_view.getText();
-                    connected_view.setText(device_name);
-                    mDevice = mAdapter.getDevice(device_name);
-                    mInfoButton.setAlpha(1);
-                    mInfoButton.setEnabled(true);
+                onClick(view, position);
             }
+
         }));
         // Set a callback for whenever we find a bluetooth device
         mDeviceScanner.setCallback(mDeviceCallback);
@@ -112,6 +109,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
         List<String> whitelist = new ArrayList<>();
         whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
         whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
+
         mDeviceScanner.setAddressWhitelist(whitelist);
 
         // Start the scan. This will call the callback a bunch of times.
@@ -159,3 +157,4 @@ public class DeviceSelectActivity extends AppCompatActivity {
         startActivity(intent);
     }
 }
+
