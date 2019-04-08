@@ -12,8 +12,8 @@ import java.util.TimeZone;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
-import edu.drexel.lapcounter.lapcounter.backend.Database.WorkoutViewModel;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workouts;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workouts;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class WorkoutDetailsActivity extends AppCompatActivity {

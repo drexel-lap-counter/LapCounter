@@ -1,4 +1,4 @@
-package edu.drexel.lapcounter.lapcounter.backend.Database;
+package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
