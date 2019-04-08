@@ -168,7 +168,7 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolUnits = "Yards";
                     break;
                 }
-            case R.id.pool_units_meters:
+            default:    // units meters
                 if(checked)
                 {
                     poolUnits = "Meters";
