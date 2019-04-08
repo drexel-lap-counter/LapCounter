@@ -21,7 +21,7 @@ public abstract class DeviceDatabase extends RoomDatabase {
 
     private static volatile DeviceDatabase INSTANCE;
 
-    static DeviceDatabase getDatabase(final Context context) {
+    public static DeviceDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (DeviceDatabase.class) {
                 if (INSTANCE == null) {

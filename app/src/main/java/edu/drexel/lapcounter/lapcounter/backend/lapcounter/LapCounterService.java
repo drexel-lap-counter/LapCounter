@@ -1,12 +1,17 @@
 package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
 import android.app.Service;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDatabase;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceRepository;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
@@ -100,5 +105,11 @@ public class LapCounterService extends Service {
         mLapCounter = new LapCounter(this);
         initCallbacks();
         mReceiver.attach(this);
+    }
+
+    public void updateThreshold(String mac) {
+        DeviceRepository repo = new DeviceRepository(getApplication());
+        Device device = repo.getDeviceByMacAddress(mac);
+        mStateMachine.setThreshold(device.getThreshold());
     }
 }

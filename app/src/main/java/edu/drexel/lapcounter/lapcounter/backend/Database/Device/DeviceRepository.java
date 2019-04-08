@@ -22,7 +22,7 @@ public class DeviceRepository {
     private DeviceDao mDeviceDao;
 
 
-    DeviceRepository(Application application) {
+    public DeviceRepository(Application application) {
        DeviceDatabase db = DeviceDatabase.getDatabase(application);
         mDeviceDao = db.deviceDao();
     }

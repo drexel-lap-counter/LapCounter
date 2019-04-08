@@ -17,6 +17,7 @@ import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION
  */
 public class LocationStateMachine {
 
+
     /**
      * States of the machine
      */
@@ -59,9 +60,6 @@ public class LocationStateMachine {
      */
     private State mState = State.UNKNOWN;
 
-    /**
-     * RSSI threshold that separates State.NEAR and State.FAR.
-     */
     private double mThreshold;
 
     /**
@@ -72,6 +70,11 @@ public class LocationStateMachine {
     public LocationStateMachine(Context context, double threshold) {
         mBroadcastManager = LocalBroadcastManager.getInstance(context);
         mThreshold = threshold;
+    }
+
+
+    public void setThreshold(double threshold) {
+        this.mThreshold = threshold;
     }
 
     /**

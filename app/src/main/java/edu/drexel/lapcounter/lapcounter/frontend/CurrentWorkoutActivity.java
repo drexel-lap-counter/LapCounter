@@ -3,8 +3,10 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -23,6 +25,7 @@ import android.view.MotionEvent;
 
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
@@ -220,14 +223,17 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     };
 
     private void connect() {
-        // TODO: Pull this from somewhere in the scary land of Android Room?
-        // TODO: Alternatively, something like:
-        /*
-            Intent requestDevice = new Intent(DeviceScanActivity.class);
-            startActivityForResult(requestDevice, REQUEST_DEVICE);
-         */
-        final String address = DevicePresets.getAddress(this);
-        mBleService.connectToDevice(address);
+        // Get the selected device from shared preferences (if there is one)
+        SharedPreferences prefs = getSharedPreferences(
+                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
+        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+
+        if (mac != null) {
+            mBleService.connectToDevice(mac);
+            mLapCounterService.updateThreshold(mac);
+        }
+
+        // TODO: If it is null... We need to discuss what happens next.
     }
 
     private Runnable updateTimerThread = new Runnable() {

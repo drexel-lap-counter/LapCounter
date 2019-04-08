@@ -167,9 +167,9 @@ public class DeviceSelectActivity extends AppCompatActivity {
     }
 
     private void checkForSelectedDevice() {
-        Device device = fetchSelectedDevice();
-        if (device != null) {
-            refreshUI(device);
+        mDevice = fetchSelectedDevice();
+        if (mDevice != null) {
+            refreshUI(mDevice);
         }
     }
 
