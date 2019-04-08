@@ -34,7 +34,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
-        int device_rssi =  intent.getIntExtra(EXTRAS_DEVICE_THRESHOLD, 0);
+        double device_rssi =  intent.getDoubleExtra(EXTRAS_DEVICE_THRESHOLD, 0);
 
         TextView name_view = findViewById(R.id.name_text_view);
         name_view.setText(mDeviceName);
@@ -43,7 +43,7 @@ public class DeviceInfoActivity extends AppCompatActivity {
         mac_view.setText(mDeviceAddress);
 
         TextView rssi_view = findViewById(R.id.rssi_text_view);
-        rssi_view.setText(Integer.toString(device_rssi));
+        rssi_view.setText(Double.toString(device_rssi));
 
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Device Info");
