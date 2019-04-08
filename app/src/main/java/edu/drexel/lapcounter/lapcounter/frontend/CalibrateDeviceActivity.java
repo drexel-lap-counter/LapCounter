@@ -178,10 +178,11 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         double threshold = mRssiCollector.computeThreshold(rewardFunc);
         log_thread("Threshold %.3f", threshold);
 
-        Intent result = getIntent();
-        result.putExtra(EXTRAS_CALIBRATED_THRESHOLD, threshold);
-        setResult(RESULT_OK, result);
-        finish();
+        //TODO: Save device to the database.
+
+        // Go back to the device selection activity.
+        Intent goToDeviceSelect = new Intent(this, DeviceSelectActivity.class);
+        startActivity(goToDeviceSelect);
     }
 
     @SuppressLint("DefaultLocale")

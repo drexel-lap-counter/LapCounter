@@ -214,7 +214,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     public void calibrateSelectedDevice(View view) {
-        mDeviceViewModel.insert(mDevice);
+        //mDeviceViewModel.insert(mDevice);
         boolean shouldLaunchDummyCalibrate = mDeviceScanner instanceof DummyDeviceScanner;
 
         Class activityToLaunch = shouldLaunchDummyCalibrate ?
