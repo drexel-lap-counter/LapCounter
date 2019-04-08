@@ -21,25 +21,20 @@ public class Device
 
     @ColumnInfo(name="threshold")
     @NonNull
-    private int threshold;
-
-
-
-    //Potential want to move Selected to its own seperate class, so
-    //we can have multiple classes be selected.
-    private boolean Selected;
+    private double threshold;
 
     public Device()
     {
     }
 
 
-    public Device(String name, String mac_address, int threshold)
+    public Device(String name, String mac_address, double threshold)
     {
-        this.name = TextUtils.isEmpty(name) ? "Unnamed Device" : name;
+        String defaultName = String.format("??? (%s)", mac_address);
+
+        this.name = TextUtils.isEmpty(name) ? defaultName : name;
         this.macAddress = mac_address;
         this.threshold = threshold;
-        Selected = false;
     }
 
 
@@ -54,14 +49,9 @@ public class Device
         return macAddress;
     }
 
-    public int getThreshold() {
+    public double getThreshold() {
         return threshold;
     }
-
-    public boolean isSelected() {
-        return Selected;
-    }
-
 
     //
     //Setters
@@ -74,14 +64,9 @@ public class Device
         this.macAddress = mac_address;
     }
 
-    public void setThreshold(int threshold) {
+    public void setThreshold(double threshold) {
         this.threshold = threshold;
     }
-
-    public void setSelected(boolean selected) {
-        Selected = selected;
-    }
-
 
     //
     //Overrides

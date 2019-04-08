@@ -1,6 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -13,6 +14,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
 import edu.drexel.lapcounter.lapcounter.backend.ble.ExponentialRewardFunc;
@@ -31,7 +34,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     }
 
     public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
-    public static final String EXTRAS_CALIBRATED_THRESHOLD = qualify("CALIBRATED_THRESHOLD");
+    public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
 
     private final static int PRINT_COLLECTOR_STATS_FREQ_MS = 500;
 
@@ -41,6 +44,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     private BLEService mBleService;
     private String mDeviceAddress;
+    private String mDeviceName;
 
     private final RssiCollector mRssiCollector = new RssiCollector();
     private long mLastPrintMillis;
@@ -73,6 +77,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
 
         Intent bleServiceIntent = new Intent(this, BLEService.class);
         bindService(bleServiceIntent, mBleServiceConn, BIND_AUTO_CREATE);
@@ -178,11 +183,22 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         double threshold = mRssiCollector.computeThreshold(rewardFunc);
         log_thread("Threshold %.3f", threshold);
 
-        //TODO: Save device to the database.
+        saveDevice(threshold);
 
         // Go back to the device selection activity.
         Intent goToDeviceSelect = new Intent(this, DeviceSelectActivity.class);
         startActivity(goToDeviceSelect);
+    }
+
+    /**
+     * Store the calibrated device in the database
+     * @param threshold the calibrated threshold.
+     */
+    private void saveDevice(double threshold) {
+        Device device = new Device(mDeviceName, mDeviceAddress, threshold);
+
+        DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
+        dvm.insert(device);
     }
 
     @SuppressLint("DefaultLocale")

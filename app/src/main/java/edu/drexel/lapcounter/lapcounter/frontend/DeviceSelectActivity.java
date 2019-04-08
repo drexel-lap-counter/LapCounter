@@ -18,6 +18,7 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
@@ -41,7 +42,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
     // Sample device scanner
-    private DeviceScanner mDeviceScanner = new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new BLEScanner(this);// new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
