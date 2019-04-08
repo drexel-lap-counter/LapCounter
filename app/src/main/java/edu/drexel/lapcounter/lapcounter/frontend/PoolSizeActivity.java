@@ -199,4 +199,7 @@ public class PoolSizeActivity extends AppCompatActivity {
     public void setCustom_pool_text(EditText custom_pool_text){
         this.custom_pool_text = custom_pool_text;
     }
+    public String getPoolUnits(){
+        return poolUnits;
+    }
 }

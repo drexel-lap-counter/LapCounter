@@ -113,4 +113,24 @@ public class PoolSizeActivityTest {
 
         verify(custom_pool_text, times(1)).setEnabled(true);
     }
+
+    @Test
+    public void onPoolUnitsRadioButtonClicked_sets_meters() {
+        when(radioButton.getId()).thenReturn(R.id.pool_units_meters);
+        when(radioButton.isChecked()).thenReturn(true);
+
+        poolSizeActivity.onPoolUnitsRadioButtonClicked(radioButton);
+
+        assertEquals("Meters", poolSizeActivity.getPoolUnits());
+    }
+
+    @Test
+    public void onPoolUnitsRadioButtonClicked_sets_yards() {
+        when(radioButton.getId()).thenReturn(R.id.pool_units_yards);
+        when(radioButton.isChecked()).thenReturn(true);
+
+        poolSizeActivity.onPoolUnitsRadioButtonClicked(radioButton);
+
+        assertEquals("Yards", poolSizeActivity.getPoolUnits());
+    }
 }
