@@ -136,7 +136,14 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolSize = 25;
                     break;
                 }
-            case R.id.pool_size_50:
+            case R.id.pool_size_custom:
+                if(checked)
+                {
+                    custom_pool_text.setEnabled(true);
+                    tryGetCustomPoolSize(custom_pool_text.getText().toString());
+                    break;
+                }
+            default:        //pool size 50
                 if(checked)
                 {
                     //Coming from Custom
@@ -147,14 +154,6 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolSize = 50;
                     break;
                 }
-            case R.id.pool_size_custom:
-                if(checked)
-                {
-                    custom_pool_text.setEnabled(true);
-                    tryGetCustomPoolSize(custom_pool_text.getText().toString());
-                    break;
-                }
-
         }
     }
 
