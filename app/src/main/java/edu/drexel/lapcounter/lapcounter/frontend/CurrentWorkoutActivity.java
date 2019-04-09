@@ -8,34 +8,32 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
-//import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.SystemClock;
-import android.widget.Button;
-import android.widget.TextView;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.view.Gravity;
-import android.view.MotionEvent;
-
+import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
-import edu.drexel.lapcounter.lapcounter.backend.dummy.DevicePresets;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_DELTAS_WINDOW_SIZE;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_MOVING_AVERAGE_SIZE;
+
+//import android.support.v4.content.LocalBroadcastManager;
 
 public class CurrentWorkoutActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
@@ -228,12 +226,19 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
         String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
 
-        if (mac != null) {
-            mBleService.connectToDevice(mac);
-            mLapCounterService.updateThreshold(mac);
+        if (mac == null) {
+            mDebugConnectLabel.setText(R.string.label_no_device_selected);
+            // TODO: What should happen if the user does not have a currently selected device?
+            // Should they be redirected to the DeviceSelectActivity? Should the
+            // CurrentWorkoutActivity simply say "No device selected." and become inert?
+            // We need to discuss transitions between this and other activities.
+            return;
         }
 
-        // TODO: If it is null... We need to discuss what happens next.
+        String connectMessage = getResources().getString(R.string.label_connecting, mac);
+        mDebugConnectLabel.setText(connectMessage);
+        mBleService.connectToDevice(mac);
+        mLapCounterService.updateThreshold(mac);
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -334,10 +339,15 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         }
     };
 
+    private void setConnectText(String deviceAddress) {
+        String s = getResources().getString(R.string.label_connected, deviceAddress);
+        mDebugConnectLabel.setText(s);
+    }
+
     private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            mDebugConnectLabel.setText(R.string.label_connected);
+            setConnectText(message.getStringExtra(BLEComm.EXTRA_DEVICE_ADDRESS));
             startResumeButton.setEnabled(true);
             restartButton.setEnabled(true);
         }
@@ -346,7 +356,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
-            mDebugConnectLabel.setText(R.string.label_connected);
+            setConnectText(message.getStringExtra(BLEComm.EXTRA_DEVICE_ADDRESS));
         }
     };
 

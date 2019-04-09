@@ -17,8 +17,9 @@
     <string name="i_device_rssi">DEVICE_RSSI</string>
     <string name="label_calibrate_instructions">Press \"Calibrate\". Swim out to the flags, pause for a moment, then swim back and press \"Done\"</string>
     <string name="label_calibrate">Calibrate</string>
-    <string name="label_connecting">Connecting.</string>
-    <string name="label_connected">Connected.</string>
+    <string name="label_no_device_selected">No device selected.</string>
+    <string name="label_connecting">Connecting to %1$s</string>
+    <string name="label_connected">Connected to %1$s.</string>
     <string name="label_device_disconnected_try_reconnect">Device disconnected. Trying to reconnect.</string>
     <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
     <string name="label_stop">Stop</string>
