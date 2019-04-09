@@ -175,8 +175,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     }
 
     public void done(View view) {
-        mBleService.disconnectDevice();
-
         // The reward function can be selected in the Hyperparameters class.
         CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
 
@@ -188,6 +186,7 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         // Go back to the device selection activity.
         Intent goToDeviceSelect = new Intent(this, DeviceSelectActivity.class);
         startActivity(goToDeviceSelect);
+        finish();
     }
 
     /**
