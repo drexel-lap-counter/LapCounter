@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import java.util.regex.Pattern;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.dummy.DevicePresets;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine;
 
@@ -76,8 +78,11 @@ public class LapCounterServiceTest extends AppCompatActivity {
     };
 
     private void connect() {
-        log("Connecting...");
-        mBleService.connectToDevice(PUCK_ADDRESS);
+        String address = DevicePresets.getAddress(this);
+        String name = DevicePresets.getDeviceName(this);
+        String msg = String.format("Connecting to %s (%s)", name, address);
+        log(msg);
+        mBleService.connectToDevice(address);
     }
 
     private LapCounterService mLapCounterService;
@@ -304,5 +309,30 @@ public class LapCounterServiceTest extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         log("onRestart");
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            DevicePresets.incrementSelectedDevice(this);
+            logNewDevice();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            DevicePresets.decrementSelectedDevice(this);
+            logNewDevice();
+            return true;
+        } else {
+            return super.onKeyUp(keyCode, event);
+        }
+    }
+
+    /**
+     * When the selected device is changed, make a note of it in the console.
+     */
+    private void logNewDevice() {
+        String address = DevicePresets.getAddress(this);
+        String name = DevicePresets.getDeviceName(this);
+        String msg = String.format("Selected Device %s (%s)", name, address);
+        log(msg);
     }
 }

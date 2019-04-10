@@ -7,14 +7,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.List;
 
 public class BLEScanner implements DeviceScanner {
+    private static final String TAG = BLEScanner.class.getSimpleName();
     private List<String> mWhitelist;
     private BLEService mBleService;
     private Context mParentContext;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
+
+    private boolean mIsScanning = false;
 
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
@@ -56,11 +60,18 @@ public class BLEScanner implements DeviceScanner {
     public void startScan() {
         Intent intent = new Intent(mParentContext, BLEService.class);
         mParentContext.bindService(intent, mBleServiceConnection, Context.BIND_AUTO_CREATE);
+        mIsScanning = true;
     }
 
     @Override
     public void stopScan() {
+        if (!mIsScanning) {
+            Log.w(TAG, "stopScan() called when mIsScanning == false.");
+            return;
+        }
+
         mBleService.stopScan(mLeScanCallback);
         mParentContext.unbindService(mBleServiceConnection);
+        mIsScanning = false;
     }
 }

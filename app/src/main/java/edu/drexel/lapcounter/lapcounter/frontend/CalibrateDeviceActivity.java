@@ -13,6 +13,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
+import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.ExponentialRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.LinearRewardFunc;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RssiCollector;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
@@ -48,7 +52,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
             mBleService = binder.getService();
-            mBleService.setRssiManagerWindowSizes(1, 1);
             mBleService.connectToDevice(mDeviceAddress);
         }
 
@@ -121,7 +124,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             long timeSinceLastPrint = currentMillis - mLastPrintMillis;
 
             if (timeSinceLastPrint >= PRINT_COLLECTOR_STATS_FREQ_MS) {
-                mCalibrateInfo.setText(mRssiCollector.toString());
+                CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
+                String collectorState = mRssiCollector.toString(rewardFunc);
+                mCalibrateInfo.setText(collectorState);
                 mLastPrintMillis = currentMillis;
             }
         }
@@ -167,7 +172,12 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     public void done(View view) {
         mBleService.disconnectDevice();
 
-        double threshold = mRssiCollector.median();
+        // The reward function can be selected in the Hyperparameters class.
+        CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
+
+        double threshold = mRssiCollector.computeThreshold(rewardFunc);
+        log_thread("Threshold %.3f", threshold);
+
         Intent result = getIntent();
         result.putExtra(EXTRAS_CALIBRATED_THRESHOLD, threshold);
         setResult(RESULT_OK, result);
