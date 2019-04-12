@@ -27,6 +27,9 @@ public class BLEComm {
     public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
     public final static String EXTRA_DISCONNECT_IS_INTENTIONAL = qualify("EXTRA_DISCONNECT_IS_INTENTIONAL");
 
+    public final static String EXTRA_DEVICE_ADDRESS = qualify("EXTRA_DEVICE_ADDRESS");
+
+
     // States of connection
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -106,7 +109,9 @@ public class BLEComm {
 
     private void broadcastConnect(boolean isReconnect) {
         String action = isReconnect ? ACTION_RECONNECTED : ACTION_CONNECTED;
-        localBroadcast(new Intent(action));
+        Intent intent = new Intent(action);
+        intent.putExtra(EXTRA_DEVICE_ADDRESS, mCurrentConnectAddress);
+        localBroadcast(intent);
     }
 
     /**

@@ -1,7 +1,9 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +20,7 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
@@ -28,8 +31,6 @@ import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
  */
 public class DeviceSelectActivity extends AppCompatActivity {
 
-    //TODO: Finalize Device Code.  This will be used with on clicks to create a device object
-    //that can be passed to view device OR we get that from the bluetooth adapter/settings itself
     private Button mInfoButton;
     private Device mDevice;
     private RecyclerView mRecyclerView;
@@ -40,8 +41,11 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
+    public static final String PREFS_KEY = "lapcounter_device_selection";
+    public static final String KEY_DEVICE_ADDRESS = "device_address";
+
     // Sample device scanner
-    private DeviceScanner mDeviceScanner = new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new BLEScanner(this);// new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
@@ -55,7 +59,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
             Device found_device = mDeviceViewModel.getDeviceByMacAddress(deviceAddress);
             mAdapter.addItem(found_device);
             mAdapter.notifyDataSetChanged();
-            // TODO: Store the device information and display it in the list however you need.
         }
     };
 
@@ -83,19 +86,16 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view, int position) {
-                    //TODO: This is where you select which item we wish to connect to via bluetooth
-                    //Get the data needed from the view, and do bluetooth connection stuff
-                    //if we successfully connect, change text in the selected text box
-                    TextView selected_view = (TextView) view;
-                    Log.i(TAG,String.format("What was onclicked?: %s",selected_view.getText()));
-                    TextView connected_view= findViewById(R.id.connected_device_view);
-                    String device_name = (String) selected_view.getText();
-                    connected_view.setText(device_name);
-                    mDevice = mAdapter.getDevice(device_name);
-                    mInfoButton.setAlpha(1);
-                    mInfoButton.setEnabled(true);
+                // Get the selected device
+                TextView selected_view = (TextView) view;
+                String device_name = (String) selected_view.getText();
+                mDevice = mAdapter.getDevice(device_name);
 
-                    // TODO: Replace with the appropriate post-device selection Activity.
+                // Select this device
+                selectDevice(mDevice);
+
+                // Update the screen
+                refreshUI(mDevice);
             }
 
             @Override
@@ -104,10 +104,12 @@ public class DeviceSelectActivity extends AppCompatActivity {
             }
 
         }));
+
+        checkForSelectedDevice();
+
         // Set a callback for whenever we find a bluetooth device
         mDeviceScanner.setCallback(mDeviceCallback);
 
-        // TODO: Remove this example eventually
         // Will need to store this info somewhere
         // Example of setting a whitelist. This is so only registered devices show up.
         List<String> whitelist = new ArrayList<>();
@@ -116,17 +118,11 @@ public class DeviceSelectActivity extends AppCompatActivity {
         {
             whitelist.add(d.getMacAddress());
         }
-        //whitelist.add("FF:FF:FF:FF:FF:00"); // Dummy A
-        //whitelist.add("FF:FF:FF:FF:FF:01"); // Dummy B
 
         mDeviceScanner.setAddressWhitelist(whitelist);
 
         // Start the scan. This will call the callback a bunch of times.
         mDeviceScanner.startScan();
-
-
-        // NOTE: I did not implement the onPause() and onResume() logic. Ideally you should
-        // stop the scan on pause and start it on resume in both this aand DeviceScanActivity.
     }
 
 
@@ -146,18 +142,14 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
-
-
-    // NOTE: there should be a second action for selecting a device as the active one to use
-    // for lap counting. However, that should not require transitioning to a new activity
-    // so I omit it for now
     public void viewDevice(View view) {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
-        // TODO: use intent.putExtra() to pass information to the next activity
-        intent.putExtra("DEVICE_NAME",mDevice.getName());
-        intent.putExtra("DEVICE_MAC",mDevice.getMacAddress());
-        intent.putExtra("DEVICE_RSSI",mDevice.getThreshold());
-        // See the prototype app for an example of this.
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
+        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_THRESHOLD, mDevice.getThreshold());
+        intent.putExtra(
+                DeviceInfoActivity.EXTRAS_USE_DUMMY_CALIBRATOR,
+                mDeviceScanner instanceof DummyDeviceScanner);
         startActivity(intent);
     }
 
@@ -165,6 +157,40 @@ public class DeviceSelectActivity extends AppCompatActivity {
     public void scanForDevices(View view) {
         Intent intent = new Intent(this, DeviceScanActivity.class);
         startActivity(intent);
+    }
+
+    private void selectDevice(Device device) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_DEVICE_ADDRESS, device.getMacAddress());
+        editor.apply();
+    }
+
+    private void checkForSelectedDevice() {
+        mDevice = fetchSelectedDevice();
+        if (mDevice != null) {
+            refreshUI(mDevice);
+        }
+    }
+
+    private Device fetchSelectedDevice() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+        String address = prefs.getString(KEY_DEVICE_ADDRESS, null);
+
+        if (address != null) {
+            DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
+            return dvm.getDeviceByMacAddress(address);
+        } else {
+            return null;
+        }
+    }
+
+    private void refreshUI(Device device) {
+        TextView connected_view = findViewById(R.id.connected_device_view);
+        connected_view.setText(device.getName());
+
+        mInfoButton.setAlpha(1);
+        mInfoButton.setEnabled(true);
     }
 }
 

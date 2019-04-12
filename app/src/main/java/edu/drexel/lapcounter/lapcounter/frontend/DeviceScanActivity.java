@@ -214,7 +214,7 @@ public class DeviceScanActivity extends AppCompatActivity {
     }
 
     public void calibrateSelectedDevice(View view) {
-        mDeviceViewModel.insert(mDevice);
+
         boolean shouldLaunchDummyCalibrate = mDeviceScanner instanceof DummyDeviceScanner;
 
         Class activityToLaunch = shouldLaunchDummyCalibrate ?
@@ -223,6 +223,7 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, activityToLaunch);
         intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
+        intent.putExtra(CalibrateDeviceActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
         startActivity(intent);
     }
 }

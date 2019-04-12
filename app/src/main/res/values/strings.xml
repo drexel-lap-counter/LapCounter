@@ -17,14 +17,15 @@
     <string name="i_device_rssi">DEVICE_RSSI</string>
     <string name="label_calibrate_instructions">Press \"Calibrate\". Swim out to the flags, pause for a moment, then swim back and press \"Done\"</string>
     <string name="label_calibrate">Calibrate</string>
-    <string name="label_connecting">Connecting.</string>
-    <string name="label_connected">Connected.</string>
+    <string name="label_no_device_selected">No device selected.</string>
+    <string name="label_connecting">Connecting to %1$s</string>
+    <string name="label_connected">Connected to %1$s.</string>
     <string name="label_device_disconnected_try_reconnect">Device disconnected. Trying to reconnect.</string>
     <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
     <string name="label_stop">Stop</string>
     <string name="label_done">Done</string>
-    <string name="no">NO</string>
-    <string name="yes">YES</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
     <string name="resumeButtonLabel">RESUME</string>
     <string name="pool_size_title">"Pool Size"</string>
     <string name="meters">Meters</string>
@@ -45,4 +46,5 @@
     <string name="save">"Save"</string>
     <string name="current_workout_timer_format">%d:%02d:%03d</string>
     <string name="ConfirmRestart">Are you sure you want to restart your workout?</string>
+    <string name="label_delete_device">Delete Device</string>
 </resources>
