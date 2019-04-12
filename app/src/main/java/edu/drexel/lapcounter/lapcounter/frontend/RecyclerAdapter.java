@@ -53,7 +53,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     public Device getDevice(String name) {
         for (int i = 0; i < mDataset.size(); i++) {
             Device device = mDataset.get(i);
-            if (device.getName() == name) {
+            if(device.getName().equals(name))
+            {
                 return device;
             }
         }
