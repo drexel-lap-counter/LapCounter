@@ -1,24 +1,30 @@
-package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
+package edu.drexel.lapcounter.lapcounter.backend.Database;
 
-import android.arch.persistence.room.*;
-
+import android.arch.persistence.room.Database;
+import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDao;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDao;
 
-@Database(entities = {Workouts.class}, version = 1)
-public abstract class WorkoutDatabase extends RoomDatabase {
+
+@Database(entities = {Workout.class, Device.class}, version = 1)
+public abstract class LapCounterDatabase extends RoomDatabase {
 
 
     public abstract WorkoutDao workoutDao();
+    public abstract DeviceDao deviceDao();
 
+    private static volatile LapCounterDatabase INSTANCE;
 
-    private static volatile WorkoutDatabase INSTANCE;
-
-    static WorkoutDatabase getDatabase(final Context context) {
+    public static LapCounterDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
-            synchronized (WorkoutDatabase.class) {
+            synchronized (LapCounterDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), WorkoutDatabase.class, "workoutsdb").build();
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), LapCounterDatabase.class, "lapcounterdb").build();
                 }
             }
         }
@@ -53,13 +59,13 @@ public abstract class WorkoutDatabase extends RoomDatabase {
 
             mDao.deleteAll();
 
-            Workouts workout = new Workouts();
+            Workout workout = new Workout();
 
             workout.setID(55);
             workout.setPoolLength(initialPoolLength);
             workout.setTotalDistanceTraveled(initialTotalDistanceTraveled);
-            workout.setStartDateTime(TimestampConverter.fromTimestamp("1999-12-27 23:00:00.000"));
-            workout.setEndDateTime(TimestampConverter.fromTimestamp("1999-12-27 23:30:00.000"));
+            workout.setStartDate(TimestampConverter.fromTimestamp("1999-12-27 23:00:00.000"));
+            workout.setEndDate(TimestampConverter.fromTimestamp("1999-12-27 23:30:00.000"));
             workout.setLaps(50);
             workout.setPoolUnits("Meters");
             mDao.addWorkout(workout);

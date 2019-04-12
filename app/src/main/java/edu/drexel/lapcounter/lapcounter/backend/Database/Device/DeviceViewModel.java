@@ -2,13 +2,8 @@ package edu.drexel.lapcounter.lapcounter.backend.Database.Device;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutRepository;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workouts;
 
 public class DeviceViewModel extends AndroidViewModel {
 

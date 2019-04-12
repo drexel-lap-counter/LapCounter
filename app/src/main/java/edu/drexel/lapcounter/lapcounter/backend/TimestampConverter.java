@@ -1,6 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.backend;
 
 import android.arch.persistence.room.TypeConverter;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,40 +10,23 @@ import java.util.Date;
 
 public class TimestampConverter
 {
-    static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
+    private static final int MILLI_IN_SEC = 1000;
     @TypeConverter
-    public static Date fromTimestamp(String value)
+    public static Date fromTimestamp(int value)
     {
-        if(value != null)
-        {
-            try
-            {
-                return df.parse(value);
-            }
-            catch(ParseException e)
-            {
-                e.printStackTrace();
-            }
-            return null;
-        }
-        else
-        {
-            return null;
-        }
+        return new Date((long)value*MILLI_IN_SEC);
     }
 
     @TypeConverter
-    public static String dateToString(Date date)
+    public static int dateToTimestamp(Date date)
     {
         if(date == null)
         {
-            return null;
+            return -1;
         }
         else
         {
-            String output = df.format(date);
-            return output;
+            return (int)(date.getTime()/MILLI_IN_SEC);
         }
     }
 }
