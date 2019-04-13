@@ -2,6 +2,7 @@ package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.arch.persistence.room.RoomDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -26,7 +27,7 @@ public class WorkoutRepository {
         mWorkoutDao = db.workoutDao();
     }
 
-    public ArrayList<Workout> getAllWorkouts()
+    public List<Workout> getAllWorkouts()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Workout>> res = ex.submit(new Callable<List<Workout>>() {
@@ -72,7 +73,7 @@ public class WorkoutRepository {
 
     }
 
-    public ArrayList<Workout> getWorkoutsByDateRange(final Date start_time,final Date end_time)
+    public List<Workout> getWorkoutsByDateRange(final Date start_time,final Date end_time) throws Exception
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Workout>> res = ex.submit(new Callable<List<Workout>>() {
@@ -89,7 +90,7 @@ public class WorkoutRepository {
         }
         catch(Exception e)
         {
-            Log.i("ERROR",e.toString());
+            throw e;
         }
         ArrayList<Workout> output = new ArrayList<Workout>();
         output.addAll(workouts);

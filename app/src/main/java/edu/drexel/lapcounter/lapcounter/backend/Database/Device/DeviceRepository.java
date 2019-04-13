@@ -23,7 +23,7 @@ public class DeviceRepository {
         mDeviceDao = db.deviceDao();
     }
 
-    ArrayList<Device> getAllDevices()
+    List<Device> getAllDevices()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Device>> res = ex.submit(new Callable<List<Device>>() {

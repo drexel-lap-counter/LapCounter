@@ -77,7 +77,7 @@ public class DeviceScanActivity extends AppCompatActivity {
         //It is either that, or get it from DeviceSelect, but i think loading again
         //might be better then passing all data to this activity,
         mDeviceViewModel = ViewModelProviders.of(this).get(DeviceViewModel.class);
-        ArrayList<Device> registered_devices = mDeviceViewModel.getAllDevices();
+        List<Device> registered_devices = mDeviceViewModel.getAllDevices();
         whitelist = new ArrayList<String>();
         for(Device device: registered_devices)
         {

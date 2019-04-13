@@ -21,10 +21,13 @@ public class WorkoutViewModel extends AndroidViewModel {
         mRepository = new WorkoutRepository(application);
     }
 
-    public ArrayList<Workout> getAllWorkouts() {
+    public List<Workout> getAllWorkouts() {
         return mRepository.getAllWorkouts();
     }
-    public ArrayList<Workout> getWorkoutsByDateRange(Date start_time, Date end_time){return mRepository.getWorkoutsByDateRange(start_time,end_time);}
+    public List<Workout> getWorkoutsByDateRange(Date start_time, Date end_time)throws Exception
+    {
+        return mRepository.getWorkoutsByDateRange(start_time,end_time);
+    }
     public void insert(Workout workout)
     {
         mRepository.insert(workout);

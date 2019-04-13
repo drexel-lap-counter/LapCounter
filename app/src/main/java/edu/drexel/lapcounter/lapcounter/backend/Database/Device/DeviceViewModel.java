@@ -4,6 +4,7 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceViewModel extends AndroidViewModel {
 
@@ -12,7 +13,7 @@ public class DeviceViewModel extends AndroidViewModel {
     // - We can put an observer on the data (instead of polling for changes) and only update the
     //   the UI when the data actually changes.
     // - Repository is completely separated from the UI through the ViewModel.
-    private ArrayList<Device> mAllDevices;
+    private List<Device> mAllDevices;
 
     public DeviceViewModel(Application application) {
         super(application);
@@ -20,7 +21,7 @@ public class DeviceViewModel extends AndroidViewModel {
         mAllDevices = mRepository.getAllDevices();
     }
 
-    public ArrayList<Device> getAllDevices() {
+    public List<Device> getAllDevices() {
         return mAllDevices;
     }
 
