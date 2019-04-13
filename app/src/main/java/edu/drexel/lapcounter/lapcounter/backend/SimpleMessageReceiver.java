@@ -88,4 +88,10 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
             handler.onMessage(intent);
         }
     }
+
+    // testing methods
+
+    protected void setmIntentFilter(IntentFilter mIntentFilter) {
+        this.mIntentFilter = mIntentFilter;
+    }
 }
