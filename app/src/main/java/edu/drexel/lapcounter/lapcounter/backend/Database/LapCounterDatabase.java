@@ -19,13 +19,13 @@ public abstract class LapCounterDatabase extends RoomDatabase {
     public abstract DeviceDao deviceDao();
 
     private static volatile LapCounterDatabase INSTANCE;
-    private final static String mDatabaseName = "lapcounterdb";
+    public final static String DATABASE_NAME = "lapcounterdb";
 
     public static LapCounterDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (LapCounterDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), LapCounterDatabase.class, mDatabaseName).build();
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), LapCounterDatabase.class, DATABASE_NAME).build();
                 }
             }
         }
