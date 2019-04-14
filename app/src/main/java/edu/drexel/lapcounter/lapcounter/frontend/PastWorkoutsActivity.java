@@ -24,6 +24,9 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
     public void selectWorkout(View view) {
         Intent intent = new Intent(this, WorkoutDetailsActivity.class);
+        //Note for Neil, once someone selects a workout from your list, just pass its id
+        //to workout details like below, my code should then handle the rest
+        intent.putExtra(WorkoutDetailsActivity.EXTRAS_WORKOUT_ID,10);
         startActivity(intent);
     }
 }

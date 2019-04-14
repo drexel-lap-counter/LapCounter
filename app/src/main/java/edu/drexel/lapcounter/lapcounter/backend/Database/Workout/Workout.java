@@ -2,37 +2,47 @@ package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
-
+import android.support.annotation.NonNull;
 import java.util.Date;
-
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
+import static android.arch.persistence.room.ForeignKey.SET_NULL;
 
-@Entity(tableName = "workouts_table")
-public class Workouts {
+@Entity(tableName = "workouts",
+        foreignKeys = @ForeignKey(entity= Device.class,
+                                   parentColumns = "mac_address",
+                                    childColumns = "Device_Mac",
+                                    onDelete = SET_NULL))
+public class Workout {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name ="Start_DateTime")
+    @ColumnInfo(name ="Start_Date")
+    @NonNull
     @TypeConverters({TimestampConverter.class})
-    public Date mStartDateTime;
+    private Date mStartDate;
 
-    @ColumnInfo(name ="End_DateTime")
+    @ColumnInfo(name ="End_Date")
     @TypeConverters({TimestampConverter.class})
-    public Date mEndDateTime;
+    private Date mEndDate;
 
     @ColumnInfo(name = "Pool_length")
-    public int mPoolLength;
+    private int mPoolLength;
 
     @ColumnInfo(name = "Total_Distance_Traveled")
-    public int mTotalDistanceTraveled;
+    private int mTotalDistanceTraveled;
 
     @ColumnInfo(name="Pool_Units")
-    public String mPoolUnits;
+    private String mPoolUnits;
 
     @ColumnInfo(name = "Laps")
-    public int mLaps;
+    private int mLaps;
+
+    @ColumnInfo(name="Device_Mac")
+    private String mDeviceMAC;
 
 
     //
@@ -44,12 +54,13 @@ public class Workouts {
         return id;
     }
 
-    public Date getStartDateTime() {
-        return mStartDateTime;
+    public Date getStartDate()
+    {
+        return mStartDate;
     }
 
-    public Date getEndDateTime() {
-        return mEndDateTime;
+    public Date getEndDate() {
+        return mEndDate;
     }
 
     public int getTotalDistanceTraveled(){
@@ -68,6 +79,10 @@ public class Workouts {
     {
         return mLaps;
     }
+    public String getDeviceMAC()
+    {
+        return mDeviceMAC;
+    }
 
 
     //
@@ -77,12 +92,12 @@ public class Workouts {
         this.id = id;
     }
 
-    public void setStartDateTime(Date startDateTime) {
-        this.mStartDateTime = startDateTime;
+    public void setStartDate(Date startDateTime) {
+        this.mStartDate = startDateTime;
     }
 
-    public void setEndDateTime(Date endDateTime) {
-        this.mEndDateTime = endDateTime;
+    public void setEndDate(Date endDateTime) {
+        this.mEndDate = endDateTime;
     }
 
     public void setTotalDistanceTraveled(int totalDistanceTraveled){
@@ -100,6 +115,10 @@ public class Workouts {
     public void setLaps(int laps)
     {
         this.mLaps = laps;
+    }
+    public void setDeviceMAC(String device_mac)
+    {
+        this.mDeviceMAC = device_mac;
     }
 
 }
