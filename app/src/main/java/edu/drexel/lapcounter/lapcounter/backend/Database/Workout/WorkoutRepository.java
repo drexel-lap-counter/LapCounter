@@ -73,7 +73,7 @@ public class WorkoutRepository {
 
     }
 
-    public List<Workout> getWorkoutsByDateRange(final long start_time,final long end_time) throws Exception
+    public List<Workout> getWorkoutsByDateRange(final Date start_time,final Date end_time) throws Exception
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Workout>> res = ex.submit(new Callable<List<Workout>>() {
@@ -173,6 +173,4 @@ public class WorkoutRepository {
         output.addAll(workouts);
         return output;
     }
-
-
 }

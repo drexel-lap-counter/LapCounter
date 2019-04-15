@@ -23,7 +23,6 @@ public interface WorkoutDao {
     @Query("SELECT * FROM workouts")
     List<Workout> getAllWorkouts();
 
-
     @Query("SELECT * FROM workouts WHERE ID=:id")
     Workout getWorkoutByID(int id);
 
@@ -35,7 +34,7 @@ public interface WorkoutDao {
 
     @Query("SELECT * FROM workouts WHERE Start_Date>=:start_time AND End_Date<=:end_time")
     @TypeConverters({TimestampConverter.class})
-    List<Workout> getWorkoutsByDateRange(long start_time, long end_time);
+    List<Workout> getWorkoutsByDateRange(Date start_time, Date end_time);
 
     @Query("SELECT * FROM workouts ORDER BY Start_Date DESC")
     List<Workout> getAllWorkoutsDecending();

@@ -37,10 +37,6 @@ public class PastWorkoutsActivity extends AppCompatActivity {
     private ArrayList<String> mID = new ArrayList<>();
 
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mWorkoutViewModel = ViewModelProviders.of(this).get(WorkoutViewModel.class);
@@ -69,7 +65,6 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
-
     private void initRecyclerView(){
 
         RecyclerView recyclerView = findViewById(R.id.recyclerv_view);
@@ -82,9 +77,6 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
     private void initPastWorkoutsView(Workout Workout) {
 
-
-
-
         DateFormat df = new SimpleDateFormat("dd MMM yyyy");
 
 
@@ -96,7 +88,6 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         mWorkoutDate.add(String.valueOf(tempStartDate));
         mPoolLength.add(String.valueOf(Workout.getPoolLength()));
         mID.add(String.valueOf(Workout.getID()));
-
 
     }
 
