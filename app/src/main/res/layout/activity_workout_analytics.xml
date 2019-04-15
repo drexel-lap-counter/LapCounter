@@ -4,53 +4,65 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".frontend.WorkoutHistoryActivity">
+    tools:context=".frontend.WorkoutAnalytics">
+
+    <Spinner
+        android:id="@+id/measurements"
+        android:layout_width="115dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="11dp"
+        app:layout_constraintBottom_toTopOf="@+id/Workout_Analytics_Start_Date"
+        app:layout_constraintEnd_toStartOf="@+id/Workout_History_SelectDate_Text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.011" />
 
     <TextView
         android:id="@+id/Workout_History_SelectDate_Text"
         android:layout_width="162dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="121dp"
+        android:layout_marginBottom="11dp"
         android:text="Select Dates: "
         android:textAlignment="center"
         android:textSize="24sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/Workout_Analytics_Start_Date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/measurements"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/Workout_History_Start_Date"
+        android:id="@+id/Workout_Analytics_Start_Date"
         android:layout_width="125dp"
-        android:layout_height="28dp"
+        android:layout_height="30dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="64dp"
-        android:layout_marginEnd="34dp"
-        android:layout_marginBottom="28dp"
         android:drawableBottom="@drawable/border"
         android:text="Start Date"
         android:textAlignment="center"
+        android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/WORKOUT_HISTORY_TTL_DIST_TRAV"
-        app:layout_constraintEnd_toStartOf="@+id/Workout_History_T"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/Workout_History_End_Date"
+        android:id="@+id/Workout_Analytics_End_Date"
         android:layout_width="125dp"
         android:layout_height="30dp"
-        android:layout_marginStart="35dp"
         android:layout_marginTop="64dp"
         android:layout_marginEnd="32dp"
         android:drawableBottom="@drawable/border"
         android:text="End Date"
         android:textAlignment="center"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/Workout_History_T"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -62,9 +74,10 @@
         android:layout_marginBottom="8dp"
         android:text="To"
         android:textAlignment="center"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintEnd_toStartOf="@+id/Workout_History_End_Date"
-        app:layout_constraintStart_toEndOf="@+id/Workout_History_Start_Date" />
+        app:layout_constraintEnd_toStartOf="@+id/Workout_Analytics_End_Date"
+        app:layout_constraintStart_toEndOf="@+id/Workout_Analytics_Start_Date" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -81,127 +94,114 @@
 
     <TextView
         android:id="@+id/WORKOUT_HISTORY_TTL_DIST_TRAV"
-        android:layout_width="160dp"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Total Distance Traveled: "
-        android:textAlignment="center"
-        android:textStyle="bold"
+        android:text="Total Distance:"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintHorizontal_bias="0.516"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 
     <TextView
         android:id="@+id/WORKOUT_HISTORY_AVG_WRK_TIME"
-        android:layout_width="wrap_content"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Avg Workout Time:  "
-        android:textAlignment="center"
-        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:textSize="23sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="125dp"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Duration: "
-        android:textAlignment="center"
-        android:textStyle="bold"
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
     <TextView
         android:id="@+id/WORKOUT_HISTORY_AVGWD"
-        android:layout_width="wrap_content"
-        android:layout_height="27dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="190dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Avg Workout Distance: "
-        android:textAlignment="center"
-        android:textStyle="bold"
+        android:text="Avg Workout Dist: "
+        android:textAlignment="viewStart"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline6"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline5" />
 
     <TextView
         android:id="@+id/TDT_Data"
-        android:layout_width="125dp"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
-        android:text="TDT Data"
+        android:text="No Data"
         android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 
     <TextView
         android:id="@+id/AVGWT_Data"
-        android:layout_width="125dp"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
-        android:text="AVGWT Data"
+        android:text="No Data"
         android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="@+id/guideline3" />
 
     <TextView
         android:id="@+id/DUR_Data"
-        android:layout_width="125dp"
-        android:layout_height="31dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="190dp"
+        android:layout_height="30dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="8dp"
-        android:text="DUR Data"
+        android:text="No Data"
         android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
     <TextView
         android:id="@+id/AVG_WD_Data"
-        android:layout_width="125dp"
+        android:layout_width="190dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="AVG WD Data"
+        android:text="No Data"
         android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline6"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="@+id/guideline5" />
 
 
@@ -217,7 +217,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline7">
+        app:layout_constraintTop_toTopOf="@+id/guideline7"
+        app:layout_constraintVertical_bias="1.0">
 
     </com.github.mikephil.charting.charts.BarChart>
 
@@ -234,7 +235,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="207dp" />
+        app:layout_constraintGuide_begin="208dp" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline3"

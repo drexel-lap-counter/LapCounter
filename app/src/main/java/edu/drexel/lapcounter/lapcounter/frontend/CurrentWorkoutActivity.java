@@ -1,44 +1,58 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
-import android.content.BroadcastReceiver;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.SystemClock;
-import android.widget.Button;
-import android.widget.TextView;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.view.Gravity;
-import android.view.MotionEvent;
-
+import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounter;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_DELTAS_WINDOW_SIZE;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_MOVING_AVERAGE_SIZE;
+
+//import android.support.v4.content.LocalBroadcastManager;
 
 public class CurrentWorkoutActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
-    private Button startButton;
+    private Button startResumeButton;
     private Button pauseButton;
     private Button restartButton;
-    private Button yesButton;
-    private Button noButton;
-    private Button resumeButton;
 
-    public static final String ACTION_LAP_COUNT =
-            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
-    public static final String EXTRA_CURRENT_LAP_COUNT =
-            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
+//    public static final String ACTION_LAP_COUNT =
+//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
+//    public static final String EXTRA_CURRENT_LAP_COUNT =
+//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
 
-    private int mFakeLapCount = 0;
+    // Unique ID for the Bluetooth request Intent
+    private static final int REQUEST_ENABLE_BT = 2;
+
+    //    private int mFakeLapCount = 0;
     private TextView timerValue;
+    private String mTimerFormat;
     private long startTime = 0L;
     private Handler customHandler = new Handler();
     private boolean isPaused = false;
@@ -51,7 +65,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private TextView mCounter;
 
     // Object for scheduling fake laps counted.
-    private Handler mHandler = new Handler();
+//    private Handler mHandler = new Handler();
+
+    private TextView mDebugConnectLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,114 +75,188 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_current_workout);
 
         // In the final version, use R.string.<string id> for titles
-        getSupportActionBar().setTitle("Current Workout");
+        getSupportActionBar().setTitle(R.string.title_current_workout);
 
         mNavBar.init();
 
-        timerValue = (TextView) findViewById(R.id.timerValue);
+        timerValue = findViewById(R.id.timerValue);
+        mTimerFormat = getString(R.string.current_workout_timer_format);
 
-        startButton = (Button) findViewById(R.id.startButton);
+        startResumeButton = findViewById(R.id.startResumeButton);
+        startResumeButton.setEnabled(false);
 
-        resumeButton = (Button) findViewById(R.id.resumeButton);
-
-        mCounter = findViewById(R.id.lapCount);
-        mCounter.setText("0");
-        // Register callbacks with the receiver
-        mReceiver.registerHandler(ACTION_LAP_COUNT, updateUI);
-
-
-
-        startButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
-                customHandler.postDelayed(updateTimerThread, 0);
-
-                startButton.setVisibility(View.INVISIBLE);
-                resumeButton.setVisibility(View.VISIBLE);
-                resumeButton.setEnabled(false);
-                pauseButton.setEnabled(true);
-
-                simulateLaps();
-            }
-        });
-
-        resumeButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
-                customHandler.postDelayed(updateTimerThread, 0);
-                resumeButton.setEnabled(false);
-                pauseButton.setEnabled(true);
-                onResume();
-            }
-        });
-
-        pauseButton = (Button) findViewById(R.id.pauseButton);
+        pauseButton = findViewById(R.id.pauseButton);
         pauseButton.setEnabled(false);
+
+        restartButton = findViewById(R.id.restartButton);
+        restartButton.setEnabled(false);
+
+        mDebugConnectLabel = findViewById(R.id.debugConnectLabel);
+
+        startResumeButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                startTime = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread, 0);
+
+                startResumeButton.setEnabled(false);
+                startResumeButton.setText(R.string.resumeButtonLabel);
+                pauseButton.setEnabled(true);
+
+                isPaused = false;
+                mBleService.startRssiRequests();
+            }
+        });
+
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-
                 timeSwapBuff += timeInMilliseconds;
                 customHandler.removeCallbacks(updateTimerThread);
-                resumeButton.setEnabled(true);
+
+                startResumeButton.setEnabled(true);
                 pauseButton.setEnabled(false);
-                onPause();
+
+                isPaused = true;
+                mBleService.stopRssiRequests();
             }
         });
 
-        restartButton = (Button) findViewById(R.id.restartButton);
+
 
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
+                if (!isPaused) {
+                    pauseButton.performClick();
+                }
                 onButtonShowPopupWindowClick(view);
             }
         });
+
+        mCounter = findViewById(R.id.lapCount);
+        mCounter.setText("0");
+        // Register callbacks with the receiver
+        mReceiver.registerHandler(LapCounter.ACTION_LAP_COUNT_UPDATED, updateUI);
+        mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        mReceiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
+        mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
+
+        requestBluetoothPermission();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mReceiver.detach(this);
+
+        if (mBleService != null) {
+            mBleService.disconnectDevice();
+            unbindServices();
+        }
+
+        mBleService = null;
+        mLapCounterService = null;
+    }
+
+    private void requestBluetoothPermission() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bindService(BLEService.class, mBleServiceConnection);
+                mReceiver.attach(this);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void bindService(Class serviceClass, ServiceConnection connection) {
+        Intent serviceIntent = new Intent(this, serviceClass);
+        bindService(serviceIntent, connection, BIND_AUTO_CREATE);
+    }
+
+    private void unbindServices() {
+        unbindService(mBleServiceConnection);
+        unbindService(mLapCounterServiceConnection);
+    }
+
+    private BLEService mBleService;
+
+    private ServiceConnection mBleServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mBleService = ((BLEService.LocalBinder) service).getService();
+            mBleService.setRssiManagerWindowSizes(DEFAULT_DELTAS_WINDOW_SIZE,
+                    DEFAULT_MOVING_AVERAGE_SIZE);
+
+            bindService(LapCounterService.class, mLapCounterServiceConnection);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBleService = null;
+        }
+    };
+
+    private LapCounterService mLapCounterService;
+
+    private ServiceConnection mLapCounterServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mLapCounterService = ((LapCounterService.LocalBinder) service).getService();
+            connect();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mLapCounterService = null;
+        }
+    };
+
+    private void connect() {
+        // Get the selected device from shared preferences (if there is one)
+        SharedPreferences prefs = getSharedPreferences(
+                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
+        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+
+        if (mac == null) {
+            mDebugConnectLabel.setText(R.string.label_no_device_selected);
+            // TODO: What should happen if the user does not have a currently selected device?
+            // Should they be redirected to the DeviceSelectActivity? Should the
+            // CurrentWorkoutActivity simply say "No device selected." and become inert?
+            // We need to discuss transitions between this and other activities.
+            return;
+        }
+
+        String connectMessage = getResources().getString(R.string.label_connecting, mac);
+        mDebugConnectLabel.setText(connectMessage);
+        mBleService.connectToDevice(mac);
+        mLapCounterService.updateThreshold(mac);
     }
 
     private Runnable updateTimerThread = new Runnable() {
 
         public void run() {
-
             timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
-
             updatedTime = timeSwapBuff + timeInMilliseconds;
             int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
             secs = secs % 60;
             int milliseconds = (int) (updatedTime % 1000);
-            timerValue.setText("" + mins + ":"
-                    + String.format("%02d", secs) + ":"
-                    + String.format("%03d", milliseconds));
+
+            String newTimerText = String.format(mTimerFormat, mins, secs, milliseconds);
+            timerValue.setText(newTimerText);
             customHandler.postDelayed(this, 0);
         }
 
     };
-
-    // TODO: Maybe rename WorkoutHistory -> Analytics so it's less confusing?
-    public void viewWorkoutHistory(View view) {
-        Intent intent = new Intent(this, WorkoutHistoryActivity.class);
-        startActivity(intent);
-    }
-
-    public void goHome(View view) {
-        Intent intent = new Intent(this, WelcomeActivity.class);
-        startActivity(intent);
-    }
-
-    public void viewPastWorkouts(View view) {
-        Intent intent = new Intent(this, PastWorkoutsActivity.class);
-        startActivity(intent);
-    }
-
-    public void configureSettings(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-    }
 
     public void onButtonShowPopupWindowClick(View view) {
 
@@ -194,24 +284,30 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             }
         });
 
-        yesButton = (Button) popupView.findViewById(R.id.yesButton);
+        Button yesButton = popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 startTime = SystemClock.uptimeMillis();
                 updatedTime = 0L;
                 timeSwapBuff = 0L;
                 timeInMilliseconds = 0L;
-                mFakeLapCount = 0;  //we need to have a design talk about notifying the counter
+                timerValue.setText(R.string.timerVal);
+
+//                mFakeLapCount = 0;
                 mCounter.setText("0");
-                customHandler.postDelayed(updateTimerThread, 0);
-                customHandler.removeCallbacks(updateTimerThread);
-                resumeButton.setEnabled(true);
+
+                startResumeButton.setText(R.string.startButtonLabel);
+                startResumeButton.setEnabled(true);
                 pauseButton.setEnabled(false);
+
+                mBleService.reset();
+                mLapCounterService.reset();
+
                 popupWindow.dismiss();
             }
         } );
 
-        noButton = (Button) popupView.findViewById(R.id.noButton);
+        Button noButton = popupView.findViewById(R.id.noButton);
         noButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 popupWindow.dismiss();
@@ -235,58 +331,70 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             // Extract info from the Intent
-            int lapCount = message.getIntExtra(EXTRA_CURRENT_LAP_COUNT, 0);
+            // TODO: Get the actual constant from LapCounter(Service?)
+            int lapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
             //Update the TextView
             mCounter.setText(Integer.toString(lapCount));
         }
     };
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isPaused = false;
-        // Enable the callbacks by registering the receiver
-        // This is shorthand for registerReceiver()
-        mReceiver.attach(this);
+    private void setConnectText(String deviceAddress) {
+        String s = getResources().getString(R.string.label_connected, deviceAddress);
+        mDebugConnectLabel.setText(s);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isPaused = true;
-        // Unsubscribe from events
-        // This is shorthand for unregisterReceiver()
-        mReceiver.detach(this);
-    }
+    private SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            setConnectText(message.getStringExtra(BLEComm.EXTRA_DEVICE_ADDRESS));
+            startResumeButton.setEnabled(true);
+            restartButton.setEnabled(true);
+        }
+    };
 
-    /**
-     * Simulate counting laps. This just increments the counter once a second
+    private SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            setConnectText(message.getStringExtra(BLEComm.EXTRA_DEVICE_ADDRESS));
+        }
+    };
+
+    private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
+            connect();
+        }
+    };
+
+    /*
+      Simulate counting laps. This just increments the counter once a second
      */
-    private void simulateLaps() {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(!isPaused) {
-                    mFakeLapCount += 2;
-
-                    publishLapCount();
-                }
-                simulateLaps();
-            }
-        }, 1000);
-    }
-
-    private void publishLapCount() {
-        // Create the intent, specifying the name of the event (i.e. "action")
-        Intent intent = new Intent(ACTION_LAP_COUNT);
-
-        // If needed, store some key-value pairs in the intent
-        intent.putExtra(EXTRA_CURRENT_LAP_COUNT, mFakeLapCount);
-
-        // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
-        // can broadcast intents
-        //sendBroadcast(intent);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
+//    private void simulateLaps() {
+//        mHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(!isPaused) {
+//                    mFakeLapCount += 2;
+//
+//                    publishLapCount();
+//                }
+//                simulateLaps();
+//            }
+//        }, 1000);
+//    }
+//
+//    private void publishLapCount() {
+//        // Create the intent, specifying the name of the event (i.e. "action")
+//        Intent intent = new Intent(ACTION_LAP_COUNT);
+//
+//        // If needed, store some key-value pairs in the intent
+//        intent.putExtra(EXTRA_CURRENT_LAP_COUNT, mFakeLapCount);
+//
+//        // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
+//        // can broadcast intents
+//        //sendBroadcast(intent);
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+//    }
 }

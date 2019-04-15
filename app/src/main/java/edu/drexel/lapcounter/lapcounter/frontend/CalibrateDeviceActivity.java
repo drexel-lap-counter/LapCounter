@@ -1,18 +1,69 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
+import android.annotation.SuppressLint;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import edu.drexel.lapcounter.lapcounter.R;
-import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
+import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.ExponentialRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.LinearRewardFunc;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.ble.RssiCollector;
+import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
 public class CalibrateDeviceActivity extends AppCompatActivity {
-    private final NavBar mNavBar = new NavBar(this);
-    private final String mDeviceName = "DEVICE_NAME";
-    private final String mDeviceMAC = "DEVICE_MAC";
-    private final String mDeviceRSSI = "DEVICE_RSSI";
+    private final static String TAG = CalibrateDeviceActivity.class.getSimpleName();
+
+    private static String qualify(String s) {
+        return CalibrateDeviceActivity.class.getPackage().getName() + "." + s;
+    }
+
+    public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
+    public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
+
+    private final static int PRINT_COLLECTOR_STATS_FREQ_MS = 500;
+
+    private TextView mCalibrateInfo;
+    private Button mCalibrate;
+    private Button mDone;
+
+    private BLEService mBleService;
+    private String mDeviceAddress;
+    private String mDeviceName;
+
+    private final RssiCollector mRssiCollector = new RssiCollector();
+    private long mLastPrintMillis;
+
+    private final SimpleMessageReceiver mReceiver = new SimpleMessageReceiver();
+
+    private final ServiceConnection mBleServiceConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
+            mBleService = binder.getService();
+            mBleService.connectToDevice(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBleService = null;
+        }
+    };
 
 
     @Override
@@ -20,16 +71,139 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calibrate_device);
 
-        // In the final version, use R.string.<string id> for titles
-        getSupportActionBar().setTitle("Calibrate Device");
+        mCalibrateInfo = findViewById(R.id.calibrate_info);
+        mCalibrate = findViewById(R.id.calibrate);
+        mDone = findViewById(R.id.done);
 
-        mNavBar.init();
+        Intent intent = getIntent();
+        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
+
+        Intent bleServiceIntent = new Intent(this, BLEService.class);
+        bindService(bleServiceIntent, mBleServiceConn, BIND_AUTO_CREATE);
+
+        registerHandlers();
     }
 
-    public void finishCalibration(View view) {
-        // TODO: Not sure if it's best to go back to the device selection or
-        // device info page.
-        Intent intent = new Intent(this, DeviceSelectActivity.class);
-        startActivity(intent);
+    private void registerHandlers() {
+        mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
+        mReceiver.registerHandler(BLEComm.ACTION_RECONNECTED, onConnect);
+        mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
+        mReceiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
+    }
+
+
+    private final SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mCalibrateInfo.setText(R.string.label_calibrate_instructions);
+            mCalibrate.setText(R.string.label_calibrate);
+            mCalibrate.setEnabled(true);
+        }
+    };
+
+    private final SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            mRssiCollector.disable();
+            mRssiCollector.clear();
+            mCalibrateInfo.setText(R.string.label_device_disconnected_try_reconnect);
+            mBleService.connectToDevice(mDeviceAddress);
+            mCalibrate.setEnabled(false);
+            mDone.setEnabled(false);
+        }
+    };
+
+    private final SimpleMessageReceiver.MessageHandler onRssi = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            double rssi = message.getDoubleExtra(RSSIManager.EXTRA_RSSI, 0.0);
+
+            if (rssi == 0.0 || !mRssiCollector.isEnabled()) {
+                return;
+            }
+
+            mRssiCollector.collect((int)rssi);
+
+            long currentMillis = System.currentTimeMillis();
+            long timeSinceLastPrint = currentMillis - mLastPrintMillis;
+
+            if (timeSinceLastPrint >= PRINT_COLLECTOR_STATS_FREQ_MS) {
+                CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
+                String collectorState = mRssiCollector.toString(rewardFunc);
+                mCalibrateInfo.setText(collectorState);
+                mLastPrintMillis = currentMillis;
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mReceiver.attach(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mReceiver.detach(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mReceiver.detach(this);
+        mBleService.disconnectDevice();
+        unbindService(mBleServiceConn);
+        mBleService = null;
+    }
+
+    public void calibrate(View view) {
+        if (mRssiCollector.isEnabled()) {
+            mBleService.stopRssiRequests();
+            mRssiCollector.disable();
+            mDone.setEnabled(true);
+            mCalibrate.setText(R.string.label_calibrate);
+            mCalibrateInfo.setText(mRssiCollector.toString());
+            return;
+        }
+
+        mBleService.startRssiRequests();
+        mDone.setEnabled(false);
+        mRssiCollector.enable();
+        mCalibrate.setText(getString(R.string.label_stop));
+    }
+
+    public void done(View view) {
+        // The reward function can be selected in the Hyperparameters class.
+        CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
+
+        double threshold = mRssiCollector.computeThreshold(rewardFunc);
+        log_thread("Threshold %.3f", threshold);
+
+        saveDevice(threshold);
+
+        // Go back to the device selection activity.
+        Intent goToDeviceSelect = new Intent(this, DeviceSelectActivity.class);
+        startActivity(goToDeviceSelect);
+        finish();
+    }
+
+    /**
+     * Store the calibrated device in the database
+     * @param threshold the calibrated threshold.
+     */
+    private void saveDevice(double threshold) {
+        Device device = new Device(mDeviceName, mDeviceAddress, threshold);
+
+        DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);
+        dvm.insert(device);
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void log_thread(String format, Object... args) {
+        String s = String.format(format, args);
+        s = String.format("[Thread %d] %s", Thread.currentThread().getId(), s);
+        Log.d(TAG, s);
     }
 }

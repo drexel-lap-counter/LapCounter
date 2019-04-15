@@ -98,20 +98,12 @@ public class PoolSizeActivity extends AppCompatActivity {
     protected void onDestroy()
     {
         super.onDestroy();
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(poolSizeKey,poolSize);
-        editor.putString(poolUnitsKey,poolUnits);
-        editor.apply();
     }
 
     @Override
     protected  void onPause()
     {
         super.onPause();
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(poolSizeKey,poolSize);
-        editor.putString(poolUnitsKey,poolUnits);
-        editor.apply();
     }
 
     protected  void onResume()
@@ -122,7 +114,6 @@ public class PoolSizeActivity extends AppCompatActivity {
 
     public void onPoolSizeRadioButtonClicked(View view)
     {
-
         boolean checked = ((RadioButton) view).isChecked();
         switch(view.getId())
         {
@@ -137,7 +128,14 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolSize = 25;
                     break;
                 }
-            case R.id.pool_size_50:
+            case R.id.pool_size_custom:
+                if(checked)
+                {
+                    custom_pool_text.setEnabled(true);
+                    tryGetCustomPoolSize(custom_pool_text.getText().toString());
+                    break;
+                }
+            default:        //pool size 50
                 if(checked)
                 {
                     //Coming from Custom
@@ -148,14 +146,6 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolSize = 50;
                     break;
                 }
-            case R.id.pool_size_custom:
-                if(checked)
-                {
-                    custom_pool_text.setEnabled(true);
-                    tryGetCustomPoolSize(custom_pool_text.getText().toString());
-                    break;
-                }
-
         }
     }
 
@@ -170,13 +160,21 @@ public class PoolSizeActivity extends AppCompatActivity {
                     poolUnits = "Yards";
                     break;
                 }
-            case R.id.pool_units_meters:
+            default:    // units meters
                 if(checked)
                 {
                     poolUnits = "Meters";
                     break;
                 }
         }
+    }
+
+    public void onConfirmButtonClicked(View view)
+    {
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(poolSizeKey,poolSize);
+        editor.putString(poolUnitsKey,poolUnits);
+        editor.apply();
     }
 
     private void tryGetCustomPoolSize(String s)
@@ -194,5 +192,14 @@ public class PoolSizeActivity extends AppCompatActivity {
         poolSize = val;
     }
 
-
+    // Methods for TESTING
+    public int getPoolSize() {
+        return poolSize;
+    }
+    public void setCustom_pool_text(EditText custom_pool_text){
+        this.custom_pool_text = custom_pool_text;
+    }
+    public String getPoolUnits(){
+        return poolUnits;
+    }
 }

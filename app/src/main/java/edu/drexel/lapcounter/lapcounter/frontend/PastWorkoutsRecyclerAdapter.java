@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import edu.drexel.lapcounter.lapcounter.R;
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{
+public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkoutsRecyclerAdapter.ViewHolder>{
 
     private static final String TAG = "RecyclerViewAdapter";
 
@@ -23,7 +23,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<String> mID;
     private Context mContext;
 
-    public RecyclerViewAdapter(Context context, ArrayList<String> workoutDate,ArrayList<String> poolLength,ArrayList<String> ID ) {
+    public PastWorkoutsRecyclerAdapter(Context context, ArrayList<String> workoutDate,ArrayList<String> poolLength,ArrayList<String> ID ) {
         mWorkoutDate = workoutDate;
         mContext = context;
         mPoolLength = poolLength;
@@ -34,7 +34,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.past_workout_layout_listitem, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_past_workouts_layout_listitem, parent, false);
         ViewHolder holder = new ViewHolder(view);
         return holder;
     }
@@ -52,12 +52,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked on: " + mWorkoutDate.get(position));
-
-                Intent intent = new Intent(mContext,WorkoutDetailsActivity.class);
-
-                intent.putExtra("image_URL",mID.get(position));
-
+                Intent intent = new Intent(mContext, WorkoutDetailsActivity.class);
+                //Note for Neil, once someone selects a workout from your list, just pass its id
+                //to workout details like below, my code should then handle the rest
+                intent.putExtra(WorkoutDetailsActivity.EXTRAS_WORKOUT_ID,mID.get(position));
                 mContext.startActivity(intent);
+
+
+
+//
+//                Intent intent = new Intent(mContext,WorkoutDetailsActivity.class);
+//
+//                intent.putExtra("image_URL",mID.get(position));
+//
+//                mContext.startActivity(intent);
             }
         });
     }

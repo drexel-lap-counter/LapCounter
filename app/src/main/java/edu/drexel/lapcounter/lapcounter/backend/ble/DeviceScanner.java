@@ -1,10 +1,9 @@
-package edu.drexel.lapcounter.lapcounter.backend;
+package edu.drexel.lapcounter.lapcounter.backend.ble;
 
-import android.bluetooth.BluetoothDevice;
 
 import java.util.List;
 
-public interface BLEScanner {
+public interface DeviceScanner {
 
     /**
      * Since Bluetooth scanning is asynchronous, the user of this interface must specify

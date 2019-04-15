@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LapCounter</string>
-    <string name="title_activity_test_navbar">TestNavbar</string>
     <string name="title_home">Home</string>
+    <string name="title_current_workout">Current Workout</string>
     <string name="title_analytics">Analytics</string>
     <string name="title_past_workouts">History</string>
     <string name="title_settings">Settings</string>
@@ -15,8 +15,17 @@
     <string name="i_device_name">DEVICE_NAME</string>
     <string name="i_device_mac">DEVICE_MAC</string>
     <string name="i_device_rssi">DEVICE_RSSI</string>
-    <string name="no">NO</string>
-    <string name="yes">YES</string>
+    <string name="label_calibrate_instructions">Press \"Calibrate\". Swim out to the flags, pause for a moment, then swim back and press \"Done\"</string>
+    <string name="label_calibrate">Calibrate</string>
+    <string name="label_no_device_selected">No device selected.</string>
+    <string name="label_connecting">Connecting to %1$s</string>
+    <string name="label_connected">Connected to %1$s.</string>
+    <string name="label_device_disconnected_try_reconnect">Device disconnected. Trying to reconnect.</string>
+    <string name="label_collecting_rssi_values">Collecting RSSI values.</string>
+    <string name="label_stop">Stop</string>
+    <string name="label_done">Done</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
     <string name="resumeButtonLabel">RESUME</string>
     <string name="pool_size_title">"Pool Size"</string>
     <string name="meters">Meters</string>
@@ -27,10 +36,20 @@
     <string name="custom">"Custom"</string>
     <string name="units">"Units</string>
     <string name="size">"Size"</string>
+    <string name="request_location_rationale">Scanning for devices requires location permission.</string>
     <string name="pool_length">"Pool Length"</string>
     <string name="workout_duration">"Workout Duration"</string>
     <string name="avg_lap_time">"Avg Lap Time"</string>
     <string name="average_speed">"Average Speed"</string>
     <string name="laps">"Laps"</string>
     <string name="total_distance">"Total Distance"</string>
+    <string name="save">"Save"</string>
+    <string name="current_workout_timer_format">%d:%02d:%03d</string>
+    <string name="ConfirmRestart">Are you sure you want to restart your workout?</string>
+    <string name="label_delete_device">Delete Device</string>
+
+    <string-array name="measurement_array">
+        <item>Yards</item>
+        <item>Meters</item>
+    </string-array>
 </resources>
