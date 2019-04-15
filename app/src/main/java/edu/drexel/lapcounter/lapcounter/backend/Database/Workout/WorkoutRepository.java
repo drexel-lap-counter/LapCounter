@@ -149,4 +149,28 @@ public class WorkoutRepository {
             return null;
         }
     }
+
+    public List<Workout> getAllWorkoutsDecending()
+    {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<List<Workout>> res = ex.submit(new Callable<List<Workout>>() {
+            @Override
+            public List<Workout> call() throws Exception {
+
+                return mWorkoutDao.getAllWorkoutsDecending();
+            }
+        });
+        List<Workout> workouts = new ArrayList<Workout>();
+        try
+        {
+            workouts = res.get();
+        }
+        catch(Exception e)
+        {
+            Log.i("ERROR",e.toString());
+        }
+        ArrayList<Workout> output = new ArrayList<Workout>();
+        output.addAll(workouts);
+        return output;
+    }
 }

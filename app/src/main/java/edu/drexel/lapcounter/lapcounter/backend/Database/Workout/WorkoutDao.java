@@ -36,5 +36,8 @@ public interface WorkoutDao {
     @TypeConverters({TimestampConverter.class})
     List<Workout> getWorkoutsByDateRange(Date start_time, Date end_time);
 
+    @Query("SELECT * FROM workouts ORDER BY Start_Date DESC")
+    List<Workout> getAllWorkoutsDecending();
+
 }
 

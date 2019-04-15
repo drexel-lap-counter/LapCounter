@@ -12,13 +12,13 @@ public class TimestampConverter
 {
     private static final int MILLI_IN_SEC = 1000;
     @TypeConverter
-    public static Date fromTimestamp(int value)
+    public static Date fromTimestamp(long value)
     {
-        return new Date((long)value*MILLI_IN_SEC);
+        return new Date(value*MILLI_IN_SEC);
     }
 
     @TypeConverter
-    public static int dateToTimestamp(Date date)
+    public static long dateToTimestamp(Date date)
     {
         if(date == null)
         {
@@ -26,7 +26,7 @@ public class TimestampConverter
         }
         else
         {
-            return (int)(date.getTime()/MILLI_IN_SEC);
+            return date.getTime() / MILLI_IN_SEC;
         }
     }
 }

@@ -40,7 +40,7 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_workout_details);
 
         Intent intent = getIntent();
-        mWorkout_id = intent.getIntExtra(EXTRAS_WORKOUT_ID,0);
+        mWorkout_id = intent.getIntExtra(EXTRAS_WORKOUT_ID, -1);
 
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Workout Details");
@@ -58,35 +58,37 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         mDeviceViewModel.insert(d);
         //This code maintains a known entry in the DB for testing, the insert will update the
         //workout with ID 10 in the DB.
-        workout.setID(10);
-        workout.setPoolLength(25);
-        workout.setTotalDistanceTraveled(1200);
-        workout.setStartDate(TimestampConverter.fromTimestamp(1554904800));
-        workout.setEndDate(TimestampConverter.fromTimestamp(1554912000));
-        workout.setDeviceMAC(d.getMacAddress());
-        workout.setLaps(34);
-        workout.setPoolUnits("Meters");
-        mWorkoutViewModel.insert(workout);
+
+//        workout.setID(10);
+//        workout.setPoolLength(25);
+//        workout.setTotalDistanceTraveled(1200);
+//        workout.setStartDate(TimestampConverter.fromTimestamp(1554904800));
+//        workout.setEndDate(TimestampConverter.fromTimestamp(1554912000));
+//        workout.setDeviceMAC(d.getMacAddress());
+//        workout.setLaps(34);
+//        workout.setPoolUnits("Meters");
+//        mWorkoutViewModel.insert(workout);
 
         //Below code is commented so Neil has an example of how the new viewmodels and their functions work.
         //If you comment below lines, it will insert a new workout with the next available unused ID number.
         //getAllWorkouts and getWorkoutsByDateRange are also below to show how they work, and that they do work.
         //All this can be deleted at a later date
 
-        /*
-        Workout a_workout = new Workout();
-        a_workout.setPoolLength(50);
-        a_workout.setTotalDistanceTraveled(500);
-        a_workout.setStartDate(TimestampConverter.fromTimestamp(1523440800));
-        a_workout.setEndDate(TimestampConverter.fromTimestamp(1523448000));
-        a_workout.setDeviceMAC(d.getMacAddress());
-        a_workout.setLaps(10);
-        a_workout.setPoolUnits("Meters");
-        mWorkoutViewModel.insert(a_workout);
+//        Workout a_workout = new Workout();
+//        a_workout.setPoolLength(50);
+//        a_workout.setTotalDistanceTraveled(500);
+//        a_workout.setStartDate(TimestampConverter.fromTimestamp(1523440800));
+//        a_workout.setEndDate(TimestampConverter.fromTimestamp(1523448000));
+//        a_workout.setDeviceMAC(d.getMacAddress());
+//        a_workout.setLaps(10);
+//        a_workout.setPoolUnits("Meters");
+//        mWorkoutViewModel.insert(a_workout);
 
 
-        ArrayList<Workout> test = mWorkoutViewModel.getAllWorkouts();
-        ArrayList<Workout> test2 = mWorkoutViewModel.getWorkoutsByDateRange(TimestampConverter.fromTimestamp(1554768000),TimestampConverter.fromTimestamp(1555096321));*/
+//        ArrayList<Workout> test = mWorkoutViewModel.getAllWorkouts();
+//        ArrayList<Workout> test2 = mWorkoutViewModel.getWorkoutsByDateRange(TimestampConverter.fromTimestamp(1554768000),TimestampConverter.fromTimestamp(1555096321));
+//
+
         workout = mWorkoutViewModel.getWorkoutByID(mWorkout_id);
         DisplayWorkoutDetails(workout);
     }
@@ -110,7 +112,8 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         date_view.setText(output);
 
         //Pool Length
-        String pool_length = Integer.toString(workout.getPoolLength()) + unit_abbrev;
+        String pool_length = Integer.toString(workout.getPoolLength())+ unit_abbrev;
+
         pool_length_view.setText(pool_length);
 
         //Workout Duration
@@ -129,6 +132,7 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         //Average Speed
         float speed = (float)workout.getPoolLength()/avg_lap_time;
         String average_speed = String.format("%.2f %s/sec",speed,unit_abbrev);
+
         average_speed_view.setText(average_speed);
 
         //Lap Count

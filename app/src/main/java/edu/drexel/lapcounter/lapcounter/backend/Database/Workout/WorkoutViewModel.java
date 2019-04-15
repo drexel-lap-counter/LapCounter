@@ -24,6 +24,7 @@ public class WorkoutViewModel extends AndroidViewModel {
     public List<Workout> getAllWorkouts() {
         return mRepository.getAllWorkouts();
     }
+
     public List<Workout> getWorkoutsByDateRange(Date start_time, Date end_time)throws Exception
     {
         return mRepository.getWorkoutsByDateRange(start_time,end_time);
@@ -40,5 +41,8 @@ public class WorkoutViewModel extends AndroidViewModel {
     public void deleteWorkout(int id){mRepository.deleteWorkoutByID(id);}
 
 
+    public List<Workout> getAllWorkoutsDecending() {
+        return mRepository.getAllWorkoutsDecending();
+    }
 
 }

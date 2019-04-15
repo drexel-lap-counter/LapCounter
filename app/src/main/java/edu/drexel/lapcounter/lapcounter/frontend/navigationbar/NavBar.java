@@ -15,7 +15,7 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.CurrentWorkoutActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.PastWorkoutsActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.SettingsActivity;
-import edu.drexel.lapcounter.lapcounter.frontend.WorkoutHistoryActivity;
+import edu.drexel.lapcounter.lapcounter.frontend.WorkoutAnalytics;
 
 public class NavBar implements BottomNavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = NavBar.class.getSimpleName();
@@ -120,7 +120,7 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
                 activity = CurrentWorkoutActivity.class;
                 break;
             case R.id.navigation_analytics:
-                activity = WorkoutHistoryActivity.class;
+                activity = WorkoutAnalytics.class;
                 break;
             case R.id.navigation_past_workouts:
                 activity = PastWorkoutsActivity.class;

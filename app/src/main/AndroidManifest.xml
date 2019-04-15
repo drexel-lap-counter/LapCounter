@@ -36,7 +36,7 @@
         </activity>
         <activity android:name=".frontend.WelcomeActivity" />
         <activity android:name=".frontend.CurrentWorkoutActivity" />
-        <activity android:name=".frontend.WorkoutHistoryActivity" />
+        <activity android:name=".frontend.WorkoutAnalytics" />
         <activity android:name=".frontend.PastWorkoutsActivity" />
         <activity android:name=".frontend.SettingsActivity" />
         <activity android:name=".frontend.PoolSizeActivity" />
