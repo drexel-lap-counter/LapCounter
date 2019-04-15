@@ -4,6 +4,8 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class WorkoutViewModel extends AndroidViewModel {
@@ -13,26 +15,34 @@ public class WorkoutViewModel extends AndroidViewModel {
     // - We can put an observer on the data (instead of polling for changes) and only update the
     //   the UI when the data actually changes.
     // - Repository is completely separated from the UI through the ViewModel.
-    private LiveData<List<Workouts>> mAllWorkouts;
 
     public WorkoutViewModel(Application application) {
         super(application);
         mRepository = new WorkoutRepository(application);
-        mAllWorkouts = mRepository.getAllWorkouts();
     }
 
-    public LiveData<List<Workouts>> getAllWorkouts() {
-        return mAllWorkouts;
+    public List<Workout> getAllWorkouts() {
+        return mRepository.getAllWorkouts();
     }
 
-    public void insert(Workouts workout)
+    public List<Workout> getWorkoutsByDateRange(Date start_time, Date end_time)throws Exception
+    {
+        return mRepository.getWorkoutsByDateRange(start_time,end_time);
+    }
+    public void insert(Workout workout)
     {
         mRepository.insert(workout);
     }
-    public Workouts getWorkoutByID(int id)
+    public Workout getWorkoutByID(int id)
     {
         return mRepository.getWorkoutByID(id);
     }
+    public void deleteAllWorkouts(){mRepository.deleteAll();}
+    public void deleteWorkout(int id){mRepository.deleteWorkoutByID(id);}
 
+
+    public List<Workout> getAllWorkoutsDecending() {
+        return mRepository.getAllWorkoutsDecending();
+    }
 
 }

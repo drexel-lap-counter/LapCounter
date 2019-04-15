@@ -47,4 +47,8 @@
     <string name="current_workout_timer_format">%d:%02d:%03d</string>
     <string name="ConfirmRestart">Are you sure you want to restart your workout?</string>
     <string name="label_delete_device">Delete Device</string>
+    <string-array name="measurement_array">
+        <item>Yards</item>
+        <item>Meters</item>
+    </string-array>
 </resources>

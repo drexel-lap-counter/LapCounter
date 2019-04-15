@@ -113,7 +113,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
         // Will need to store this info somewhere
         // Example of setting a whitelist. This is so only registered devices show up.
         List<String> whitelist = new ArrayList<>();
-        ArrayList<Device> registered_devices = mDeviceViewModel.getAllDevices();
+        List<Device> registered_devices = mDeviceViewModel.getAllDevices();
         for(Device d : registered_devices)
         {
             whitelist.add(d.getMacAddress());

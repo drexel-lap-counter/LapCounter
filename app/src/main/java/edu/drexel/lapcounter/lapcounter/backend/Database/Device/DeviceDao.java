@@ -1,15 +1,11 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database.Device;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workouts;
 
 
 @Dao

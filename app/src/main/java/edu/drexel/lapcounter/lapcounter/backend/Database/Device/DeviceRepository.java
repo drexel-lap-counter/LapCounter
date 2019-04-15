@@ -1,11 +1,9 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database.Device;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -13,9 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDao;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDatabase;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workouts;
+import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 
 public class DeviceRepository {
 
@@ -23,11 +19,11 @@ public class DeviceRepository {
 
 
     public DeviceRepository(Application application) {
-       DeviceDatabase db = DeviceDatabase.getDatabase(application);
+        LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mDeviceDao = db.deviceDao();
     }
 
-    ArrayList<Device> getAllDevices()
+    List<Device> getAllDevices()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Device>> res = ex.submit(new Callable<List<Device>>() {
