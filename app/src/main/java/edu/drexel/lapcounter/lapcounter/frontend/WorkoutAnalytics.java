@@ -31,6 +31,7 @@ import java.util.TimeZone;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
@@ -236,7 +237,9 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
 
             try {
-                workoutsBetweenDateRange =  mWorkoutViewModel.getWorkoutsByDateRange(dbStartDate,dbEndDate);
+                Date startDate = TimestampConverter.fromTimestamp(dbStartDate);
+                Date endDate = TimestampConverter.fromTimestamp(dbEndDate);
+                workoutsBetweenDateRange =  mWorkoutViewModel.getWorkoutsByDateRange(startDate, endDate);
             } catch (Exception e) {
                 e.printStackTrace();
             }

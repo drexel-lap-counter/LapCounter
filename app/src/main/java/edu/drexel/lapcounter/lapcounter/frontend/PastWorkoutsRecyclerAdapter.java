@@ -55,7 +55,9 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
                 Intent intent = new Intent(mContext, WorkoutDetailsActivity.class);
                 //Note for Neil, once someone selects a workout from your list, just pass its id
                 //to workout details like below, my code should then handle the rest
-                intent.putExtra(WorkoutDetailsActivity.EXTRAS_WORKOUT_ID,mID.get(position));
+                int id = Integer.parseInt(mID.get(position));
+
+                intent.putExtra(WorkoutDetailsActivity.EXTRAS_WORKOUT_ID, id);
                 mContext.startActivity(intent);
 
 
