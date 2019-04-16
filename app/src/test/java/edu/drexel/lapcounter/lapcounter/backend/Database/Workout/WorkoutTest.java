@@ -7,12 +7,12 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-public class WorkoutsTest {
+public class WorkoutTest {
 
-    Workouts workout;
+    Workout workout;
     @Before
     public void setUp() throws Exception {
-        workout = new Workouts();
+        workout = new Workout();
     }
 
     @Test
@@ -29,8 +29,8 @@ public class WorkoutsTest {
     public void getStartDateTime_retreives_setStartDateTime() {
         Date date = new Date();
 
-        workout.setStartDateTime(date);
-        Date retrieved = workout.getStartDateTime();
+        workout.setStartDate(date);
+        Date retrieved = workout.getStartDate();
 
         assertEquals(date.getTime(), retrieved.getTime());
     }
@@ -39,8 +39,8 @@ public class WorkoutsTest {
     public void getEndDateTime_retreives_setEndDateTime() {
         Date date = new Date();
 
-        workout.setEndDateTime(date);
-        Date retrieved = workout.getEndDateTime();
+        workout.setEndDate(date);
+        Date retrieved = workout.getEndDate();
 
         assertEquals(date.getTime(), retrieved.getTime());
     }
@@ -83,5 +83,15 @@ public class WorkoutsTest {
         int retrieved = workout.getLaps();
 
         assertEquals(laps, retrieved);
+    }
+
+    @Test
+    public void getDeviceMAC_retrieves_setDeviceMAC() {
+        String MAC = "12:f3:21:04:23";
+
+        workout.setDeviceMAC(MAC);
+        String retrieved = workout.getDeviceMAC();
+
+        assertEquals(MAC, retrieved);
     }
 }
