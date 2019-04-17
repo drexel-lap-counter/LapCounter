@@ -41,6 +41,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private Button startResumeButton;
     private Button pauseButton;
     private Button restartButton;
+    private Button saveButton;
 
 //    public static final String ACTION_LAP_COUNT =
 //            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
@@ -91,6 +92,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         restartButton = findViewById(R.id.restartButton);
         restartButton.setEnabled(false);
 
+        saveButton = findViewById(R.id.saveButton);
+        saveButton.setEnabled(false);
+
         mDebugConnectLabel = findViewById(R.id.debugConnectLabel);
 
         startResumeButton.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +135,16 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                     pauseButton.performClick();
                 }
                 onButtonShowPopupWindowClick(view);
+            }
+        });
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (!isPaused) {
+                    pauseButton.performClick();
+                }
+                // TODO: make version of this function for saving
+                //onButtonShowPopupWindowClick(view);
             }
         });
 
