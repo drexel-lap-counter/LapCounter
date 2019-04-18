@@ -7,6 +7,9 @@ import android.arch.lifecycle.LiveData;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 
 public class WorkoutViewModel extends AndroidViewModel {
 
@@ -21,6 +24,25 @@ public class WorkoutViewModel extends AndroidViewModel {
         mRepository = new WorkoutRepository(application);
     }
 
+    /*** Units***/
+    public List<Units> getAllUnits() throws InterruptedException, ExecutionException
+    {
+        return mRepository.getAllUnits();
+    }
+
+    public void insert(Units units)
+    {
+        mRepository.insert(units);
+    }
+
+    public void deleteWorkout(Units units)
+    {
+        mRepository.deleteUnits(units);
+    }
+
+
+
+    /*** Workout ***/
     public List<Workout> getAllWorkouts() {
         return mRepository.getAllWorkouts();
     }
