@@ -16,6 +16,14 @@ public interface UnitsDao
     @Query("SELECT * FROM units_table")
     List<Units> getAllUnits();
 
+    /**
+     * Count the rows in the table. This is used to check whether the table
+     * is empty.
+     * @return the number of rows in the units table
+     */
+    @Query("SELECT COUNT(*) from units_table")
+    int getNumRows();
+
     @Delete()
     void deleteUnits(Units units);
 }

@@ -22,14 +22,7 @@ import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 
 public class LoadingActivity extends AppCompatActivity {
 
-    /*** final static strings for units ***/
-    public final static String unitsMeters = "Meters";
-    public final static String unitsYards = "Yards";
 
-    /*** final static string for states ***/
-    public final static String statesNear = "NEAR";
-    public final static String statesFar = "FAR";
-    public final static String statesUnknown = "UNKNOWN";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,71 +31,10 @@ public class LoadingActivity extends AppCompatActivity {
 
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Splash Screen");
-        WorkoutViewModel mWorkoutViewModel =  ViewModelProviders.of(this).get(WorkoutViewModel.class);
 
 
-        try
-        {
-            //Units setup
-            List<Units> units = new ArrayList<>();
-            List<State> states = new ArrayList<>();
-            units = mWorkoutViewModel.getAllUnits();
-            if(units.size() == 0)
-            {
-                Units unit = new Units(unitsMeters);
-                mWorkoutViewModel.insert(unit);
-                unit = new Units(unitsYards);
-                mWorkoutViewModel.insert(unit);
-            }
-
-            TransitionRepository repo = new TransitionRepository(getApplication());
-            states = repo.getAllStates();
-            if(states.size() == 0)
-            {
-                State state = new State(statesFar);
-                repo.insert(state);
-                state = new State(statesNear);
-                repo.insert(state);
-                state = new State(statesUnknown);
-                repo.insert(state);
-            }
-        }
-        catch(Exception e)
-        {
-            //Not sure what to do here
-            Log.e("LoadingActivity","Error Connecting and Initalizing Database");
-        }
-
-
-
-        //Workout example data setup
-        List<Workout> workouts = mWorkoutViewModel.getAllWorkouts();
-        //Debug
-        if(workouts.size() == 0)
-        {
-            Workout workout= new Workout();
-
-            workout.setID(10);
-            workout.setPoolLength(25);
-            workout.setTotalDistanceTraveled(1200);
-            workout.setStartDate(TimestampConverter.fromTimestamp(1554904800));
-            workout.setEndDate(TimestampConverter.fromTimestamp(1554912000));
-            workout.setLaps(34);
-            workout.setPoolUnits(unitsMeters);
-            mWorkoutViewModel.insert(workout);
-
-            workout = new Workout();
-            workout.setPoolLength(50);
-            workout.setTotalDistanceTraveled(500);
-            workout.setStartDate(TimestampConverter.fromTimestamp(1554976800));
-            workout.setEndDate(TimestampConverter.fromTimestamp(1554984000));
-            workout.setLaps(10);
-            workout.setPoolUnits(unitsYards);
-            mWorkoutViewModel.insert(workout);
-        }
-
-
-
+        // Initialize database as needed.
+        initDatabase();
     }
 
     /**
@@ -115,5 +47,53 @@ public class LoadingActivity extends AppCompatActivity {
     public void finishLoading(View view) {
         Intent intent = new Intent(this, WelcomeActivity.class);
         startActivity(intent);
+    }
+
+    private void initDatabase() {
+        // Initialize the enum tables. ====================================
+        try
+        {
+            WorkoutRepository workoutRepo = new WorkoutRepository(getApplication());
+            workoutRepo.initUnitsTable();
+
+
+            TransitionRepository transRepo = new TransitionRepository(getApplication());
+            transRepo.initStatesTable();
+        }
+        catch(Exception e)
+        {
+            //Not sure what to do here
+            Log.e("LoadingActivity","Error Connecting and Initalizing Database");
+        }
+
+        // Initialize the workouts with some dummy data ========================
+        WorkoutViewModel mWorkoutViewModel =
+                ViewModelProviders.of(this).get(WorkoutViewModel.class);
+
+        //Workout example data setup.
+        List<Workout> workouts = mWorkoutViewModel.getAllWorkouts();
+        //Debug
+        if(workouts.size() == 0)
+        {
+            Workout workout= new Workout();
+
+            workout.setID(10);
+            workout.setPoolLength(25);
+            workout.setTotalDistanceTraveled(1200);
+            workout.setStartDate(TimestampConverter.fromTimestamp(1554904800));
+            workout.setEndDate(TimestampConverter.fromTimestamp(1554912000));
+            workout.setLaps(34);
+            workout.setPoolUnits(Units.METERS);
+            mWorkoutViewModel.insert(workout);
+
+            workout = new Workout();
+            workout.setPoolLength(50);
+            workout.setTotalDistanceTraveled(500);
+            workout.setStartDate(TimestampConverter.fromTimestamp(1554976800));
+            workout.setEndDate(TimestampConverter.fromTimestamp(1554984000));
+            workout.setLaps(10);
+            workout.setPoolUnits(Units.YARDS);
+            mWorkoutViewModel.insert(workout);
+        }
     }
 }

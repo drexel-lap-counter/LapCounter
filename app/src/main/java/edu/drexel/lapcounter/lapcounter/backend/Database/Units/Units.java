@@ -8,6 +8,13 @@ import android.support.annotation.NonNull;
 @Entity(tableName = "units_table")
 public class Units
 {
+    /** Enum values */
+    public static final String METERS = "Meters";
+    public static final String YARDS = "Yards";
+
+    /**  List of all enum values for easy database initialization. */
+    public static final String[] UNITS_VALUES = new String[]{METERS, YARDS};
+
     @PrimaryKey()
     @NonNull
     @ColumnInfo(name="Unit_Name")

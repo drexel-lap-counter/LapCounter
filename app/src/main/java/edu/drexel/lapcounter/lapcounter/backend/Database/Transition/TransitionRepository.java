@@ -39,6 +39,18 @@ public class TransitionRepository
         return res.get();
     }
 
+    public int getNumStates() throws ExecutionException, InterruptedException {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<Integer> res = ex.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() {
+                return mStateDao.getNumRows();
+            }
+        });
+        return res.get();
+    }
+
+
     public void insert(State state)
     {
         new insertStateAsyncTask(mStateDao).execute(state);
@@ -76,5 +88,18 @@ public class TransitionRepository
         }
     }
 
+    /**
+     * Initialize the States table
+     */
+    public void initStatesTable() throws ExecutionException, InterruptedException {
+        // First, let's check if the table already is full. If so, we can stop.
+        if (getNumStates() > 0)
+            return;
 
+        // The table is empty, so populate it:
+        for (String state_name : State.STATE_VALUES) {
+            State state = new State(state_name);
+            insert(state);
+        }
+    }
 }

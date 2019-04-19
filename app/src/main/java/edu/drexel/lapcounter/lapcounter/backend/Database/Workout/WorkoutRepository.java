@@ -28,7 +28,7 @@ public class WorkoutRepository {
     private UnitsDao mUnitsDao;
 
 
-    WorkoutRepository(Application application) {
+    public WorkoutRepository(Application application) {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mWorkoutDao = db.workoutDao();
         mUnitsDao = db.unitsDao();
@@ -50,13 +50,25 @@ public class WorkoutRepository {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Units>> res = ex.submit(new Callable<List<Units>>() {
             @Override
-            public List<Units> call() throws Exception {
+            public List<Units> call() {
 
                 return mUnitsDao.getAllUnits();
             }
         });
         return res.get();
     }
+
+    public int getNumUnits() throws ExecutionException, InterruptedException {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<Integer> res = ex.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() {
+                return mUnitsDao.getNumRows();
+            }
+        });
+        return res.get();
+    }
+
     public void insert(Units units)
     {
         new insertUnitsAsyncTask(mUnitsDao).execute(units);
@@ -242,5 +254,20 @@ public class WorkoutRepository {
         ArrayList<Workout> output = new ArrayList<Workout>();
         output.addAll(workouts);
         return output;
+    }
+
+    /**
+     * Initialize the Units table
+     */
+    public void initUnitsTable() throws ExecutionException, InterruptedException {
+        // First, let's check if the table already is full. If so, we can stop.
+        if (getNumUnits() > 0)
+            return;
+
+        // The table is empty, so populate it:
+        for (String unit_name : Units.UNITS_VALUES) {
+            Units unit = new Units(unit_name);
+            insert(unit);
+        }
     }
 }
