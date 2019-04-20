@@ -17,6 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 repositories {
     maven { url 'https://jitpack.io' }
@@ -45,4 +50,7 @@ dependencies {
 
     // Graph components
     implementation 'com.github.PhilJay:MPAndroidChart:v2.2.4'
+
+    // Nordic Semiconductors's BLE library.
+    implementation 'no.nordicsemi.android:ble:2.1.1'
 }
