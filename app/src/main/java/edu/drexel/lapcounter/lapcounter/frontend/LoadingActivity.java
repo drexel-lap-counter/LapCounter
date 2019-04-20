@@ -22,7 +22,7 @@ import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 
 public class LoadingActivity extends AppCompatActivity {
 
-
+    private final static String TAG = LoadingActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,10 +60,9 @@ public class LoadingActivity extends AppCompatActivity {
             TransitionRepository transRepo = new TransitionRepository(getApplication());
             transRepo.initStatesTable();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            //Not sure what to do here
-            Log.e("LoadingActivity","Error Connecting and Initalizing Database");
+            Log.e(TAG, "Error Connecting and Initalizing Database", e);
         }
 
         // Initialize the workouts with some dummy data ========================
