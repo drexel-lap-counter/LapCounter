@@ -6,27 +6,109 @@ import android.arch.persistence.room.RoomDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDao;
 import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
 
 public class WorkoutRepository {
 
     private WorkoutDao mWorkoutDao;
+    private UnitsDao mUnitsDao;
 
 
-    WorkoutRepository(Application application) {
+    public WorkoutRepository(Application application) {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mWorkoutDao = db.workoutDao();
+        mUnitsDao = db.unitsDao();
     }
 
+    //Attempt to refactor some of the code
+    /*private <T> T Execute(Callable<T> callable) throws InterruptedException, ExecutionException
+    {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<T> res = ex.submit(callable);
+
+        T output = res.get();
+        return output;
+    }*/
+
+    /*** UNITS CODE***/
+    public List<Units> getAllUnits() throws InterruptedException, ExecutionException
+    {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<List<Units>> res = ex.submit(new Callable<List<Units>>() {
+            @Override
+            public List<Units> call() {
+
+                return mUnitsDao.getAllUnits();
+            }
+        });
+        return res.get();
+    }
+
+    public int getNumUnits() throws ExecutionException, InterruptedException {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<Integer> res = ex.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() {
+                return mUnitsDao.getNumRows();
+            }
+        });
+        return res.get();
+    }
+
+    public void insert(Units units)
+    {
+        new insertUnitsAsyncTask(mUnitsDao).execute(units);
+    }
+    private static class insertUnitsAsyncTask extends AsyncTask<Units,Void,Void>
+    {
+        private UnitsDao mAsyncTaskDao;
+
+        insertUnitsAsyncTask(UnitsDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Units... params) {
+            mAsyncTaskDao.insert(params[0]);
+            return null;
+        }
+    }
+
+    public void deleteUnits(Units units)
+    {
+        new InsertDeleteUnitsASyncTask(mUnitsDao).execute(units);
+    }
+    private static class InsertDeleteUnitsASyncTask extends AsyncTask<Units,Void,Void>
+    {
+        private UnitsDao mAsyncTaskDao;
+
+        InsertDeleteUnitsASyncTask(UnitsDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Units... params) {
+            mAsyncTaskDao.deleteUnits(params[0]);
+            return null;
+        }
+    }
+
+
+    /*** WORKOUT CODE ***/
     public List<Workout> getAllWorkouts()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -172,5 +254,20 @@ public class WorkoutRepository {
         ArrayList<Workout> output = new ArrayList<Workout>();
         output.addAll(workouts);
         return output;
+    }
+
+    /**
+     * Initialize the Units table
+     */
+    public void initUnitsTable() throws ExecutionException, InterruptedException {
+        // First, let's check if the table already is full. If so, we can stop.
+        if (getNumUnits() > 0)
+            return;
+
+        // The table is empty, so populate it:
+        for (String unit_name : Units.UNITS_VALUES) {
+            Units unit = new Units(unit_name);
+            insert(unit);
+        }
     }
 }

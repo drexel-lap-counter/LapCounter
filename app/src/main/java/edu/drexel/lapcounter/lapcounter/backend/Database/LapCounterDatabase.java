@@ -7,16 +7,22 @@ import android.content.Context;
 
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDao;
+import edu.drexel.lapcounter.lapcounter.backend.Database.State.State;
+import edu.drexel.lapcounter.lapcounter.backend.Database.State.StateDao;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDao;
 
 
-@Database(entities = {Workout.class, Device.class}, version = 1)
+@Database(entities = {Workout.class, Device.class, Units.class, State.class}, version = 1)
 public abstract class LapCounterDatabase extends RoomDatabase {
 
 
     public abstract WorkoutDao workoutDao();
     public abstract DeviceDao deviceDao();
+    public abstract UnitsDao unitsDao();
+    public abstract StateDao stateDao();
 
     private static volatile LapCounterDatabase INSTANCE;
     public final static String DATABASE_NAME = "lapcounterdb";

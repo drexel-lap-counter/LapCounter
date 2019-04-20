@@ -8,14 +8,19 @@ import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.NonNull;
 import java.util.Date;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 import static android.arch.persistence.room.ForeignKey.SET_NULL;
 
 @Entity(tableName = "workouts",
-        foreignKeys = @ForeignKey(entity= Device.class,
+        foreignKeys = {@ForeignKey(entity= Device.class,
                                    parentColumns = "mac_address",
                                     childColumns = "Device_Mac",
-                                    onDelete = SET_NULL))
+                                    onDelete = SET_NULL),
+                       @ForeignKey(entity = Units.class,
+                                    parentColumns = "Unit_Name",
+                                    childColumns = "Pool_Units",
+                                    onDelete = SET_NULL)})
 public class Workout {
     @PrimaryKey(autoGenerate = true)
     public int id;
