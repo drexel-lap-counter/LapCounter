@@ -1,6 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -175,6 +176,8 @@ public class PoolSizeActivity extends AppCompatActivity {
         editor.putInt(poolSizeKey,poolSize);
         editor.putString(poolUnitsKey,poolUnits);
         editor.apply();
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     private void tryGetCustomPoolSize(String s)
