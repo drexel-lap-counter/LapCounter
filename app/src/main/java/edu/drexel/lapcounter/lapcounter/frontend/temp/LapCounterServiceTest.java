@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -16,10 +17,12 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DevicePresets;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LapCounterService;
@@ -56,7 +59,6 @@ public class LapCounterServiceTest extends AppCompatActivity {
 
     private final static SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat("HH:mm:ss");
 
-    private final static String PUCK_ADDRESS = "D1:AA:19:79:8A:18";
     private BLEService mBleService;
 
     private static final int REQUEST_ENABLE_BT = 2;
@@ -251,7 +253,22 @@ public class LapCounterServiceTest extends AppCompatActivity {
         mReceiver.registerHandler(ACTION_STATE_TRANSITION, mOnStateTransition);
         mReceiver.registerHandler(ACTION_CONNECTED, mOnConnect);
         mReceiver.registerHandler(ACTION_DISCONNECTED, mOnDisconnect);
+        mReceiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, mOnRawRSSI);
     }
+
+    private SimpleMessageReceiver.MessageHandler mOnRawRSSI = new SimpleMessageReceiver.MessageHandler() {
+        @Override
+        public void onMessage(Intent message) {
+            int rssi = message.getIntExtra(BLEComm.EXTRA_RAW_RSSI, 0);
+            Date now = new Date();
+
+            String iso = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
+
+
+            String msg = String.format("%s: %d", iso, rssi);
+            Log.i("lapcounter.raw_rssi_log", msg);
+        }
+    };
 
     @Override
     protected void onDestroy() {
