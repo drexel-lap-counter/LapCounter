@@ -2,14 +2,16 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,10 +21,21 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import java.util.Locale;
+import java.util.function.BiConsumer;
+
+import androidx.annotation.NonNull;
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.ble.MovingAverage;
+import edu.drexel.lapcounter.lapcounter.backend.ble.SlidingWindow;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
-public class CurrentWorkoutActivity extends AppCompatActivity {
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_IN;
+import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_OUT;
+
+public class CurrentWorkoutActivity extends AppCompatActivity implements LapCounterBleManagerCallbacks {
+    private final static String TAG = CurrentWorkoutActivity.class.getSimpleName();
+
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
     private Button startResumeButton;
@@ -47,6 +60,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private TextView mCounter;
 
     private TextView mDebugConnectLabel;
+
+    private LapCounterBleManager mBleManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +101,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                 pauseButton.setEnabled(true);
 
                 isPaused = false;
+
+                readRssi();
             }
         });
 
@@ -130,8 +147,59 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         requestBluetoothPermission();
     }
 
+    private void readRssi() {
+        mBleManager.readRssi().with(this::onRssi).done(unused_arg -> {
+            // Poll infrequently to jump past noise.
+            mBleManager.sleep(2500).enqueue(); // Hyperparameter 1
+
+            if (!isPaused) {
+                readRssi();
+            }
+        }).enqueue();
+    }
+
+
+    private Integer mPreviousRssi = null;
+    private int mPreviousDirection = DIRECTION_OUT;
+    private int mLapCount = 0;
+
+    private void onRssi(BluetoothDevice device, int rssi) {
+        rssi = Math.abs(rssi);
+
+        Log.i(TAG, Integer.toString(rssi));
+
+        if (mPreviousRssi == null) {
+            mPreviousRssi = rssi;
+            return;
+        }
+
+        int delta = rssi - mPreviousRssi;
+
+        if (Math.abs(delta) < 10) { // Hyperparameter 2
+            Log.i(TAG, "Ignored small delta of " + delta);
+            return;
+        }
+
+        mPreviousRssi = rssi;
+
+        int direction = (int)Math.signum(delta);
+
+        // The swimmer flipped near the beginning of the pool.
+        if (mPreviousDirection == DIRECTION_IN && direction == DIRECTION_OUT) {
+            // So they completed 2 laps.
+            ++mLapCount;
+            mCounter.setText(String.format(Locale.US, "%d", mLapCount));
+            Log.i(TAG, "Lap counted.");
+        }
+
+        mPreviousDirection = direction;
+    }
+
     @Override
     protected void onDestroy() {
+        if (mBleManager != null) {
+            mBleManager.disconnect();
+        }
         super.onDestroy();
 
     }
@@ -141,11 +209,18 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
     }
 
+    private static BluetoothAdapter getAdapter(Context c) {
+        BluetoothManager m = (BluetoothManager) c.getSystemService(Context.BLUETOOTH_SERVICE);
+        return m.getAdapter();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == Activity.RESULT_OK) {
-                // todo: ble init
+                mBleManager = new LapCounterBleManager(this);
+                mBleManager.setGattCallbacks(this);
+                connect();
             }
             return;
         }
@@ -153,26 +228,26 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
 
-    private void connect() {
-        // Get the selected device from shared preferences (if there is one)
-        SharedPreferences prefs = getSharedPreferences(
-                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
-        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
-
-        if (mac == null) {
-            mDebugConnectLabel.setText(R.string.label_no_device_selected);
-            // TODO: What should happen if the user does not have a currently selected device?
-            // Should they be redirected to the DeviceSelectActivity? Should the
-            // CurrentWorkoutActivity simply say "No device selected." and become inert?
-            // We need to discuss transitions between this and other activities.
-            return;
-        }
-
-        String connectMessage = getResources().getString(R.string.label_connecting, mac);
-        mDebugConnectLabel.setText(connectMessage);
-
-        // todo: ble connect
-    }
+//    private void connect() {
+//        // Get the selected device from shared preferences (if there is one)
+//        SharedPreferences prefs = getSharedPreferences(
+//                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
+//        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+//
+//        if (mac == null) {
+//            mDebugConnectLabel.setText(R.string.label_no_device_selected);
+//            // TODO: What should happen if the user does not have a currently selected device?
+//            // Should they be redirected to the DeviceSelectActivity? Should the
+//            // CurrentWorkoutActivity simply say "No device selected." and become inert?
+//            // We need to discuss transitions between this and other activities.
+//            return;
+//        }
+//
+//        String connectMessage = getResources().getString(R.string.label_connecting, mac);
+//        mDebugConnectLabel.setText(connectMessage);
+//
+//        // todo: ble connect
+//    }
 
     private Runnable updateTimerThread = new Runnable() {
 
@@ -250,4 +325,84 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mDebugConnectLabel.setText(s);
     }
 
+    private void connect() {
+        final String PUCK = "D1:AA:19:79:8A:18";
+        mBleManager.connect(getAdapter(this).getRemoteDevice(PUCK))
+                .useAutoConnect(true)
+                .retry(300, 100)
+                .enqueue();
+    }
+
+    @Override
+    public void onDeviceConnecting(@NonNull BluetoothDevice device) {
+        String connectMessage = getResources().getString(R.string.label_connecting,
+                device.getAddress());
+        mDebugConnectLabel.setText(connectMessage);
+    }
+
+    @Override
+    public void onDeviceConnected(@NonNull BluetoothDevice device) {
+        setConnectText(device.getAddress());
+        startResumeButton.setEnabled(true);
+        restartButton.setEnabled(true);
+    }
+
+    @Override
+    public void onDeviceDisconnecting(@NonNull BluetoothDevice device) {
+        mDebugConnectLabel.setText("Interesting. Disconnecting from " + device.getAddress());
+    }
+
+    @Override
+    public void onDeviceDisconnected(@NonNull BluetoothDevice device) {
+        mDebugConnectLabel.setText("Interesting. Disconnected from " + device.getAddress());
+        connect();
+    }
+
+    @Override
+    public void onLinkLossOccurred(@NonNull BluetoothDevice device) {
+        mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
+    }
+
+    private void log(BluetoothDevice d, String s) {
+        s = String.format(Locale.US, "Device %s (%s), %s", d.getAddress(), d.getName(), s);
+        Log.i(TAG, s);
+    }
+
+    @Override
+    public void onServicesDiscovered(@NonNull BluetoothDevice device, boolean optionalServicesFound) {
+        log(device, "onServicesDiscovered()");
+    }
+
+    @Override
+    public void onDeviceReady(@NonNull BluetoothDevice device) {
+        log(device, "onDeviceReady()");
+    }
+
+    @Override
+    public void onBondingRequired(@NonNull BluetoothDevice device) {
+        log(device, "onBondingRequired()");
+
+    }
+
+    @Override
+    public void onBonded(@NonNull BluetoothDevice device) {
+        log(device, "onBonded()");
+    }
+
+    @Override
+    public void onBondingFailed(@NonNull BluetoothDevice device) {
+        log(device, "onBondingFailed()");
+    }
+
+    @Override
+    public void onError(@NonNull BluetoothDevice device, @NonNull String message, int errorCode) {
+        String s = String.format(Locale.ENGLISH, "Device %s, error %d: %s", device.getAddress(),
+                errorCode, message);
+        Log.e(TAG, s);
+    }
+
+    @Override
+    public void onDeviceNotSupported(@NonNull BluetoothDevice device) {
+        Log.e(TAG, String.format("Device %s not supported.", device.getAddress()));
+    }
 }
