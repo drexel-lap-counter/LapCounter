@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.time.Duration;
 import java.util.Date;
@@ -98,6 +99,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         WorkoutViewModel wvm = ViewModelProviders.of(this).get(WorkoutViewModel.class);
         wvm.insert(workout);
+
+        Toast.makeText(this, R.string.save_workout_successful, Toast.LENGTH_SHORT).show();
+
+        startResumeButton.setText(R.string.startButtonLabel);
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        saveButton.setEnabled(false);
     }
 
     @Override
