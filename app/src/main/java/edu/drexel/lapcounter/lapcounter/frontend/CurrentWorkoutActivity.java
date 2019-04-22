@@ -43,11 +43,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private Button restartButton;
     private Button saveButton;
 
-//    public static final String ACTION_LAP_COUNT =
-//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
-//    public static final String EXTRA_CURRENT_LAP_COUNT =
-//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
-
     // Unique ID for the Bluetooth request Intent
     private static final int REQUEST_ENABLE_BT = 2;
 
@@ -65,10 +60,22 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     // Text fields in the activity
     private TextView mCounter;
 
-    // Object for scheduling fake laps counted.
-//    private Handler mHandler = new Handler();
-
     private TextView mDebugConnectLabel;
+
+    private void pause() {
+        // If we're already paused, do nothing.
+        if (isPaused)
+            return;
+
+        timeSwapBuff += timeInMilliseconds;
+        customHandler.removeCallbacks(updateTimerThread);
+
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+
+        isPaused = true;
+        mBleService.stopRssiRequests();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,34 +123,20 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
-
-                startResumeButton.setEnabled(true);
-                pauseButton.setEnabled(false);
-
-                isPaused = true;
-                mBleService.stopRssiRequests();
+                pause();
             }
         });
 
-
-
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
+                pause();
                 onButtonShowPopupWindowClick(view);
             }
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
-                // TODO: make version of this function for saving
+                pause();
                 //onButtonShowPopupWindowClick(view);
             }
         });
@@ -345,7 +338,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             // Extract info from the Intent
-            // TODO: Get the actual constant from LapCounter(Service?)
             int lapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
             //Update the TextView
@@ -381,34 +373,4 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             connect();
         }
     };
-
-    /*
-      Simulate counting laps. This just increments the counter once a second
-     */
-//    private void simulateLaps() {
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(!isPaused) {
-//                    mFakeLapCount += 2;
-//
-//                    publishLapCount();
-//                }
-//                simulateLaps();
-//            }
-//        }, 1000);
-//    }
-//
-//    private void publishLapCount() {
-//        // Create the intent, specifying the name of the event (i.e. "action")
-//        Intent intent = new Intent(ACTION_LAP_COUNT);
-//
-//        // If needed, store some key-value pairs in the intent
-//        intent.putExtra(EXTRA_CURRENT_LAP_COUNT, mFakeLapCount);
-//
-//        // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
-//        // can broadcast intents
-//        //sendBroadcast(intent);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-//    }
 }
