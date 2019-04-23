@@ -52,4 +52,9 @@
         <item>Yards</item>
         <item>Meters</item>
     </string-array>
+    <string-array name="graphTypes">
+        <item>Distance Traveled</item>
+        <item>Average Speed</item>
+        <item>Workout Duration</item>
+    </string-array>
 </resources>
