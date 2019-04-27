@@ -15,8 +15,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".frontend.CalibrateDeviceActivity"></activity>
-        <activity android:name=".frontend.temp.LapCounterServiceTest" />
+        <activity
+            android:name=".frontend.CalibrateDeviceActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name=".frontend.temp.LapCounterServiceTest"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
 
         <service
             android:name=".backend.ble.BLEService"
@@ -27,25 +33,63 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".frontend.LoadingActivity">
+        <activity
+            android:name=".frontend.LoadingActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".frontend.WelcomeActivity" />
-        <activity android:name=".frontend.CurrentWorkoutActivity" />
-        <activity android:name=".frontend.WorkoutAnalytics" />
-        <activity android:name=".frontend.PastWorkoutsActivity" />
-        <activity android:name=".frontend.SettingsActivity" />
-        <activity android:name=".frontend.PoolSizeActivity" />
-        <activity android:name=".frontend.DeviceSelectActivity" />
-        <activity android:name=".frontend.WorkoutDetailsActivity" />
-        <activity android:name=".frontend.DummyCalibrateDeviceActivity" />
-        <activity android:name=".frontend.DeviceScanActivity" />
-        <activity android:name=".frontend.DeviceInfoActivity" />
-        <activity android:name=".frontend.temp.ReceiverTest" />
+        <activity
+            android:name=".frontend.WelcomeActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.CurrentWorkoutActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.WorkoutAnalytics"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.PastWorkoutsActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.SettingsActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.PoolSizeActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.DeviceSelectActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.WorkoutDetailsActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.DummyCalibrateDeviceActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.DeviceScanActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.DeviceInfoActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".frontend.temp.ReceiverTest"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"/>
     </application>
-
 </manifest>
