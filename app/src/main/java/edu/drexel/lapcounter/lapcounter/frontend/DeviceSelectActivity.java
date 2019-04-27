@@ -146,7 +146,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
-        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_THRESHOLD, mDevice.getThreshold());
         intent.putExtra(
                 DeviceInfoActivity.EXTRAS_USE_DUMMY_CALIBRATOR,
                 mDeviceScanner instanceof DummyDeviceScanner);
