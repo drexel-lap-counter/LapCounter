@@ -53,4 +53,6 @@
         <item>Yards</item>
         <item>Meters</item>
     </string-array>
+    <string name="device_name">Device Name</string>
+    <string name="device_mac">Device MAC</string>
 </resources>
