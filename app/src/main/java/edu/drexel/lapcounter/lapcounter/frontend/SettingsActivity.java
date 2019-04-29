@@ -8,7 +8,6 @@ import android.view.View;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
-import edu.drexel.lapcounter.lapcounter.frontend.temp.ReceiverTest;
 
 public class SettingsActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_settings);
@@ -31,16 +30,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void selectDevice(View view) {
         Intent intent = new Intent(this, DeviceSelectActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * NOTE: This button is temporary! I just needed an activity to test message passing
-     * I will remove this eventually
-     * @param view
-     */
-    public void testReciever(View view) {
-        Intent intent = new Intent(this, ReceiverTest.class);
         startActivity(intent);
     }
 
