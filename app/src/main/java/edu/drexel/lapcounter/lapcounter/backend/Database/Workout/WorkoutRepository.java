@@ -1,37 +1,38 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.RoomDatabase;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDao;
 import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
+import edu.drexel.lapcounter.lapcounter.backend.lapcounter.TransitionLog;
 
 public class WorkoutRepository {
 
     private WorkoutDao mWorkoutDao;
     private UnitsDao mUnitsDao;
+    private Application mApp;
 
 
     public WorkoutRepository(Application application) {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mWorkoutDao = db.workoutDao();
         mUnitsDao = db.unitsDao();
+        mApp = application;
     }
 
     //Attempt to refactor some of the code
@@ -90,13 +91,13 @@ public class WorkoutRepository {
 
     public void deleteUnits(Units units)
     {
-        new InsertDeleteUnitsASyncTask(mUnitsDao).execute(units);
+        new DeleteUnitsASyncTask(mUnitsDao).execute(units);
     }
-    private static class InsertDeleteUnitsASyncTask extends AsyncTask<Units,Void,Void>
+    private static class DeleteUnitsASyncTask extends AsyncTask<Units,Void,Void>
     {
         private UnitsDao mAsyncTaskDao;
 
-        InsertDeleteUnitsASyncTask(UnitsDao dao) {
+        DeleteUnitsASyncTask(UnitsDao dao) {
             mAsyncTaskDao = dao;
         }
 
@@ -181,20 +182,30 @@ public class WorkoutRepository {
 
     public void insert(Workout workout)
     {
-        new insertAsyncTask(mWorkoutDao).execute(workout);
+        new InsertAsyncTask(mWorkoutDao, mApp).execute(workout);
     }
-    private static class insertAsyncTask extends AsyncTask<Workout,Void,Void>
+    private static class InsertAsyncTask extends AsyncTask<Workout,Void,Integer>
     {
         private WorkoutDao mAsyncTaskDao;
+        private Application mApp;
+        private LocalBroadcastManager mBroadcastManager;
 
-        insertAsyncTask(WorkoutDao dao) {
+        InsertAsyncTask(WorkoutDao dao, Application app) {
             mAsyncTaskDao = dao;
+            mApp = app;
+            mBroadcastManager = LocalBroadcastManager.getInstance(mApp);
         }
 
         @Override
-        protected Void doInBackground(final Workout... params) {
-            mAsyncTaskDao.addWorkout(params[0]);
-            return null;
+        protected Integer doInBackground(final Workout... params) {
+            return (int) mAsyncTaskDao.addWorkout(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer workoutID) {
+            Intent intent = new Intent(TransitionLog.ACTION_FLUSH_LOG);
+            intent.putExtra(TransitionLog.EXTRA_WORKOUT_ID, workoutID);
+            mBroadcastManager.sendBroadcast(intent);
         }
     }
 

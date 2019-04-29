@@ -18,7 +18,7 @@ import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 public interface WorkoutDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void addWorkout(Workout workout);
+    long addWorkout(Workout workout);
 
     @Query("SELECT * FROM workouts")
     List<Workout> getAllWorkouts();

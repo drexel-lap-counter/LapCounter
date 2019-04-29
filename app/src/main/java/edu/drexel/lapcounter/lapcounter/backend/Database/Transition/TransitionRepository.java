@@ -13,18 +13,17 @@ import java.util.concurrent.Future;
 import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.State;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.StateDao;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutRepository;
 
 public class TransitionRepository
 {
     private StateDao mStateDao;
+    private TransitionDao mTransitionDao;
 
     public TransitionRepository(Application application)
     {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mStateDao = db.stateDao();
+        mTransitionDao = db.transitionDao();
     }
 
     public List<State> getAllStates() throws InterruptedException, ExecutionException
@@ -51,7 +50,7 @@ public class TransitionRepository
     }
 
 
-    public void insert(State state)
+    public void insertState(State state)
     {
         new insertStateAsyncTask(mStateDao).execute(state);
     }
@@ -99,7 +98,24 @@ public class TransitionRepository
         // The table is empty, so populate it:
         for (String state_name : State.STATE_VALUES) {
             State state = new State(state_name);
-            insert(state);
+            insertState(state);
+        }
+    }
+
+    public void insertState(Transition transition) {
+        new InsertTransitionTask(mTransitionDao).execute(transition);
+    }
+    private static class InsertTransitionTask extends AsyncTask<Transition, Void, Void> {
+        private TransitionDao mTransitionDao;
+
+        public InsertTransitionTask(TransitionDao dao) {
+            mTransitionDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(Transition... transitions) {
+            mTransitionDao.insertTransition(transitions[0]);
+            return null;
         }
     }
 }
