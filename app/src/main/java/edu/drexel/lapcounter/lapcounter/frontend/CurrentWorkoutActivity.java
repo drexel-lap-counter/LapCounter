@@ -57,6 +57,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private TextView timerValue;
     private String mTimerFormat;
     private Date startTime;
+    private Date pauseTime;
     private Handler customHandler = new Handler();
     private boolean isPaused = false;
 
@@ -75,6 +76,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         if (isPaused)
             return;
 
+        // Save the paused time to use as
+        pauseTime = new Date();
+
         timeSwapBuff += timeInMilliseconds;
         customHandler.removeCallbacks(updateTimerThread);
 
@@ -89,7 +93,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         Workout workout = new Workout();
         workout.setDeviceMAC(loadDeviceAddress());
         workout.setStartDate(startTime);
-        workout.setEndDate(new Date());
+        workout.setEndDate(pauseTime);
         workout.setLaps(mLapCount);
         int poolLength = loadPoolLength();
 
