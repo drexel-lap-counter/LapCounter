@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -101,10 +102,13 @@ public class DeviceScanActivity extends AppCompatActivity {
                 Log.i(TAG,String.format("What was onclicked?: %s",selected_view.getText()));
                 TextView connected_view= findViewById(R.id.scan_device_selected);
                 String device_name = (String) selected_view.getText();
+                LinearLayout mBackground;
                 mButton.setAlpha(1);
                 mButton.setEnabled(true);
                 connected_view.setText(device_name);
                 mDevice = mAdapter.getDevice(device_name);
+                mBackground = (LinearLayout) view.findViewById(R.id.device_scan_recycler_view);
+                mBackground.setSelected(true);
             }
 
             @Override
