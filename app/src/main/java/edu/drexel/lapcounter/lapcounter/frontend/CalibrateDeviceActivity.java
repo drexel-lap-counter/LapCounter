@@ -40,7 +40,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     private TextView mCalibrateInfo;
     private Button mCalibrate;
-    private Button mDone;
 
     private BLEService mBleService;
     private String mDeviceAddress;
@@ -73,11 +72,11 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
         mCalibrateInfo = findViewById(R.id.calibrate_info);
         mCalibrate = findViewById(R.id.calibrate);
-        mDone = findViewById(R.id.done);
 
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
+        mCalibrateInfo.setText(getString(R.string.label_connecting, mDeviceAddress));
 
         Intent bleServiceIntent = new Intent(this, BLEService.class);
         bindService(bleServiceIntent, mBleServiceConn, BIND_AUTO_CREATE);
@@ -110,7 +109,6 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             mCalibrateInfo.setText(R.string.label_device_disconnected_try_reconnect);
             mBleService.connectToDevice(mDeviceAddress);
             mCalibrate.setEnabled(false);
-            mDone.setEnabled(false);
         }
     };
 
@@ -160,21 +158,25 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     public void calibrate(View view) {
         if (mRssiCollector.isEnabled()) {
-            mBleService.stopRssiRequests();
-            mRssiCollector.disable();
-            mDone.setEnabled(true);
-            mCalibrate.setText(R.string.label_calibrate);
-            mCalibrateInfo.setText(mRssiCollector.toString());
-            return;
+            finishCalibration();
+            goToDeviceSelectScreen();
+        } else {
+            startCalibration();
         }
-
-        mBleService.startRssiRequests();
-        mDone.setEnabled(false);
-        mRssiCollector.enable();
-        mCalibrate.setText(getString(R.string.label_stop));
     }
 
-    public void done(View view) {
+    private void startCalibration() {
+        mBleService.startRssiRequests();
+        mRssiCollector.enable();
+        mCalibrate.setText(getString(R.string.label_done));
+    }
+
+    private void finishCalibration() {
+        mBleService.stopRssiRequests();
+        mRssiCollector.disable();
+    }
+
+    private void goToDeviceSelectScreen() {
         // The reward function can be selected in the Hyperparameters class.
         CalibrationRewardFunc rewardFunc = Hyperparameters.CALIBRATION_REWARD_FUNC;
 
