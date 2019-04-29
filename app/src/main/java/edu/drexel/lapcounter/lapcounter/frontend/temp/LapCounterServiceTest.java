@@ -16,9 +16,12 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Transition.Transition;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Transition.TransitionRepository;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DevicePresets;
@@ -184,12 +187,27 @@ public class LapCounterServiceTest extends AppCompatActivity {
         mLog = findViewById(R.id.log);
         log("onCreate");
 
+        logTransitionLog();
+
         mStartOrStop = findViewById(R.id.start_or_stop_btn);
         mRssi = findViewById(R.id.filtered_rssi);
         mDir = findViewById(R.id.dir);
         mState = findViewById(R.id.state);
 
         requestBluetoothPermission();
+    }
+
+    private void logTransitionLog() {
+        TransitionRepository repo = new TransitionRepository(getApplication());
+        try {
+            for (Transition transition : repo.getAllTransitions()) {
+                log(transition.toString());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private void requestBluetoothPermission() {

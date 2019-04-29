@@ -17,4 +17,7 @@ public interface TransitionDao {
 
     @Query("SELECT * FROM transitions_table WHERE Workout_ID=:id ORDER BY Transition_Time")
     List<Transition> getTransitionsByWorkout(int id);
+
+    @Query("SELECT * FROM transitions_table ORDER BY Transition_Time")
+    List<Transition> getAllTransitions();
 }

@@ -50,7 +50,7 @@ public class TransitionRepository
     }
 
 
-    public void insertState(State state)
+    public void insert(State state)
     {
         new insertStateAsyncTask(mStateDao).execute(state);
     }
@@ -98,11 +98,11 @@ public class TransitionRepository
         // The table is empty, so populate it:
         for (String state_name : State.STATE_VALUES) {
             State state = new State(state_name);
-            insertState(state);
+            insert(state);
         }
     }
 
-    public void insertState(Transition transition) {
+    public void insert(Transition transition) {
         new InsertTransitionTask(mTransitionDao).execute(transition);
     }
     private static class InsertTransitionTask extends AsyncTask<Transition, Void, Void> {
@@ -117,5 +117,17 @@ public class TransitionRepository
             mTransitionDao.insertTransition(transitions[0]);
             return null;
         }
+    }
+
+    public List<Transition> getAllTransitions() throws InterruptedException, ExecutionException
+    {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<List<Transition>> res = ex.submit(new Callable<List<Transition>>() {
+            @Override
+            public List<Transition> call(){
+                return mTransitionDao.getAllTransitions();
+            }
+        });
+        return res.get();
     }
 }

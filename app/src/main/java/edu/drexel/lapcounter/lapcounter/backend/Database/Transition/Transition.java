@@ -7,6 +7,7 @@ import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.NonNull;
 
 import java.util.Date;
+import java.util.Locale;
 
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.State;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
@@ -90,5 +91,11 @@ public class Transition {
         this.mTransitionTime = mTransitionTime;
         this.mBeforeState = mBeforeState;
         this.mAfterState = mAfterState;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "Transition (%s, %d): %s -> %s",
+                getTransitionTime().toString(), getWorkoutID(), getBeforeState(), getAfterState());
     }
 }

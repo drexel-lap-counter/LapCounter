@@ -61,7 +61,7 @@ public class TransitionLog {
             TransitionRepository repo = new TransitionRepository(mService.getApplication());
             for (Transition transition : mTransitions) {
                 transition.setWorkoutID(workoutID);
-                repo.insertState(transition);
+                repo.insert(transition);
             }
         }
     };
