@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -203,8 +204,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         String currentDevice = loadDeviceAddress();
 
@@ -219,25 +220,39 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
-        // The user changed their device mid-workout.
+        // So the user changed their device mid-workout.
+
+        mDeviceAddress = currentDevice;
+
         pause();
 
+        // Connect to the new device.
         mBleService.disconnectDevice();
 
-        // Ask if they'd like to save their current workout.
-        new android.support.v7.app.AlertDialog.Builder(this)
-                .setMessage("Since you've connected to a different device, the current workout " +
+        // Did the user already start a workout with the previous device?
+        if (updatedTime > 0)
+        {
+            // Ask if they'd like to save their current workout.
+            new android.support.v7.app.AlertDialog.Builder(this)
+                    .setMessage("Since you've connected to a different device, the current workout " +
                             "must be stopped. Would you like to save your progress?")
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        saveWorkout();
-                    }
-                })
-                .setNegativeButton(R.string.no, null)
-                .show();
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveWorkout();
+                            restartWorkout();
+                        }
+                    })
+                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            restartWorkout();
+                        }
+                    })
+                    .show();
+        }
 
-        restartWorkout();
+        mBleService.connectToDevice(mDeviceAddress);
     }
 
     private void requestBluetoothPermission() {
