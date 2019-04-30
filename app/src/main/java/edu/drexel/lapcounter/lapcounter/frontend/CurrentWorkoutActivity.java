@@ -1,14 +1,15 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,15 +21,22 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
-import java.util.Locale;
-import java.util.function.BiConsumer;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
+import java.util.Date;
+import java.util.Locale;
+
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
+import edu.drexel.lapcounter.lapcounter.backend.ble.DisconnectChecker;
 import edu.drexel.lapcounter.lapcounter.backend.ble.MovingAverage;
-import edu.drexel.lapcounter.lapcounter.backend.ble.SlidingWindow;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
+import no.nordicsemi.android.ble.ConnectRequest;
+import no.nordicsemi.android.ble.ConnectionPriorityRequest;
+import no.nordicsemi.android.ble.SimpleRequest;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_IN;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_OUT;
@@ -48,7 +56,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
     private TextView timerValue;
     private String mTimerFormat;
-    private long startTime = 0L;
+    private Date startTime;
+    private Date pauseTime;
     private Handler customHandler = new Handler();
     private boolean isPaused = false;
 
@@ -60,6 +69,47 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     private TextView mCounter;
 
     private TextView mDebugConnectLabel;
+    private int mLapCount;
+
+    private void pause() {
+        // If we're already paused, do nothing.
+        if (isPaused)
+            return;
+
+        // Save the paused time to use as
+        pauseTime = new Date();
+
+        timeSwapBuff += timeInMilliseconds;
+        customHandler.removeCallbacks(updateTimerThread);
+
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+
+        isPaused = true;
+    }
+
+    private void saveWorkout() {
+        Workout workout = new Workout();
+        workout.setDeviceMAC(loadDeviceAddress());
+        workout.setStartDate(startTime);
+        workout.setEndDate(pauseTime);
+        workout.setLaps(mLapCount);
+        int poolLength = loadPoolLength();
+
+        workout.setPoolLength(poolLength);
+        workout.setPoolUnits(loadPoolUnits());
+        workout.setTotalDistanceTraveled(mLapCount * poolLength);
+
+        WorkoutViewModel wvm = ViewModelProviders.of(this).get(WorkoutViewModel.class);
+        wvm.insert(workout);
+
+        Toast.makeText(this, R.string.save_workout_successful, Toast.LENGTH_SHORT).show();
+
+        startResumeButton.setText(R.string.startButtonLabel);
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        saveButton.setEnabled(false);
+    }
 
     private LapCounterBleManager mBleManager;
 
@@ -93,12 +143,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         startResumeButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
+                startTime = new Date();
                 customHandler.postDelayed(updateTimerThread, 0);
 
                 startResumeButton.setEnabled(false);
                 startResumeButton.setText(R.string.resumeButtonLabel);
                 pauseButton.setEnabled(true);
+                saveButton.setEnabled(true);
 
                 isPaused = false;
 
@@ -108,36 +159,22 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View view) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
-
-                startResumeButton.setEnabled(true);
-                pauseButton.setEnabled(false);
-
-                isPaused = true;
+                pause();
             }
         });
 
-
-
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
+                pause();
                 onButtonShowPopupWindowClick(view);
             }
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
-                // TODO: make version of this function for saving
-                //onButtonShowPopupWindowClick(view);
+                pause();
+                saveWorkout();
             }
         });
 
@@ -149,8 +186,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
     private void readRssi() {
         mBleManager.readRssi().with(this::onRssi).done(unused_arg -> {
-            // Poll infrequently to jump past noise.
-            mBleManager.sleep(2500).enqueue(); // Hyperparameter 1
+            mBleManager.sleep(300).enqueue();
 
             if (!isPaused) {
                 readRssi();
@@ -158,41 +194,51 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         }).enqueue();
     }
 
+    private final DisconnectChecker mDisconnectChecker = new DisconnectChecker();
 
-    private Integer mPreviousRssi = null;
+    private final MovingAverage mRssiMovingAvg = new MovingAverage(10);
+    private Double mPreviousRssiAvg = null;
     private int mPreviousDirection = DIRECTION_OUT;
-    private int mLapCount = 0;
+    private boolean mDisconnected = false;
 
     private void onRssi(BluetoothDevice device, int rssi) {
+        if (mDisconnectChecker.shouldDisconnect(rssi)) {
+            mBleManager.disconnect().enqueue();
+            return;
+        }
+
         rssi = Math.abs(rssi);
 
-        Log.i(TAG, Integer.toString(rssi));
+        double currentRssiAvg = mRssiMovingAvg.filter(rssi);
 
-        if (mPreviousRssi == null) {
-            mPreviousRssi = rssi;
+        if (!mRssiMovingAvg.windowIsFull()) {
+            Log.i(TAG, "mRssiMovingAvg is not full.");
             return;
         }
 
-        int delta = rssi - mPreviousRssi;
-
-        if (Math.abs(delta) < 10) { // Hyperparameter 2
-            Log.i(TAG, "Ignored small delta of " + delta);
+        if (mPreviousRssiAvg == null) {
+            mPreviousRssiAvg = currentRssiAvg;
             return;
         }
 
-        mPreviousRssi = rssi;
+        double delta = currentRssiAvg - mPreviousRssiAvg;
 
-        int direction = (int)Math.signum(delta);
+        if (Math.abs(delta) < 5) {
+            Log.i(TAG, String.format("Ignored small delta of %.3f", delta));
+            return;
+        }
 
-        // The swimmer flipped near the beginning of the pool.
-        if (mPreviousDirection == DIRECTION_IN && direction == DIRECTION_OUT) {
-            // So they completed 2 laps.
-            ++mLapCount;
-            mCounter.setText(String.format(Locale.US, "%d", mLapCount));
+        mPreviousRssiAvg = currentRssiAvg;
+
+        int currentDirection = (int)Math.signum(delta);
+
+        if (mPreviousDirection == DIRECTION_IN && currentDirection == DIRECTION_OUT) {
+            mLapCount += 2;
+            mCounter.setText(Integer.toString(mLapCount));
             Log.i(TAG, "Lap counted.");
         }
 
-        mPreviousDirection = direction;
+        mPreviousDirection = currentDirection;
     }
 
     @Override
@@ -201,7 +247,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
             mBleManager.disconnect();
         }
         super.onDestroy();
-
     }
 
     private void requestBluetoothPermission() {
@@ -227,32 +272,58 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private String loadDeviceAddress() {
+        // Get the selected device from shared preferences (if there is one)
+        SharedPreferences prefs = getSharedPreferences(
+                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
+        return prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+    }
 
-//    private void connect() {
-//        // Get the selected device from shared preferences (if there is one)
-//        SharedPreferences prefs = getSharedPreferences(
-//                DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
-//        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
-//
-//        if (mac == null) {
-//            mDebugConnectLabel.setText(R.string.label_no_device_selected);
-//            // TODO: What should happen if the user does not have a currently selected device?
-//            // Should they be redirected to the DeviceSelectActivity? Should the
-//            // CurrentWorkoutActivity simply say "No device selected." and become inert?
-//            // We need to discuss transitions between this and other activities.
-//            return;
-//        }
-//
-//        String connectMessage = getResources().getString(R.string.label_connecting, mac);
-//        mDebugConnectLabel.setText(connectMessage);
-//
-//        // todo: ble connect
-//    }
+    private int loadPoolLength() {
+        SharedPreferences prefs = getSharedPreferences(
+                PoolSizeActivity.poolSizePreferences, Context.MODE_PRIVATE);
+        return prefs.getInt(PoolSizeActivity.poolSizeKey, PoolSizeActivity.defPoolSize);
+    }
+
+    private String loadPoolUnits() {
+        SharedPreferences prefs = getSharedPreferences(
+                PoolSizeActivity.poolSizePreferences, Context.MODE_PRIVATE);
+        return prefs.getString(PoolSizeActivity.poolUnitsKey, PoolSizeActivity.defPoolUnits);
+    }
+
+    private ConnectRequest connect(String deviceAddress) {
+        return mBleManager.connect(getAdapter(this).getRemoteDevice(deviceAddress))
+                .useAutoConnect(false);
+    }
+
+    private ConnectRequest getConnectRequest() {
+        String mac = loadDeviceAddress();
+
+        if (mac == null) {
+            mDebugConnectLabel.setText(R.string.label_no_device_selected);
+            // TODO: What should happen if the user does not have a currently selected device?
+            // Should they be redirected to the DeviceSelectActivity? Should the
+            // CurrentWorkoutActivity simply say "No device selected." and become inert?
+            // We need to discuss transitions between this and other activities.
+            return null;
+        }
+
+        return connect(mac).done(device -> {
+            int priority = ConnectionPriorityRequest.CONNECTION_PRIORITY_HIGH;
+            mBleManager.setConnectionPriority(priority);
+        });
+    }
+
+    private void connect() {
+        getConnectRequest().enqueue();
+    }
 
     private Runnable updateTimerThread = new Runnable() {
 
         public void run() {
-            timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
+            Date now = new Date();
+            timeInMilliseconds = now.getTime() - startTime.getTime();
+
             updatedTime = timeSwapBuff + timeInMilliseconds;
             int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
@@ -265,6 +336,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         }
 
     };
+
+    public void resetLapCountState() {
+        mDisconnectChecker.reset();
+        mRssiMovingAvg.clear();
+        mPreviousRssiAvg = null;
+        mPreviousDirection = DIRECTION_OUT;
+    }
 
     public void onButtonShowPopupWindowClick(View view) {
 
@@ -295,7 +373,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         Button yesButton = popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
+                startTime = new Date();
                 updatedTime = 0L;
                 timeSwapBuff = 0L;
                 timeInMilliseconds = 0L;
@@ -307,6 +385,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
                 startResumeButton.setText(R.string.startButtonLabel);
                 startResumeButton.setEnabled(true);
                 pauseButton.setEnabled(false);
+                saveButton.setEnabled(false);
+
+                resetLapCountState();
+                mDisconnected = false;
 
                 popupWindow.dismiss();
             }
@@ -325,26 +407,28 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         mDebugConnectLabel.setText(s);
     }
 
-    private void connect() {
-        final String PUCK = "D1:AA:19:79:8A:18";
-        mBleManager.connect(getAdapter(this).getRemoteDevice(PUCK))
-                .useAutoConnect(true)
-                .retry(300, 100)
-                .enqueue();
-    }
-
     @Override
     public void onDeviceConnecting(@NonNull BluetoothDevice device) {
-        String connectMessage = getResources().getString(R.string.label_connecting,
-                device.getAddress());
+        String connectMessage = getString(R.string.label_connecting, device.getAddress());
         mDebugConnectLabel.setText(connectMessage);
+        mDisconnectChecker.reset();
     }
 
     @Override
     public void onDeviceConnected(@NonNull BluetoothDevice device) {
         setConnectText(device.getAddress());
-        startResumeButton.setEnabled(true);
-        restartButton.setEnabled(true);
+
+        resetLapCountState();
+
+        if (mDisconnected) {
+            mPreviousDirection = DIRECTION_IN;
+            readRssi();
+        } else {
+            startResumeButton.setEnabled(true);
+            restartButton.setEnabled(true);
+        }
+
+        mDisconnected = false;
     }
 
     @Override
@@ -355,6 +439,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     @Override
     public void onDeviceDisconnected(@NonNull BluetoothDevice device) {
         mDebugConnectLabel.setText("Interesting. Disconnected from " + device.getAddress());
+        mDisconnected = true;
         connect();
     }
 

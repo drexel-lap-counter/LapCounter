@@ -5,6 +5,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.ConnectionPriorityRequest;
 import no.nordicsemi.android.ble.ReadRssiRequest;
 import no.nordicsemi.android.ble.SleepRequest;
 
@@ -36,5 +37,9 @@ public class LapCounterBleManager extends BleManager<LapCounterBleManagerCallbac
 
     public SleepRequest sleep(long delayMs) {
         return super.sleep(delayMs);
+    }
+
+    public ConnectionPriorityRequest setConnectionPriority(int priority) {
+        return super.requestConnectionPriority(priority);
     }
 }
