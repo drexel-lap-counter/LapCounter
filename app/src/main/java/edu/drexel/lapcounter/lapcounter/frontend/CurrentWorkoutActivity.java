@@ -202,10 +202,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     private boolean mDisconnected = false;
 
     private void onRssi(BluetoothDevice device, int rssi) {
-        if (mDisconnectChecker.shouldDisconnect(rssi)) {
-            mBleManager.disconnect().enqueue();
-            return;
-        }
+//        if (mDisconnectChecker.shouldDisconnect(rssi)) {
+//            mBleManager.disconnect().enqueue();
+//            return;
+//        }
 
         rssi = Math.abs(rssi);
 
@@ -296,7 +296,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
                 .useAutoConnect(false);
     }
 
-    private ConnectRequest getConnectRequest() {
+    private void connect() {
         String mac = loadDeviceAddress();
 
         if (mac == null) {
@@ -305,17 +305,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
             // Should they be redirected to the DeviceSelectActivity? Should the
             // CurrentWorkoutActivity simply say "No device selected." and become inert?
             // We need to discuss transitions between this and other activities.
-            return null;
+            return;
         }
 
-        return connect(mac).done(device -> {
+        connect(mac).done(device -> {
             int priority = ConnectionPriorityRequest.CONNECTION_PRIORITY_HIGH;
             mBleManager.setConnectionPriority(priority);
-        });
-    }
-
-    private void connect() {
-        getConnectRequest().enqueue();
+        }).enqueue();
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -416,19 +412,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
     @Override
     public void onDeviceConnected(@NonNull BluetoothDevice device) {
-        setConnectText(device.getAddress());
-
-        resetLapCountState();
-
-        if (mDisconnected) {
-            mPreviousDirection = DIRECTION_IN;
-            readRssi();
-        } else {
-            startResumeButton.setEnabled(true);
-            restartButton.setEnabled(true);
-        }
-
-        mDisconnected = false;
     }
 
     @Override
@@ -438,9 +421,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
     @Override
     public void onDeviceDisconnected(@NonNull BluetoothDevice device) {
-        mDebugConnectLabel.setText("Interesting. Disconnected from " + device.getAddress());
         mDisconnected = true;
         connect();
+        mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
     }
 
     @Override
@@ -461,6 +444,20 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     @Override
     public void onDeviceReady(@NonNull BluetoothDevice device) {
         log(device, "onDeviceReady()");
+
+        setConnectText(device.getAddress());
+
+        resetLapCountState();
+
+        if (mDisconnected) {
+            mPreviousDirection = DIRECTION_IN;
+            readRssi();
+        } else {
+            startResumeButton.setEnabled(true);
+            restartButton.setEnabled(true);
+        }
+
+        mDisconnected = false;
     }
 
     @Override
