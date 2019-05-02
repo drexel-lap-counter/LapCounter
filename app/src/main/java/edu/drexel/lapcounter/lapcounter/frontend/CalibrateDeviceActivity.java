@@ -18,8 +18,6 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.ble.CalibrationRewardFunc;
-import edu.drexel.lapcounter.lapcounter.backend.ble.ExponentialRewardFunc;
-import edu.drexel.lapcounter.lapcounter.backend.ble.LinearRewardFunc;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RssiCollector;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
