@@ -104,6 +104,34 @@ public class MovingAverageTest {
 
 
     @Test
-    public void clear() {
+    public void clear_erases_buffer() {
+        final int size = 10;
+        MovingAverage ma = new MovingAverage(size);
+
+        for (int i = 0; i < size; ++i) {
+            ma.filter(i);
+        }
+
+        assertTrue(ma.windowIsFull());
+        ma.clear();
+        assertFalse(ma.windowIsFull());
+    }
+
+    @Test
+    public void clear_still_can_add_elements_and_compute_average() {
+        final int size = 10;
+        MovingAverage ma = new MovingAverage(size);
+
+        for (int i = 0; i < size; ++i) {
+            ma.filter(i);
+        }
+
+        assertTrue(ma.windowIsFull());
+        ma.clear();
+        assertFalse(ma.windowIsFull());
+
+        for (int i = 1; i <= size; ++i) {
+            CustomAssertions.assertEquals(ma.filter(i), (i + 1) / 2.0);
+        }
     }
 }
