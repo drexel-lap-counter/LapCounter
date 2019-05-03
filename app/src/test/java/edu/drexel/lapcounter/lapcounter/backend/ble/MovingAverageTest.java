@@ -25,6 +25,11 @@ public class MovingAverageTest {
     }
 
     @Test
+    public void windowIsFull_true_when_buffer_size_is_zero() {
+        assertTrue(new MovingAverage(0).windowIsFull());
+    }
+
+    @Test
     public void windowIsFull_false_when_partially_filled() {
         final int size = 10;
         MovingAverage ma = new MovingAverage(size);
@@ -33,6 +38,12 @@ public class MovingAverageTest {
         }
 
         assertFalse(ma.windowIsFull());
+    }
+
+    @Test
+    public void filter_returns_zero_when_buffer_accepts_no_elements() {
+        MovingAverage ma = new MovingAverage(0);
+        CustomAssertions.assertEquals(ma.filter(52), 0);
     }
 
     @Test
