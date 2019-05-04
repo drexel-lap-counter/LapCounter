@@ -1,5 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.backend.ble;
 
+import android.util.CustomAssertions;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -130,8 +132,33 @@ public class RssiCollectorTest {
     }
 
     @Test
-    public void mean() {
+    public void mean_of_zero_elements_is_zero() {
+        CustomAssertions.assertEquals(0, new RssiCollector().mean());
     }
+
+    @Test
+    public void mean_of_one_element_is_that_element() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        int element = 17;
+        rc.collect(element);
+        CustomAssertions.assertEquals(element, rc.mean());
+    }
+
+    @Test
+    public void mean_of_n_elements() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+
+        int n = 100;
+        for (int i = 1; i <= n; ++i) {
+            rc.collect(i);
+        }
+
+        double expected_mean = (n + 1) / 2.0;
+        CustomAssertions.assertEquals(expected_mean, rc.mean());
+    }
+
 
     @Test
     public void stdDev() {
