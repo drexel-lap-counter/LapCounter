@@ -240,14 +240,6 @@ public class RssiCollectorTest {
         CustomAssertions.assertEquals(expected_median, rc.median());
     }
 
-    @Test
-    public void min() {
-    }
-
-    @Test
-    public void max() {
-    }
-
 //    @Test
 //    public void toString() {
 //    }
@@ -257,6 +249,45 @@ public class RssiCollectorTest {
 //    }
 
     @Test
-    public void computeThreshold() {
+    public void computeThreshold_of_zero_elements() {
+        RssiCollector rc = new RssiCollector();
+        double threshold = rc.computeThreshold(new LinearRewardFunc());
+        CustomAssertions.assertEquals(0, threshold);
+    }
+
+    @Test
+    public void computeThreshold_of_one_element() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        int element = 92;
+        rc.collect(element);
+
+        double threshold = rc.computeThreshold(new LinearRewardFunc());
+        CustomAssertions.assertEquals(element, threshold);
+    }
+
+    @Test
+    public void computeThreshold_of_n_element() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        int expected_threshold = 73;
+
+        // Go out to the threshold.
+        for (int rssi = 20; rssi < expected_threshold; ++rssi) {
+            rc.collect(rssi);
+        }
+
+        // Stay still at the threshold for a while.
+        for (int i = 0; i < 5; ++i) {
+            rc.collect(expected_threshold);
+        }
+
+        // Come back to the beginning.
+        for (int rssi = expected_threshold - 1; rssi >= 20; --rssi) {
+            rc.collect(rssi);
+        }
+
+        double threshold = rc.computeThreshold(new LinearRewardFunc());
+        CustomAssertions.assertEquals(expected_threshold, threshold);
     }
 }
