@@ -199,7 +199,45 @@ public class RssiCollectorTest {
     }
 
     @Test
-    public void median() {
+    public void median_of_zero_elements_is_zero() {
+        CustomAssertions.assertEquals(0, new RssiCollector().median());
+    }
+
+    @Test
+    public void median_of_one_element_is_that_element() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        int element = 17;
+        rc.collect(element);
+        CustomAssertions.assertEquals(element, rc.median());
+    }
+
+    @Test
+    public void median_of_n_elements_odd() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+
+        int n = 9;
+        for (int i = 1; i <= n; ++i) {
+            rc.collect(i);
+        }
+
+        double expected_median = (n + 1) / 2.0;
+        CustomAssertions.assertEquals(expected_median, rc.median());
+    }
+
+    @Test
+    public void median_of_n_elements_even() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+
+        int n = 10;
+        for (int i = 1; i <= n; ++i) {
+            rc.collect(i);
+        }
+
+        double expected_median = (n + 1) / 2.0;
+        CustomAssertions.assertEquals(expected_median, rc.median());
     }
 
     @Test
