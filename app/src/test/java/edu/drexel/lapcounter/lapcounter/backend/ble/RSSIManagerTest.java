@@ -3,7 +3,6 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 import android.content.Context;
 import android.content.Intent;
 import android.util.CustomAssertions;
-import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,20 +26,25 @@ import static org.mockito.Mockito.when;
 public class RSSIManagerTest {
     private static final String TAG = RSSIManagerTest.class.getSimpleName();
 
+    private IBroadcastManager mBroadcastManager;
     private BLEComm mComm;
-    private RSSIManager mManager;
+    private RSSIManager mRssiManager;
 
     @Before
     public void setup() {
-        IBroadcastManager mockManager = new IBroadcastManager() {
+        final Context context = mock(Context.class);
+        final SimpleMessageReceiver receiver = new SimpleMessageReceiver();
+
+        mBroadcastManager = new IBroadcastManager() {
             @Override
             public void sendBroadcast(Intent intent) {
-                Log.i(TAG, "Mock sendBroadcast()");
+                receiver.onReceive(context, intent);
             }
         };
 
         mComm = mock(BLEComm.class);
-        mManager = new RSSIManager(mockManager, mComm);
+        mRssiManager = new RSSIManager(mBroadcastManager, mComm);
+        mRssiManager.initCallbacks(receiver);
     }
 
     @Test
@@ -48,24 +52,20 @@ public class RSSIManagerTest {
         final int STATE_DISCONNECTED = BLEComm.STATE_CONNECTED + 1;
         when(mComm.getConnectionState()).thenReturn(STATE_DISCONNECTED);
 
-        mManager.scheduleRssiRequest();
+        mRssiManager.scheduleRssiRequest();
 
         // Run Handler::postDelayed() callbacks if needed.
         Robolectric.flushForegroundThreadScheduler();
 
         // Wait at most two times the RSSI polling frequency before asserting that
         // another RSSI request was not scheduled.
-        verify(mComm, after(2 * mManager.getPollFrequencyMs()).never()).requestRssi();
+        verify(mComm, after(2 * mRssiManager.getPollFrequencyMs()).never()).requestRssi();
     }
 
     @Test
     public void scheduleRssiRequest_schedule_when_connected() {
         // Fake a successful connection state.
         when(mComm.getConnectionState()).thenReturn(BLEComm.STATE_CONNECTED);
-
-        // Let's register a SimpleMessageReceiver that we directly invoke with Intents.
-        final SimpleMessageReceiver messageReceiver = new SimpleMessageReceiver();
-        mManager.initCallbacks(messageReceiver);
 
         // We're eventually going to check that our RSSIManager successfully received this value.
         final int rssiToSend = 72;
@@ -79,20 +79,18 @@ public class RSSIManagerTest {
                 Intent rawRssiMsg = new Intent(BLEComm.ACTION_RAW_RSSI_AVAILABLE);
                 rawRssiMsg.putExtra(BLEComm.EXTRA_RAW_RSSI, rssiToSend);
 
-                // Directly invoke SimpleMessageReceiver::onReceive() to call RSSIManager's
-                // code that processes incoming raw RSSI values.
-                messageReceiver.onReceive(mock(Context.class), rawRssiMsg);
+                mBroadcastManager.sendBroadcast(rawRssiMsg);
                 return null;
             }
         }).when(mComm).requestRssi();
 
         // Kick off RSSI scheduling.
-        mManager.scheduleRssiRequest();
+        mRssiManager.scheduleRssiRequest();
 
         // Run Handler::postDelayed() callbacks if needed.
         Robolectric.flushForegroundThreadScheduler();
 
-        final long timeToWaitBeforeAssertMs = 2 * mManager.getPollFrequencyMs();
+        final long timeToWaitBeforeAssertMs = 2 * mRssiManager.getPollFrequencyMs();
 
         try {
             Thread.sleep(timeToWaitBeforeAssertMs);
@@ -105,7 +103,12 @@ public class RSSIManagerTest {
 
         // And more importantly, assert that the RSSIManager successfully received our raw RSSI
         // value.
-        CustomAssertions.assertEquals(mManager.getRssi(), rssiToSend);
+        CustomAssertions.assertEquals(mRssiManager.getRssi(), rssiToSend);
+    }
+
+    @Test
+    public void publishRssiAndDirection_when_windows_are_full() {
+
     }
 
     @Test
