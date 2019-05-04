@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.CustomAssertions;
 import android.util.Log;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -26,8 +27,11 @@ import static org.mockito.Mockito.when;
 public class RSSIManagerTest {
     private static final String TAG = RSSIManagerTest.class.getSimpleName();
 
-    @Test
-    public void scheduleRssiRequest_does_not_schedule_when_disconnected() {
+    private BLEComm mComm;
+    private RSSIManager mManager;
+
+    @Before
+    public void setup() {
         IBroadcastManager mockManager = new IBroadcastManager() {
             @Override
             public void sendBroadcast(Intent intent) {
@@ -35,40 +39,33 @@ public class RSSIManagerTest {
             }
         };
 
-        BLEComm mockComm = mock(BLEComm.class);
-        RSSIManager rm = new RSSIManager(mockManager, mockComm);
+        mComm = mock(BLEComm.class);
+        mManager = new RSSIManager(mockManager, mComm);
+    }
 
+    @Test
+    public void scheduleRssiRequest_does_not_schedule_when_disconnected() {
         final int STATE_DISCONNECTED = BLEComm.STATE_CONNECTED + 1;
-        when(mockComm.getConnectionState()).thenReturn(STATE_DISCONNECTED);
+        when(mComm.getConnectionState()).thenReturn(STATE_DISCONNECTED);
 
-        rm.scheduleRssiRequest();
+        mManager.scheduleRssiRequest();
 
         // Run Handler::postDelayed() callbacks if needed.
         Robolectric.flushForegroundThreadScheduler();
 
         // Wait at most two times the RSSI polling frequency before asserting that
         // another RSSI request was not scheduled.
-        verify(mockComm, after(2 * rm.getPollFrequencyMs()).never()).requestRssi();
+        verify(mComm, after(2 * mManager.getPollFrequencyMs()).never()).requestRssi();
     }
 
     @Test
     public void scheduleRssiRequest_schedule_when_connected() {
-        IBroadcastManager mockManager = new IBroadcastManager() {
-            @Override
-            public void sendBroadcast(Intent intent) {
-                Log.i(TAG, "Mock sendBroadcast()");
-            }
-        };
-
-        BLEComm mockComm = mock(BLEComm.class);
-        RSSIManager rm = new RSSIManager(mockManager, mockComm);
-
         // Fake a successful connection state.
-        when(mockComm.getConnectionState()).thenReturn(BLEComm.STATE_CONNECTED);
+        when(mComm.getConnectionState()).thenReturn(BLEComm.STATE_CONNECTED);
 
         // Let's register a SimpleMessageReceiver that we directly invoke with Intents.
         final SimpleMessageReceiver messageReceiver = new SimpleMessageReceiver();
-        rm.initCallbacks(messageReceiver);
+        mManager.initCallbacks(messageReceiver);
 
         // We're eventually going to check that our RSSIManager successfully received this value.
         final int rssiToSend = 72;
@@ -87,15 +84,15 @@ public class RSSIManagerTest {
                 messageReceiver.onReceive(mock(Context.class), rawRssiMsg);
                 return null;
             }
-        }).when(mockComm).requestRssi();
+        }).when(mComm).requestRssi();
 
         // Kick off RSSI scheduling.
-        rm.scheduleRssiRequest();
+        mManager.scheduleRssiRequest();
 
         // Run Handler::postDelayed() callbacks if needed.
         Robolectric.flushForegroundThreadScheduler();
 
-        final long timeToWaitBeforeAssertMs = 2 * rm.getPollFrequencyMs();
+        final long timeToWaitBeforeAssertMs = 2 * mManager.getPollFrequencyMs();
 
         try {
             Thread.sleep(timeToWaitBeforeAssertMs);
@@ -104,11 +101,11 @@ public class RSSIManagerTest {
         }
 
         // Assert that RSSIManager eventually calls BLEComm::requestRssi
-        verify(mockComm, atLeastOnce()).requestRssi();
+        verify(mComm, atLeastOnce()).requestRssi();
 
         // And more importantly, assert that the RSSIManager successfully received our raw RSSI
         // value.
-        CustomAssertions.assertEquals(rm.getRssi(), rssiToSend);
+        CustomAssertions.assertEquals(mManager.getRssi(), rssiToSend);
     }
 
     @Test
