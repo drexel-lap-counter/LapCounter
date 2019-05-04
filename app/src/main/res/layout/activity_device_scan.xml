@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".frontend.DeviceScanActivity">
+    tools:context=".frontend.DeviceScanActivity"
+    android:drawable="@drawable/item_sel">
 
     <Button
         android:id="@+id/button13"

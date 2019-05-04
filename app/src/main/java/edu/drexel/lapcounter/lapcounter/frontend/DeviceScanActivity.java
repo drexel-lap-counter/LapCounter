@@ -18,8 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,9 +71,6 @@ public class DeviceScanActivity extends AppCompatActivity {
 
         mNavBar.init();
 
-        //Once data storge implementation is complete, load whitelist from storage
-        //It is either that, or get it from DeviceSelect, but i think loading again
-        //might be better then passing all data to this activity,
         mDeviceViewModel = ViewModelProviders.of(this).get(DeviceViewModel.class);
         List<Device> registered_devices = mDeviceViewModel.getAllDevices();
         whitelist = new ArrayList<String>();
@@ -88,16 +83,15 @@ public class DeviceScanActivity extends AppCompatActivity {
         RecyclerView mRecyclerView = findViewById(R.id.device_scan_recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        ArrayList<Device> myDataset = new ArrayList<Device>();
-        mAdapter = new RecyclerAdapter(myDataset);
+        ArrayList<Device> Dataset = new ArrayList<Device>();
+        mAdapter = new RecyclerAdapter(Dataset,getResources().getColor(R.color.zebraStripeColorLight),getResources().getColor(R.color.zebraStripeColorDark));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getBaseContext(), mRecyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                //TODO: This is where you select which item we wish to connect to via bluetooth
-                //Get the data needed from the view, and do bluetooth connection stuff
-                //if we successfully connect, change text in the selected text box
                 TextView selected_view = (TextView) view;
+                mAdapter.setSelectedPos(position);
+                mAdapter.notifyDataSetChanged();
                 Log.i(TAG,String.format("What was onclicked?: %s",selected_view.getText()));
                 TextView connected_view= findViewById(R.id.scan_device_selected);
                 String device_name = (String) selected_view.getText();
@@ -105,11 +99,6 @@ public class DeviceScanActivity extends AppCompatActivity {
                 mButton.setEnabled(true);
                 connected_view.setText(device_name);
                 mDevice = mAdapter.getDevice(device_name);
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-                onClick(view, position);
             }
         }));
 
