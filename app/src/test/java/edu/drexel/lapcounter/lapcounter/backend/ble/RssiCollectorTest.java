@@ -161,7 +161,41 @@ public class RssiCollectorTest {
 
 
     @Test
-    public void stdDev() {
+    public void stdDev_of_zero_elements_is_zero() {
+        int unused_mean = -1;
+        CustomAssertions.assertEquals(0, new RssiCollector().stdDev(unused_mean));
+    }
+
+    @Test
+    public void stdDev_of_one_element_is_zero() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        rc.collect(10);
+        int unused_mean = -1;
+
+        CustomAssertions.assertEquals(0, rc.stdDev(unused_mean));
+    }
+
+    @Test
+    public void stdDev_of_n_elements() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+
+        int n = 100;
+        for (int i = 1; i <= n; ++i) {
+            rc.collect(i);
+        }
+
+        final double mean = rc.mean();
+
+        double expected_deviations_sum = (n + 1);
+        expected_deviations_sum *= (2 * n + 1) / 6.0 - mean;
+        expected_deviations_sum += mean * mean;
+        expected_deviations_sum *= n;
+
+        double expected_std_dev = Math.sqrt(expected_deviations_sum / (n - 1));
+
+        CustomAssertions.assertEquals(expected_std_dev, rc.stdDev(mean));
     }
 
     @Test
