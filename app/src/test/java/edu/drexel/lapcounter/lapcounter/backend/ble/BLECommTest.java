@@ -27,7 +27,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
@@ -46,9 +45,57 @@ public class BLECommTest {
     BluetoothGatt gatt;
 
     private SimpleMessageReceiver mReceiver;
-    private IBroadcastManager mBroadcastManager;
+
     private MockDevice mDevice;
-    private MockAdapter mAdapter;
+
+    class MockDevice implements IBluetoothDevice {
+        private BluetoothGattCallback mCallback;
+
+        @Override
+        public BluetoothGatt connectGatt(Context parent, boolean shouldReconnect,
+                                         BluetoothGattCallback callback) {
+            mCallback = callback;
+            return gatt;
+        }
+
+        void sendConnected() {
+            mCallback.onConnectionStateChange(gatt, -1, BluetoothProfile.STATE_CONNECTED);
+        }
+
+        void sendDisconnected() {
+            mCallback.onConnectionStateChange(gatt, -1, BluetoothProfile.STATE_DISCONNECTED);
+        }
+
+        void sendRssi(int rssi) {
+            sendRssi(rssi, BluetoothGatt.GATT_SUCCESS);
+        }
+
+        void sendRssi(int rssi, int status) {
+            mCallback.onReadRemoteRssi(gatt, rssi, status);
+        }
+    }
+
+    class MockAdapter implements IBluetoothAdapter {
+        private final IBluetoothDevice mDevice;
+
+        MockAdapter(IBluetoothDevice device) {
+            mDevice = device;
+        }
+
+        @Override
+        public IBluetoothDevice getRemoteDevice(String address) {
+            return mDevice;
+        }
+
+        @Override
+        public void startLeScan(BluetoothAdapter.LeScanCallback scanCallback) {
+            scanCallback.onLeScan(null, -1, null);
+        }
+
+        @Override
+        public void stopLeScan(BluetoothAdapter.LeScanCallback scanCallback) {
+        }
+    }
 
     @Before
     public void setUp() {
@@ -56,7 +103,8 @@ public class BLECommTest {
 
         mReceiver = new SimpleMessageReceiver();
 
-        mBroadcastManager = new IBroadcastManager() {
+        // Feed the broadcast intent directly to SimpleMessageReceiver.
+        IBroadcastManager broadcastManager = new IBroadcastManager() {
             @Override
             public void sendBroadcast(Intent intent) {
                 // Feed the broadcast intent directly to SimpleMessageReceiver.
@@ -65,9 +113,9 @@ public class BLECommTest {
         };
 
         mDevice = new MockDevice();
-        mAdapter = new MockAdapter(mDevice);
+        MockAdapter adapter = new MockAdapter(mDevice);
 
-        comm = new BLEComm(context, mAdapter, mBroadcastManager);
+        comm = new BLEComm(context, adapter, broadcastManager);
     }
 
     @Test
@@ -197,55 +245,6 @@ public class BLECommTest {
         assertEquals(comm.getConnectionState(), mConnectionState);
     }
 
-    class MockDevice implements IBluetoothDevice {
-        private BluetoothGattCallback mCallback;
-
-        @Override
-        public BluetoothGatt connectGatt(Context parent, boolean shouldReconnect,
-                                         BluetoothGattCallback callback) {
-            mCallback = callback;
-            return gatt;
-        }
-
-        public void sendConnected() {
-            mCallback.onConnectionStateChange(gatt, -1, BluetoothProfile.STATE_CONNECTED);
-        }
-
-        public void sendDisconnected() {
-            mCallback.onConnectionStateChange(gatt, -1, BluetoothProfile.STATE_DISCONNECTED);
-        }
-
-        public void sendRssi(int rssi) {
-            sendRssi(rssi, BluetoothGatt.GATT_SUCCESS);
-        }
-
-        public void sendRssi(int rssi, int status) {
-            mCallback.onReadRemoteRssi(gatt, rssi, status);
-        }
-    }
-
-    class MockAdapter implements IBluetoothAdapter {
-        private final IBluetoothDevice mDevice;
-
-        MockAdapter(IBluetoothDevice device) {
-            mDevice = device;
-        }
-
-        @Override
-        public IBluetoothDevice getRemoteDevice(String address) {
-            return mDevice;
-        }
-
-        @Override
-        public void startLeScan(BluetoothAdapter.LeScanCallback scanCallback) {
-            scanCallback.onLeScan(null, -1, null);
-        }
-
-        @Override
-        public void stopLeScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        }
-    }
-
     @Test
     public void first_connect_changes_connection_state() {
         comm.connect("device_address");
@@ -348,7 +347,7 @@ public class BLECommTest {
         final int rssiToSend = -72;
         when(gatt.readRemoteRssi()).thenAnswer(new Answer<Boolean>() {
             @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+            public Boolean answer(InvocationOnMock invocation) {
                 mDevice.sendRssi(rssiToSend);
                 return true;
             }
@@ -376,7 +375,7 @@ public class BLECommTest {
         final int rssiToSend = -72;
         when(gatt.readRemoteRssi()).thenAnswer(new Answer<Boolean>() {
             @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+            public Boolean answer(InvocationOnMock invocation) {
                 mDevice.sendRssi(rssiToSend, BluetoothGatt.GATT_FAILURE);
                 return true;
             }
