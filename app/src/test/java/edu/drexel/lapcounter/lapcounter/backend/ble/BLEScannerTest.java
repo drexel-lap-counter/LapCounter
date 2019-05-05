@@ -11,11 +11,11 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -24,13 +24,13 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class BLEScannerTest {
 
-    BLEScanner scanner;
+    private BLEScanner scanner;
 
     @Mock
     Context context;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
         scanner = new BLEScanner(context);
     }
@@ -40,7 +40,6 @@ public class BLEScannerTest {
         DeviceScanner.Callback callback = new DeviceScanner.Callback() {
             @Override
             public void onDeviceFound(String deviceName, String deviceAddress, int rssi) {
-                return;
             }
         };
 

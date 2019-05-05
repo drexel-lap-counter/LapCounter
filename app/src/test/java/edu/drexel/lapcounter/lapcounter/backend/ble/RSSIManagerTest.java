@@ -28,8 +28,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class RSSIManagerTest {
-    private static final String TAG = RSSIManagerTest.class.getSimpleName();
-
     private SimpleMessageReceiver mReceiver;
     private IBroadcastManager mBroadcastManager;
     private BLEComm mComm;

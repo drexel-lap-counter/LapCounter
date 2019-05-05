@@ -3,29 +3,29 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeast;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class BLECommTest {
 
-    BLEComm comm;
+    private BLEComm comm;
+
     @Mock
     Context context;
     @Mock
@@ -35,14 +35,14 @@ public class BLECommTest {
     BluetoothGatt gatt;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         comm = new BLEComm(context, adapter);
     }
 
     @Test
     public void requestRssi_calls_gatt_if_connected() {
-        comm.setmConnectionState(comm.STATE_CONNECTED);
+        comm.setmConnectionState(BLEComm.STATE_CONNECTED);
         when(gatt.readRemoteRssi()).thenReturn(true);
         comm.setmBluetoothGatt(gatt);
 
@@ -69,16 +69,14 @@ public class BLECommTest {
 
         boolean connect = comm.connect(address);
 
-        assertEquals(false, connect);
+        assertFalse(connect);
     }
 
     @Test
     public void connect_returns_false_if_address_is_null() {
-        String address = null;
+        boolean connect = comm.connect(null);
 
-        boolean connect = comm.connect(address);
-
-        assertEquals(false, connect);
+        assertFalse(connect);
     }
 
     @Test
@@ -88,7 +86,7 @@ public class BLECommTest {
 
         boolean connect = comm.connect(address);
 
-        assertEquals(true, connect);
+        assertTrue(connect);
     }
 
     @Test
@@ -99,7 +97,7 @@ public class BLECommTest {
 
         boolean connect = comm.connect(address);
 
-        assertEquals(false, connect);
+        assertFalse(connect);
     }
 
     @Test
@@ -110,7 +108,7 @@ public class BLECommTest {
 
         boolean connect = comm.connect(address);
 
-        assertEquals(true, connect);
+        assertTrue(connect);
     }
 
     @Test
