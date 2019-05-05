@@ -16,6 +16,12 @@ public class BLEService extends Service {
 
     private SimpleMessageReceiver mReceiver;
 
+    public BLEService(BLEComm comm, RSSIManager rssiManager, SimpleMessageReceiver receiver) {
+        mBleComm = comm;
+        mRssiManager = rssiManager;
+        mReceiver = receiver;
+    }
+
     public class LocalBinder extends Binder {
         public BLEService getService() {
             return BLEService.this;
