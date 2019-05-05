@@ -5,5 +5,6 @@ import android.bluetooth.BluetoothGattCallback;
 import android.content.Context;
 
 interface IBluetoothDevice {
-    BluetoothGatt connectGatt(Context mParent, boolean b, BluetoothGattCallback mGattCallback);
+    BluetoothGatt connectGatt(Context parent, boolean shouldReconnect,
+                              BluetoothGattCallback callback);
 }

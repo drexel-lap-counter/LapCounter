@@ -15,9 +15,13 @@ class BluetoothAdapterWrapped implements IBluetoothAdapter {
 
     @Override
     public IBluetoothDevice getRemoteDevice(final String address) {
-        return new IBluetoothDevice() {
-             BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        final BluetoothDevice device = mAdapter.getRemoteDevice(address);
 
+        if (device == null) {
+            return null;
+        }
+
+        return new IBluetoothDevice() {
             @Override
             public BluetoothGatt connectGatt(Context parent, boolean shouldReconnect,
                                              BluetoothGattCallback callback) {

@@ -31,9 +31,10 @@ public class BLEComm {
 
 
     // States of connection
-    private static final int STATE_DISCONNECTED = 0;
+    static final int STATE_DISCONNECTED = 0;
     static final int STATE_CONNECTING = 1;
     static final int STATE_CONNECTED = 2;
+    private final IBroadcastManager mBroadcastManager;
 
     private String mPreviousConnectAddress;
     private String mCurrentConnectAddress;
@@ -85,9 +86,16 @@ public class BLEComm {
     }
 
     public BLEComm(Context parent) {
-        mParent = parent;
-        setBluetoothAdapter(getAdapter(parent));
+        this(parent, new BluetoothAdapterWrapped(getAdapter(parent)),
+                new LocalBroadcastManagerWrapped(LocalBroadcastManager.getInstance(parent)));
     }
+
+    public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){
+        mParent = parent;
+        setBluetoothAdapter(adapter);
+        mBroadcastManager = broadcastManager;
+    }
+
 
     private static BluetoothAdapter getAdapter(Context c) {
         BluetoothManager m = (BluetoothManager) c.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -104,7 +112,7 @@ public class BLEComm {
     }
 
     private void localBroadcast(Intent intent) {
-        LocalBroadcastManager.getInstance(mParent).sendBroadcast(intent);
+        mBroadcastManager.sendBroadcast(intent);
     }
 
     private void broadcastConnect(boolean isReconnect) {
@@ -227,13 +235,16 @@ public class BLEComm {
         this.mConnectionState = mConnectionState;
     }
 
-    public BLEComm(Context mParent, BluetoothAdapter adapter){
-        this.mParent = mParent;
-        setBluetoothAdapter(adapter);
+    public void setBluetoothAdapter(BluetoothAdapter adapter) {
+        if (adapter == null) {
+            setBluetoothAdapter((IBluetoothAdapter)null);
+        } else {
+            setBluetoothAdapter(new BluetoothAdapterWrapped(adapter));
+        }
     }
 
-    public void setBluetoothAdapter(BluetoothAdapter mBluetoothAdapter) {
-        this.mBluetoothAdapter = new BluetoothAdapterWrapped(mBluetoothAdapter);
+    public void setBluetoothAdapter(IBluetoothAdapter adapter) {
+        this.mBluetoothAdapter = adapter;
     }
 
     public String getmPreviousConnectAddress() {
