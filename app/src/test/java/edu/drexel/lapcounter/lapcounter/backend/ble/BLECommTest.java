@@ -235,38 +235,26 @@ public class BLECommTest {
 
     @Test
     public void first_connect_changes_connection_state() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
 
         assertEquals(BLEComm.STATE_CONNECTED, comm.getConnectionState());
     }
 
     @Test
     public void reconnect_changes_connection_state() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
 
         // Reconnect
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
 
         assertEquals(BLEComm.STATE_CONNECTED, comm.getConnectionState());
     }
 
     @Test
     public void first_connect_broadcasts_connect_action() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         SimpleMessageReceiver.MessageHandler onConnect = new SimpleMessageReceiver.MessageHandler() {
             @Override
             public void onMessage(Intent message) {
@@ -276,15 +264,11 @@ public class BLECommTest {
 
         mReceiver.registerHandler(BLEComm.ACTION_CONNECTED, onConnect);
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
     }
 
     @Test
     public void reconnect_broadcasts_reconnect_action() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         SimpleMessageReceiver.MessageHandler onReconnect = new SimpleMessageReceiver.MessageHandler() {
             @Override
             public void onMessage(Intent message) {
@@ -295,19 +279,15 @@ public class BLECommTest {
         mReceiver.registerHandler(BLEComm.ACTION_RECONNECTED, onReconnect);
 
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
 
         // Reconnect
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
     }
 
     @Test
     public void disconnect_broadcasts_disconnect_action() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
             @Override
             public void onMessage(Intent message) {
@@ -322,30 +302,22 @@ public class BLECommTest {
         mReceiver.registerHandler(BLEComm.ACTION_DISCONNECTED, onDisconnect);
 
         comm.connect("device_address");
-        device.sendDisconnected();
+        mDevice.sendDisconnected();
     }
 
     @Test
     public void disconnect_changes_connection_state() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         comm.connect("device_address");
-        device.sendConnected();
-        device.sendDisconnected();
+        mDevice.sendConnected();
+        mDevice.sendDisconnected();
 
         assertEquals(BLEComm.STATE_DISCONNECTED, comm.getConnectionState());
     }
 
     @Test
     public void startScan_disconnects_before_scanning() {
-        final MockDevice device = new MockDevice();
-        final MockAdapter adapter = new MockAdapter(device);
-        comm.setBluetoothAdapter(adapter);
-
         comm.connect("device_address");
-        device.sendConnected();
+        mDevice.sendConnected();
 
         comm.startScan(new BluetoothAdapter.LeScanCallback() {
             @Override
