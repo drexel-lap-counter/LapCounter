@@ -2,6 +2,9 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.content.Context;
 
 class BluetoothAdapterWrapped implements IBluetoothAdapter {
     private final BluetoothAdapter mAdapter;
@@ -11,8 +14,16 @@ class BluetoothAdapterWrapped implements IBluetoothAdapter {
     }
 
     @Override
-    public BluetoothDevice getRemoteDevice(String address) {
-        return mAdapter.getRemoteDevice(address);
+    public IBluetoothDevice getRemoteDevice(final String address) {
+        return new IBluetoothDevice() {
+             BluetoothDevice device = mAdapter.getRemoteDevice(address);
+
+            @Override
+            public BluetoothGatt connectGatt(Context parent, boolean shouldReconnect,
+                                             BluetoothGattCallback callback) {
+                return device.connectGatt(parent, shouldReconnect, callback);
+            }
+        };
     }
 
     @Override

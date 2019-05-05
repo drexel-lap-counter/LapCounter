@@ -158,7 +158,7 @@ public class BLEComm {
             return true;
         }
 
-        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        IBluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 
         if (device == null) {
             Log.w(TAG, "Device not found.  Unable to connect.");
