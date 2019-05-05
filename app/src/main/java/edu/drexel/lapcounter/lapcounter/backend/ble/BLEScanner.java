@@ -89,12 +89,4 @@ public class BLEScanner implements DeviceScanner {
     public List<String> getmWhitelist() {
         return mWhitelist;
     }
-
-    void setmBleService(BLEService mBleService) {
-        this.mBleService = mBleService;
-    }
-
-    public ServiceConnection getmBleServiceConnection() {
-        return mBleServiceConnection;
-    }
 }
