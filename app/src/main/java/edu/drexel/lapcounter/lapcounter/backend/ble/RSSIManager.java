@@ -148,7 +148,7 @@ public class RSSIManager {
         mRssiDeltas.addLast(mCurrentRssi - mPreviousRssi);
     }
 
-    private boolean windowsAreFull() {
+    public boolean windowsAreFull() {
         return mFilter.windowIsFull() && mRssiDeltas.isFull();
     }
 
