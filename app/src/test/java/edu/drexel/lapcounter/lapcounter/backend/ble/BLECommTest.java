@@ -7,12 +7,15 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.util.CustomAssertions;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
@@ -22,7 +25,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
@@ -209,6 +214,14 @@ public class BLECommTest {
         public void sendDisconnected() {
             mCallback.onConnectionStateChange(gatt, -1, BluetoothProfile.STATE_DISCONNECTED);
         }
+
+        public void sendRssi(int rssi) {
+            sendRssi(rssi, BluetoothGatt.GATT_SUCCESS);
+        }
+
+        public void sendRssi(int rssi, int status) {
+            mCallback.onReadRemoteRssi(gatt, rssi, status);
+        }
     }
 
     class MockAdapter implements IBluetoothAdapter {
@@ -325,5 +338,62 @@ public class BLECommTest {
                 assertEquals(BLEComm.STATE_DISCONNECTED, comm.getConnectionState());
             }
         });
+    }
+
+    @Test
+    public void requestRssi_broadcasts_rssi() {
+        comm.connect("device_address");
+        mDevice.sendConnected();
+
+        final int rssiToSend = -72;
+        when(gatt.readRemoteRssi()).thenAnswer(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                mDevice.sendRssi(rssiToSend);
+                return true;
+            }
+        });
+
+        // Register a handler to check if BLEComm broadcasts the correct RSSI.
+
+        SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
+            @Override
+            public void onMessage(Intent message) {
+                int rssi = message.getIntExtra(BLEComm.EXTRA_RAW_RSSI, -1);
+                assertEquals(rssiToSend, rssi);
+            }
+        };
+
+        mReceiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
+        comm.requestRssi();
+    }
+
+    @Test
+    public void requestRssi_does_not_broadcast_rssi_on_gatt_failure() {
+        comm.connect("device_address");
+        mDevice.sendConnected();
+
+        final int rssiToSend = -72;
+        when(gatt.readRemoteRssi()).thenAnswer(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                mDevice.sendRssi(rssiToSend, BluetoothGatt.GATT_FAILURE);
+                return true;
+            }
+        });
+
+        // Register a handler to check if BLEComm broadcasts the correct RSSI.
+
+        SimpleMessageReceiver.MessageHandler onRawRssi = new SimpleMessageReceiver.MessageHandler() {
+            @Override
+            public void onMessage(Intent message) {
+                fail("BLEComm was not supposed to broadcast RSSI when the GATT fails.");
+            }
+        };
+
+        mReceiver.registerHandler(BLEComm.ACTION_RAW_RSSI_AVAILABLE, onRawRssi);
+        comm.requestRssi();
+
+        CustomAssertions.waitBeforeAssert(3000);
     }
 }

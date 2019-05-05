@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 public class RSSIManager {
     private static String qualify(String s) {
@@ -109,7 +110,7 @@ public class RSSIManager {
 
     public RSSIManager(Context context, BLEComm bleComm) {
         LocalBroadcastManager m = LocalBroadcastManager.getInstance(context);
-        mBroadcastManager = new LocalBroadcastManagerWrapped(m);
+        mBroadcastManager = new LocalBroadcastManagerWrapper(m);
         mBleComm = bleComm;
     }
 

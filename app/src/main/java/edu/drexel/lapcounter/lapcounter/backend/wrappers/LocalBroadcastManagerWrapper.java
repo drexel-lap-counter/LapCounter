@@ -1,12 +1,14 @@
-package edu.drexel.lapcounter.lapcounter.backend.ble;
+package edu.drexel.lapcounter.lapcounter.backend.wrappers;
 
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
-class LocalBroadcastManagerWrapped implements IBroadcastManager {
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBroadcastManager;
+
+public class LocalBroadcastManagerWrapper implements IBroadcastManager {
     private final LocalBroadcastManager mLocalBroadcastManager;
 
-    public LocalBroadcastManagerWrapped(LocalBroadcastManager m) {
+    public LocalBroadcastManagerWrapper(LocalBroadcastManager m) {
         mLocalBroadcastManager = m;
     }
 

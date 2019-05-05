@@ -1,4 +1,4 @@
-package edu.drexel.lapcounter.lapcounter.backend.ble;
+package edu.drexel.lapcounter.lapcounter.backend.wrappers;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -6,10 +6,13 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.content.Context;
 
-class BluetoothAdapterWrapped implements IBluetoothAdapter {
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBluetoothAdapter;
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBluetoothDevice;
+
+public class BluetoothAdapterWrapper implements IBluetoothAdapter {
     private final BluetoothAdapter mAdapter;
 
-    public BluetoothAdapterWrapped(BluetoothAdapter adapter) {
+    public BluetoothAdapterWrapper(BluetoothAdapter adapter) {
         mAdapter = adapter;
     }
 

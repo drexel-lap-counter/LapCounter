@@ -97,15 +97,6 @@ public class RSSIManagerTest {
         scheduleRssiRequest();
     }
 
-    private void waitBeforeAssert(long delayMs) {
-        try {
-            Thread.sleep(delayMs);
-        } catch (InterruptedException e) {
-            fail("Test interrupted");
-        }
-    }
-
-
     private void sendNRssiValues(int n) {
         for (int i = 1; i <= n; ++i) {
             mRssiManager.stopRssiRequests();
@@ -151,7 +142,7 @@ public class RSSIManagerTest {
 
         sendRssi(rssiToSend);
 
-        waitBeforeAssert(2 * mRssiManager.getPollFrequencyMs());
+        CustomAssertions.waitBeforeAssert(2 * mRssiManager.getPollFrequencyMs());
 
         // Assert that RSSIManager eventually calls BLEComm::requestRssi
         verify(mComm, atLeastOnce()).requestRssi();
@@ -216,7 +207,7 @@ public class RSSIManagerTest {
 
         sendNRssiValues(MAX_WINDOW_SIZE / 2);
 
-        waitBeforeAssert(2 * mRssiManager.getPollFrequencyMs());
+        CustomAssertions.waitBeforeAssert(2 * mRssiManager.getPollFrequencyMs());
     }
 
     @Test

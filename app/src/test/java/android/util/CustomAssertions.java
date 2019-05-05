@@ -1,6 +1,7 @@
 package android.util;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class CustomAssertions {
     //https://floating-point-gui.de/errors/comparison/
@@ -27,5 +28,13 @@ public class CustomAssertions {
 
     public static void assertEquals(double a, double b) {
         assertTrue(nearlyEqual(a, b, 10 * Double.MIN_VALUE));
+    }
+
+    public static void waitBeforeAssert(long delayMs) {
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            fail("Test interrupted");
+        }
     }
 }

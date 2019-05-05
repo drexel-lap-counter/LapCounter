@@ -1,7 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
@@ -12,6 +11,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.Objects;
+
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.BluetoothAdapterWrapper;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 public class BLEComm {
     // Tag for logging
@@ -86,8 +88,8 @@ public class BLEComm {
     }
 
     public BLEComm(Context parent) {
-        this(parent, new BluetoothAdapterWrapped(getAdapter(parent)),
-                new LocalBroadcastManagerWrapped(LocalBroadcastManager.getInstance(parent)));
+        this(parent, new BluetoothAdapterWrapper(getAdapter(parent)),
+                new LocalBroadcastManagerWrapper(LocalBroadcastManager.getInstance(parent)));
     }
 
     public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){
@@ -239,7 +241,7 @@ public class BLEComm {
         if (adapter == null) {
             setBluetoothAdapter((IBluetoothAdapter)null);
         } else {
-            setBluetoothAdapter(new BluetoothAdapterWrapped(adapter));
+            setBluetoothAdapter(new BluetoothAdapterWrapper(adapter));
         }
     }
 
