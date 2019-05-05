@@ -240,13 +240,26 @@ public class RssiCollectorTest {
         CustomAssertions.assertEquals(expected_median, rc.median());
     }
 
-//    @Test
-//    public void toString() {
-//    }
-//
-//    @Test
-//    public void toString1() {
-//    }
+    @Test
+    public void test_toString() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        rc.collect(10);
+
+        String expected = "n=1, mean=10.000, median=10.000, stdDev=0.000, min=10, max=10";
+        assertEquals(expected, rc.toString());
+    }
+
+    @Test
+    public void test_toString_with_calibration_func() {
+        RssiCollector rc = new RssiCollector();
+        rc.enable();
+        rc.collect(10);
+
+        String expected = "n=1, mean=10.000, median=10.000, stdDev=0.000, min=10, max=10\n" +
+                "best_rssi is 10.000 with delta of 10.000 to yield reward of 100.000";
+        assertEquals(expected, rc.toString(new LinearRewardFunc()));
+    }
 
     @Test
     public void computeThreshold_of_zero_elements() {
