@@ -38,7 +38,7 @@ public class BLEComm {
     private String mPreviousConnectAddress;
     private String mCurrentConnectAddress;
 
-    private BluetoothAdapter mBluetoothAdapter;
+    private IBluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
 
     private int mConnectionState = STATE_DISCONNECTED;
@@ -86,7 +86,7 @@ public class BLEComm {
 
     public BLEComm(Context parent) {
         mParent = parent;
-        mBluetoothAdapter = getAdapter(mParent);
+        setBluetoothAdapter(getAdapter(parent));
     }
 
     private static BluetoothAdapter getAdapter(Context c) {
@@ -229,11 +229,11 @@ public class BLEComm {
 
     public BLEComm(Context mParent, BluetoothAdapter adapter){
         this.mParent = mParent;
-        this.mBluetoothAdapter = adapter;
+        setBluetoothAdapter(adapter);
     }
 
-    public void setmBluetoothAdapter(BluetoothAdapter mBluetoothAdapter) {
-        this.mBluetoothAdapter = mBluetoothAdapter;
+    public void setBluetoothAdapter(BluetoothAdapter mBluetoothAdapter) {
+        this.mBluetoothAdapter = new BluetoothAdapterWrapped(mBluetoothAdapter);
     }
 
     public String getmPreviousConnectAddress() {
