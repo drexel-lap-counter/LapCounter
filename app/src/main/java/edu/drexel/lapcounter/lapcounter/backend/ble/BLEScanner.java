@@ -11,11 +11,13 @@ import android.util.Log;
 
 import java.util.List;
 
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.ContextWrapper;
+
 public class BLEScanner implements DeviceScanner {
     private static final String TAG = BLEScanner.class.getSimpleName();
     private List<String> mWhitelist;
     private BLEService mBleService;
-    private Context mParentContext;
+    private IContext mParentContext;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
     boolean mIsScanning = false;
@@ -34,6 +36,10 @@ public class BLEScanner implements DeviceScanner {
     };
 
     public BLEScanner(Context parent) {
+        this(new ContextWrapper(parent));
+    }
+
+    public BLEScanner(IContext parent) {
         mParentContext = parent;
     }
 
@@ -58,7 +64,7 @@ public class BLEScanner implements DeviceScanner {
 
     @Override
     public void startScan() {
-        Intent intent = new Intent(mParentContext, BLEService.class);
+        Intent intent = new Intent(mParentContext.getInner(), BLEService.class);
         mParentContext.bindService(intent, mBleServiceConnection, Context.BIND_AUTO_CREATE);
         mIsScanning = true;
     }
