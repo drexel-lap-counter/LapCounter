@@ -89,7 +89,7 @@ public class BLEComm {
 
     public BLEComm(Context parent) {
         this(parent, new BluetoothAdapterWrapper(getAdapter(parent)),
-                new LocalBroadcastManagerWrapper(LocalBroadcastManager.getInstance(parent)));
+                LocalBroadcastManagerWrapper.getInstance(parent));
     }
 
     public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){

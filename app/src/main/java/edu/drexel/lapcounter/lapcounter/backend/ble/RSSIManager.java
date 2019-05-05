@@ -109,9 +109,7 @@ public class RSSIManager {
     }
 
     public RSSIManager(Context context, BLEComm bleComm) {
-        LocalBroadcastManager m = LocalBroadcastManager.getInstance(context);
-        mBroadcastManager = new LocalBroadcastManagerWrapper(m);
-        mBleComm = bleComm;
+        this(LocalBroadcastManagerWrapper.getInstance(context), bleComm);
     }
 
     public RSSIManager(IBroadcastManager broadcastManager, BLEComm bleComm) {
