@@ -338,6 +338,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
         mRssiMovingAvg.clear();
         mPreviousRssiAvg = null;
         mPreviousDirection = DIRECTION_OUT;
+        mLapCount = 0;
     }
 
     public void onButtonShowPopupWindowClick(View view) {
