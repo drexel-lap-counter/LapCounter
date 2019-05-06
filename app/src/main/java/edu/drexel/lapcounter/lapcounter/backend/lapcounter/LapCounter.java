@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBroadcastManager;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 import static edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver.MessageHandler;
 import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine.EXTRA_STATE_AFTER;
@@ -34,7 +36,7 @@ public class LapCounter {
     /**
      * Used to publish events.
      */
-    private LocalBroadcastManager mBroadcastManager;
+    private IBroadcastManager mBroadcastManager;
 
     /**
      * Count laps in the normal case: a state transition. This method filters for
@@ -69,7 +71,11 @@ public class LapCounter {
      * @param context the parent Service for setting up callbacks
      */
     public LapCounter(Context context) {
-        mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        this(LocalBroadcastManagerWrapper.getInstance(context));
+    }
+
+    public LapCounter(IBroadcastManager broadcastManager) {
+        mBroadcastManager = broadcastManager;
     }
 
     /**
