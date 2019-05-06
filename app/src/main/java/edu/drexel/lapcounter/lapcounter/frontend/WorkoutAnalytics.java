@@ -483,10 +483,6 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
                         }
                     }
-//                    Date d = new Date(duration);
-//                    DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//                    df.setTimeZone(TimeZone.getTimeZone("UTC"));
-//                    String time_formatted = df.format(d);
 
                     barEntries.add(new BarEntry(duration, j));
                 }
@@ -498,7 +494,17 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             e.printStackTrace();
         }
 
-        BarDataSet barDataSet = new BarDataSet(barEntries,"Distance Swam");
+        BarDataSet barDataSet = new BarDataSet(barEntries,"");
+
+        if(graphType.compareTo("Distance Traveled") == 0) {
+            barDataSet = new BarDataSet(barEntries, "Distance Swam");
+        }
+        else if(graphType.compareTo("Average Speed") == 0){
+            barDataSet = new BarDataSet(barEntries, "Average Speed");
+        }
+        else if(graphType.compareTo("Workout Duration") == 0) {
+            barDataSet = new BarDataSet(barEntries, "Workout Duration");
+        }
         BarData barData = new BarData(dates,barDataSet);
         barChart.setData(barData);
         barChart.setDescription("");
