@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.IBroadcastManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
 
@@ -18,6 +19,8 @@ import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateM
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -151,10 +154,18 @@ public class DisconnectManagerTest {
 
     private void testEarlyReturn(LocationStateMachine.State before,
                                  LocationStateMachine.State after) {
-
         assertNull(mDisconnectManager.getReconnectFunc());
+        sendDisconnect();
         failIfPublishMissedLaps();
         sendTransition(before, after);
+    }
+
+    private void sendDisconnect() {
+        mBroadcastManager.sendBroadcast(new Intent(BLEComm.ACTION_DISCONNECTED));
+    }
+
+    private void sendReconnect() {
+        mBroadcastManager.sendBroadcast(new Intent(BLEComm.ACTION_RECONNECTED));
     }
 
     @Test
@@ -221,5 +232,54 @@ public class DisconnectManagerTest {
 
         assertTrue(onMissedLaps.gotPublishedLap);
         assertNull(mDisconnectManager.getReconnectFunc());
+    }
+
+    @Test
+    public void onDisconnect_early_returns_when_reconnect_func_is_not_null() {
+        assertNull(mDisconnectManager.getReconnectFunc());
+
+        // First disconnect will initialize reconnect func.
+        sendDisconnect();
+        ReconnectFunction rf = mDisconnectManager.getReconnectFunc();
+        assertNotNull(rf);
+
+        // Second disconnect should cause an early return.
+        sendDisconnect();
+
+        // So the reconnect func remains unchanged.
+        assertEquals(rf, mDisconnectManager.getReconnectFunc());
+    }
+
+    @Test
+    public void onDisconnect_saves_timestamp_to_current_athlete_state() {
+        long timestamp = System.currentTimeMillis();
+        long prevTimestamp = mDisconnectManager.getCurrentState().timestamp;
+
+        sendDisconnect();
+
+        long newTimestamp = mDisconnectManager.getCurrentState().timestamp;
+
+        // Has the timestamp been updated?
+        assertNotEquals(newTimestamp, prevTimestamp);
+
+        // Is the timestamp (roughly; within 1 sec) correct?
+        assertTrue(Math.abs(newTimestamp - timestamp) <= 1);
+    }
+
+    @Test
+    public void onReconnect_saves_timestamp() {
+        // It's a one-line method; not much else to test.
+        long timestamp = System.currentTimeMillis();
+        long prevTimestamp = mDisconnectManager.getCurrentState().timestamp;
+
+        sendReconnect();
+
+        long newTimestamp = mDisconnectManager.getCurrentState().timestamp;
+
+        // Has the timestamp been updated?
+        assertNotEquals(newTimestamp, prevTimestamp);
+
+        // Is the timestamp (roughly; within 1 sec) correct?
+        assertTrue(Math.abs(newTimestamp - timestamp) <= 1);
     }
 }
