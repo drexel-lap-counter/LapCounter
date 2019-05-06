@@ -57,4 +57,20 @@
         <item>Average Speed</item>
         <item>Workout Duration</item>
     </string-array>
+
+    <string name="device_name">Device Name</string>
+    <string name="device_mac">Device MAC</string>
+    <string name="label_select_dates">Select Dates:</string>
+    <string name="label_start_date">Start Date</string>
+    <string name="label_end_date">End Date</string>
+    <string name="label_to">to</string>
+    <string name="label_total_distance">Total Distance:</string>
+    <string name="label_avg_workout_time">Avg Workout Time:</string>
+    <string name="label_duration">Duration:</string>
+    <string name="label_avg_workout_dist">Avg Workout Dist:</string>
+    <string name="label_no_data">No Data</string>
+    <string name="no_data">No Data</string>
+    <string name="label_past_workout_distances">PAST WORKOUT DISTANCES</string>
+    <string name="label_txt_pool_size">txt_pool_size</string>
+    <string name="label_date_name">Date_name</string>
 </resources>
