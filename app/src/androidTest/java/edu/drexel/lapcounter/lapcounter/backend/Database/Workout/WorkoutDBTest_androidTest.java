@@ -35,6 +35,7 @@ public class WorkoutDBTest_androidTest {
     private long end_timestamp_one = 1554912000; //03/11/2019 @ 12:00:00am utc
     private long start_timestamp_two = 1554976800; //03/15/2019 @ 2:00pm utc
     private long end_timestamp_two = 1554984000; //03/15/2019 @ 4:00pm utc
+    private int wait_time = 100;
 
     @Before
     public void setUp() throws Exception
@@ -82,8 +83,10 @@ public class WorkoutDBTest_androidTest {
     public void insert_retrieve_Units() throws Exception
     {
         workout_repo.insert(units);
+        Thread.sleep(wait_time);
         List<Units> retreived = workout_repo.getAllUnits();
-        assertEquals(retreived.size(),1);
+
+        assertEquals(1,retreived.size());
 
         Units ret_units = retreived.get(0);
         assertTrue(ret_units.getUnitName().equals(TestUnits));
@@ -94,8 +97,8 @@ public class WorkoutDBTest_androidTest {
     {
         workout_repo.insert(units);
         workout_repo.insert(workout_one);
+        Thread.sleep(wait_time);
         int id = workout_one.getID();
-        List<Workout> l = workout_repo.getAllWorkouts();
         Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
         boolean val = retreived.equals(workout_one);
         assertTrue(val);
