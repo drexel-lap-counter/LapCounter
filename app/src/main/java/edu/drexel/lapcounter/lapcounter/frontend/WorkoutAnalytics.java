@@ -347,7 +347,39 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         //
 
         float Avg_Workout_Time= ((float)difference / Float.valueOf(1))/MILLISECONDS_IN_SECOND;
-        String avg_time_str = String.format("%.2f sec",(Avg_Workout_Time/workoutsBetweenDateRange.size()));
+        int avg_time_int = (int) Avg_Workout_Time/workoutsBetweenDateRange.size();
+        String S1;
+        String S2;
+        String S3;
+
+        int p1 = avg_time_int % 60;
+        if(p1 <10){
+            S1 = "0" +Integer.toString(p1);
+        }
+        else
+            S1 = Integer.toString(p1);
+
+        int p2 = avg_time_int / 60;
+
+
+        int p3 = p2 % 60;
+        if(p3 <10){
+            S3 = "0" +Integer.toString(p3);
+        }
+        else
+            S3 = Integer.toString(p3);
+
+        p2 = p2 / 60;
+
+        if(p2 <10){
+            S2 = "0" +Integer.toString(p2);
+        }
+        else
+            S2 = Integer.toString(p2);
+
+
+
+        String avg_time_str = String.format("%s:%s:%s",S2,S3,S1);
         setAvgWorkoutTimeText.setText(avg_time_str);
 
     }
