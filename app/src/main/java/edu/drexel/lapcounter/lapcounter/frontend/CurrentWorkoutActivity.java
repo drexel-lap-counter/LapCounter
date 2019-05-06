@@ -202,10 +202,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     private boolean mDisconnected = false;
 
     private void onRssi(BluetoothDevice device, int rssi) {
-//        if (mDisconnectChecker.shouldDisconnect(rssi)) {
-//            mBleManager.disconnect().enqueue();
-//            return;
-//        }
+        if (mDisconnectChecker.shouldDisconnect(rssi)) {
+            customHandler.postDelayed(() -> mBleManager.disconnect().enqueue(), 500);
+            return;
+        }
 
         rssi = Math.abs(rssi);
 
@@ -423,7 +423,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
     @Override
     public void onDeviceDisconnected(@NonNull BluetoothDevice device) {
         mDisconnected = true;
-        connect();
+        customHandler.postDelayed(this::connect, 500);
         mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
     }
 
@@ -452,7 +452,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity implements LapCoun
 
         if (mDisconnected) {
             mPreviousDirection = DIRECTION_IN;
-            readRssi();
+            customHandler.postDelayed(this::readRssi, 500);
         } else {
             startResumeButton.setEnabled(true);
             restartButton.setEnabled(true);
