@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.Hyperparameters;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 public class RSSIManager {
     private static String qualify(String s) {
@@ -22,7 +23,7 @@ public class RSSIManager {
     public static final int DIRECTION_OUT = 1;
     public static final int DIRECTION_IN = -1;
 
-    private LocalBroadcastManager mBroadcastManager;
+    private IBroadcastManager mBroadcastManager;
 
     public static final int DEFAULT_DELTAS_WINDOW_SIZE = Hyperparameters.RSSI_DELTA_WINDOW_SIZE;
     private SlidingWindow<Double> mRssiDeltas = new SlidingWindow<>(DEFAULT_DELTAS_WINDOW_SIZE);
@@ -36,6 +37,10 @@ public class RSSIManager {
     private static final int NORMAL_RSSI_PERIOD_MS = Hyperparameters.RSSI_POLL_PERIOD_MS;
     private static final int RECONNECT_RSSI_PERIOD_MS =
             Hyperparameters.RECONNECT_RSSI_POLL_PERIOD_MS;
+
+    public int getPollFrequencyMs() {
+        return mPollFrequencyMs;
+    }
 
     private int mPollFrequencyMs = RECONNECT_RSSI_PERIOD_MS;
 
@@ -104,7 +109,11 @@ public class RSSIManager {
     }
 
     public RSSIManager(Context context, BLEComm bleComm) {
-        mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        this(LocalBroadcastManagerWrapper.getInstance(context), bleComm);
+    }
+
+    public RSSIManager(IBroadcastManager broadcastManager, BLEComm bleComm) {
+        mBroadcastManager = broadcastManager;
         mBleComm = bleComm;
     }
 
@@ -138,7 +147,7 @@ public class RSSIManager {
         mRssiDeltas.addLast(mCurrentRssi - mPreviousRssi);
     }
 
-    private boolean windowsAreFull() {
+    public boolean windowsAreFull() {
         return mFilter.windowIsFull() && mRssiDeltas.isFull();
     }
 
