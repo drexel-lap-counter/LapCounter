@@ -66,4 +66,6 @@
     <string name="label_no_data">No Data</string>
     <string name="no_data">No Data</string>
     <string name="label_past_workout_distances">PAST WORKOUT DISTANCES</string>
+    <string name="label_txt_pool_size">txt_pool_size</string>
+    <string name="label_date_name">Date_name</string>
 </resources>
