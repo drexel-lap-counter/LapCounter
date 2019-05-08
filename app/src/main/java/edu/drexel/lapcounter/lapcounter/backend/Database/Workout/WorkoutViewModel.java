@@ -2,9 +2,7 @@ package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -59,7 +57,7 @@ public class WorkoutViewModel extends AndroidViewModel {
     {
         return mRepository.getWorkoutByID(id);
     }
-    public void deleteAllWorkouts(){mRepository.deleteAll();}
+    public void deleteAllWorkouts(){mRepository.deleteAllWorkouts();}
     public void deleteWorkout(int id){mRepository.deleteWorkoutByID(id);}
 
 

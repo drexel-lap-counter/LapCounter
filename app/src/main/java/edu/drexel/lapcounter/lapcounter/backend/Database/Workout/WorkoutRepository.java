@@ -1,23 +1,18 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.RoomDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceDao;
 import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
@@ -103,6 +98,23 @@ public class WorkoutRepository {
         @Override
         protected Void doInBackground(final Units... params) {
             mAsyncTaskDao.deleteUnits(params[0]);
+            return null;
+        }
+    }
+
+    public void deleteAllUnits()
+    {
+        new DeleteAllUnitsAsyncTask(mUnitsDao).execute();
+    }
+    private static class DeleteAllUnitsAsyncTask extends AsyncTask<Void,Void,Void>
+    {
+        private UnitsDao mAsyncTaskDao;
+        DeleteAllUnitsAsyncTask(UnitsDao dao) {mAsyncTaskDao = dao;}
+
+        @Override
+        protected Void doInBackground(Void...params)
+        {
+            mAsyncTaskDao.deleteAllUnits();
             return null;
         }
     }
@@ -198,19 +210,19 @@ public class WorkoutRepository {
         }
     }
 
-    public void deleteAll()
+    public void deleteAllWorkouts()
     {
-        new DeleteAllAsyncTask(mWorkoutDao).execute();
+        new DeleteAllWorkoutsAsyncTask(mWorkoutDao).execute();
     }
-    private static class DeleteAllAsyncTask extends AsyncTask<Void,Void,Void>
+    private static class DeleteAllWorkoutsAsyncTask extends AsyncTask<Void,Void,Void>
     {
         private WorkoutDao mAsyncTaskDao;
-        DeleteAllAsyncTask(WorkoutDao dao) {mAsyncTaskDao = dao;}
+        DeleteAllWorkoutsAsyncTask(WorkoutDao dao) {mAsyncTaskDao = dao;}
 
         @Override
         protected Void doInBackground(Void...params)
         {
-            mAsyncTaskDao.deleteAll();
+            mAsyncTaskDao.deleteAllWorkouts();
             return null;
         }
     }

@@ -1,28 +1,19 @@
 package edu.drexel.lapcounter.lapcounter.backend.Database.Workout;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.support.test.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
-import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceRepository;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
-import kotlin.Unit;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 public class WorkoutDBTest_androidTest {
 
@@ -36,6 +27,7 @@ public class WorkoutDBTest_androidTest {
     private long start_timestamp_two = 1554976800; //03/15/2019 @ 2:00pm utc
     private long end_timestamp_two = 1554984000; //03/15/2019 @ 4:00pm utc
     private int wait_time = 100;
+
 
     @Before
     public void setUp() throws Exception
@@ -65,7 +57,7 @@ public class WorkoutDBTest_androidTest {
 
         units = new Units(TestUnits);
 
-        workout_repo.deleteAll();
+        workout_repo.deleteAllWorkouts();
         workout_repo.deleteUnits(units);
 
 
@@ -74,8 +66,49 @@ public class WorkoutDBTest_androidTest {
     @After
     public void cleanUp() throws Exception
     {
-       workout_repo.deleteAll();
-       workout_repo.deleteUnits(units);
+       workout_repo.deleteAllWorkouts();
+       workout_repo.deleteAllUnits();
+    }
+
+
+    @Test
+    public void init_Units() throws Exception
+    {
+        final String yards = "Yards", meters = "Meters";
+        workout_repo.initUnitsTable();
+        Thread.sleep(wait_time);
+        int count = workout_repo.getNumUnits();
+        assertEquals(2,count);
+        List<Units> all_units = workout_repo.getAllUnits();
+        boolean have_yards = false, have_meters = false;
+        for (Units u : all_units)
+        {
+            if(u.getUnitName().equals(yards))
+            {
+                have_yards = true;
+            }
+
+            if(u.getUnitName().equals(meters))
+            {
+                have_meters = true;
+            }
+        }
+        assertTrue(have_yards);
+        assertTrue(have_meters);
+    }
+
+    @Test
+    public void insert_delete_Units() throws Exception
+    {
+        workout_repo.insert(units);
+        Thread.sleep(wait_time);
+        int num = workout_repo.getNumUnits();
+        assertEquals(1,num);
+        workout_repo.deleteUnits(units);
+        Thread.sleep(wait_time);
+        num = workout_repo.getNumUnits();
+        assertEquals(0,num);
+
     }
 
 
@@ -100,8 +133,34 @@ public class WorkoutDBTest_androidTest {
         Thread.sleep(wait_time);
         int id = workout_one.getID();
         Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
+        Thread.sleep(wait_time);
         boolean val = retreived.equals(workout_one);
         assertTrue(val);
     }
 
+    @Test
+    public void insert_delete_Workout() throws Exception
+    {
+        workout_repo.insert(units);
+        workout_repo.insert(workout_one);
+        Thread.sleep(wait_time);
+        Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
+        assertTrue(retreived != null && retreived.getID() == workout_one.getID());
+        workout_repo.deleteWorkoutByID(workout_one.getID());
+        Thread.sleep(wait_time);
+        retreived = workout_repo.getWorkoutByID(workout_one.getID());
+        assertTrue(retreived == null);
+    }
+
+    @Test
+    public void insert_retreive_multiple_Workouts() throws Exception
+    {
+        workout_repo.insert(units);
+        workout_repo.insert(workout_one);
+        workout_repo.insert(workout_two);
+        Thread.sleep(wait_time);
+        List<Workout> retrieved = workout_repo.getAllWorkouts();
+        assertEquals(2,retrieved.size());
+
+    }
 }
