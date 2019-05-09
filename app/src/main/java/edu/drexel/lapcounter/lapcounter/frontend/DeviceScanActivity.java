@@ -79,6 +79,20 @@ public class DeviceScanActivity extends AppCompatActivity {
             whitelist.add(device.getMacAddress());
         }
         mButton = findViewById(R.id.button13);
+
+        initRecyclerView();
+        requestBluetoothPermission();
+
+    }
+
+    private void initScanner(DeviceScanner scanner) {
+        mDeviceScanner = scanner;
+        mDeviceScanner.setCallback(mDeviceCallback);
+        mDeviceScanner.startScan();
+    }
+
+    private void initRecyclerView()
+    {
         //RecyclerView
         RecyclerView mRecyclerView = findViewById(R.id.device_scan_recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
@@ -101,16 +115,8 @@ public class DeviceScanActivity extends AppCompatActivity {
                 mDevice = mAdapter.getDevice(device_name);
             }
         }));
-
-        requestBluetoothPermission();
-
     }
 
-    private void initScanner(DeviceScanner scanner) {
-        mDeviceScanner = scanner;
-        mDeviceScanner.setCallback(mDeviceCallback);
-        mDeviceScanner.startScan();
-    }
 
     private void initBleScanner() {
         initScanner(new BLEScanner(this));

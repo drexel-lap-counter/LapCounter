@@ -44,7 +44,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
     public static final String KEY_DEVICE_ADDRESS = "device_address";
 
     // Sample device scanner
-    private DeviceScanner mDeviceScanner = new BLEScanner(this);// new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new BLEScanner(this);//new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
