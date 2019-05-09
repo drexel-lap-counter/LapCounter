@@ -1,10 +1,12 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -14,6 +16,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -70,6 +73,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
     private TextView mDebugConnectLabel;
     private int mLapCount;
+
+    private String mDeviceAddress;
 
     private void pause() {
         // If we're already paused, do nothing.
@@ -202,6 +207,58 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mLapCounterService = null;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        String currentDevice = loadDeviceAddress();
+
+        if (mDeviceAddress == null) {
+            // Pull the currently selected device from SharedPreferences.
+            mDeviceAddress = currentDevice;
+            return;
+        }
+
+        if (mDeviceAddress.equals(currentDevice)) {
+            // Device hasn't changed. There's nothing to do.
+            return;
+        }
+
+        // So the user changed their device mid-workout.
+
+        mDeviceAddress = currentDevice;
+
+        pause();
+
+        // Connect to the new device.
+        mBleService.disconnectDevice();
+
+        // Did the user already start a workout with the previous device?
+        if (updatedTime > 0)
+        {
+            // Ask if they'd like to save their current workout.
+            new android.support.v7.app.AlertDialog.Builder(this)
+                    .setMessage("Since you've connected to a different device, the current workout " +
+                            "must be stopped. Would you like to save your progress?")
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveWorkout();
+                            restartWorkout();
+                        }
+                    })
+                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            restartWorkout();
+                        }
+                    })
+                    .show();
+        }
+
+        mBleService.connectToDevice(mDeviceAddress);
+    }
+
     private void requestBluetoothPermission() {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -282,8 +339,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
     private void connect() {
-        String mac = loadDeviceAddress();
-        if (mac == null) {
+        if (mDeviceAddress == null) {
             mDebugConnectLabel.setText(R.string.label_no_device_selected);
             // TODO: What should happen if the user does not have a currently selected device?
             // Should they be redirected to the DeviceSelectActivity? Should the
@@ -292,10 +348,12 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
-        String connectMessage = getResources().getString(R.string.label_connecting, mac);
+
+
+        String connectMessage = getResources().getString(R.string.label_connecting, mDeviceAddress);
         mDebugConnectLabel.setText(connectMessage);
-        mBleService.connectToDevice(mac);
-        mLapCounterService.updateThreshold(mac);
+        mBleService.connectToDevice(mDeviceAddress);
+        mLapCounterService.updateThreshold(mDeviceAddress);
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -316,6 +374,25 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         }
 
     };
+
+    private void restartWorkout() {
+        startTime = new Date();
+        updatedTime = 0L;
+        timeSwapBuff = 0L;
+        timeInMilliseconds = 0L;
+        timerValue.setText(R.string.timerVal);
+
+//                mFakeLapCount = 0;
+        mCounter.setText("0");
+
+        startResumeButton.setText(R.string.startButtonLabel);
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        saveButton.setEnabled(false);
+
+        mBleService.reset();
+        mLapCounterService.reset();
+    }
 
     public void onButtonShowPopupWindowClick(View view) {
 
@@ -346,23 +423,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         Button yesButton = popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                startTime = new Date();
-                updatedTime = 0L;
-                timeSwapBuff = 0L;
-                timeInMilliseconds = 0L;
-                timerValue.setText(R.string.timerVal);
-
-//                mFakeLapCount = 0;
-                mCounter.setText("0");
-
-                startResumeButton.setText(R.string.startButtonLabel);
-                startResumeButton.setEnabled(true);
-                pauseButton.setEnabled(false);
-                saveButton.setEnabled(false);
-
-                mBleService.reset();
-                mLapCounterService.reset();
-
+                restartWorkout();
                 popupWindow.dismiss();
             }
         } );
