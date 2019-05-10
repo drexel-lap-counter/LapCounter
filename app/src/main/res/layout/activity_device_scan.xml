@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".frontend.DeviceScanActivity">
+    tools:context=".frontend.DeviceScanActivity"
+    android:drawable="@drawable/item_sel">
 
     <Button
         android:id="@+id/button13"
@@ -22,9 +23,12 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/device_scan_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="689dp"
-        android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@+id/button13" />
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button13"
+        app:layout_constraintVertical_bias="1.0" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
