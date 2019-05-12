@@ -31,6 +31,7 @@ public class UnitsDBTest
 
         workout_repo.deleteAllWorkouts();
         workout_repo.deleteUnits(units);
+        Thread.sleep(wait_time);
     }
 
     @After
@@ -38,6 +39,7 @@ public class UnitsDBTest
     {
         workout_repo.deleteAllWorkouts();
         workout_repo.deleteAllUnits();
+        Thread.sleep(wait_time);
     }
 
 
@@ -48,8 +50,6 @@ public class UnitsDBTest
         workout_repo.initUnitsTable();
         Thread.sleep(wait_time);
         int count = workout_repo.getNumUnits();
-        Thread.sleep(wait_time);
-
         assertEquals(2,count);
         List<Units> all_units = workout_repo.getAllUnits();
         boolean have_yards = false, have_meters = false;
@@ -75,7 +75,6 @@ public class UnitsDBTest
         workout_repo.insert(units);
         Thread.sleep(wait_time);
         int num = workout_repo.getNumUnits();
-        Thread.sleep(wait_time);
         assertEquals(1,num);
         workout_repo.deleteUnits(units);
         Thread.sleep(wait_time);
@@ -91,7 +90,6 @@ public class UnitsDBTest
         workout_repo.insert(units);
         Thread.sleep(wait_time);
         List<Units> retreived = workout_repo.getAllUnits();
-        Thread.sleep(wait_time);
         assertEquals(1,retreived.size());
 
         Units ret_units = retreived.get(0);

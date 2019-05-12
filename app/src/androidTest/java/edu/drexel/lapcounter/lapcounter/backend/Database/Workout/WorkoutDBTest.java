@@ -59,6 +59,7 @@ public class WorkoutDBTest {
 
         workout_repo.deleteAllWorkouts();
         workout_repo.deleteUnits(units);
+        Thread.sleep(wait_time);
 
 
     }
@@ -68,6 +69,7 @@ public class WorkoutDBTest {
     {
        workout_repo.deleteAllWorkouts();
        workout_repo.deleteAllUnits();
+       Thread.sleep(wait_time);
     }
 
 
@@ -79,7 +81,6 @@ public class WorkoutDBTest {
         Thread.sleep(wait_time);
         int id = workout_one.getID();
         Workout retreived = workout_repo.getWorkoutByID(id);
-        Thread.sleep(wait_time);
         boolean val = retreived.equals(workout_one);
         assertTrue(val);
     }
@@ -91,7 +92,6 @@ public class WorkoutDBTest {
         workout_repo.insert(workout_one);
         Thread.sleep(wait_time);
         Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
-        Thread.sleep(wait_time);
         assertTrue(retreived != null && retreived.getID() == workout_one.getID());
         workout_repo.deleteWorkoutByID(workout_one.getID());
         Thread.sleep(wait_time);
@@ -107,7 +107,6 @@ public class WorkoutDBTest {
         workout_repo.insert(workout_two);
         Thread.sleep(wait_time);
         List<Workout> retrieved = workout_repo.getAllWorkouts();
-        Thread.sleep(wait_time);
         assertEquals(2,retrieved.size());
 
     }
@@ -120,7 +119,6 @@ public class WorkoutDBTest {
         workout_repo.insert(workout_one);
         Thread.sleep(wait_time);
         List<Workout> retrieved = workout_repo.getAllWorkoutsDecending();
-        Thread.sleep(wait_time);
         assertEquals(2,retrieved.size());
         Workout ret_workout_one = retrieved.get(0);
         Workout ret_workout_two = retrieved.get(1);

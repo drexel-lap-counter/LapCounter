@@ -110,4 +110,23 @@ public class DeviceRepository {
         }
     }
 
+    public void deleteAllDevices() {
+        new DeleteAllAsyncTask(mDeviceDao).execute();
+    }
+
+    private static class DeleteAllAsyncTask extends AsyncTask<Void, Void, Void> {
+        private DeviceDao mAsyncTaskDao;
+
+        DeleteAllAsyncTask(DeviceDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mAsyncTaskDao.deleteAll();
+            return null;
+        }
+    }
+
 }
