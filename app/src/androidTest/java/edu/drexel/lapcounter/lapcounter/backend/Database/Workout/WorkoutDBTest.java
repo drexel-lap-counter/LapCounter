@@ -15,7 +15,7 @@ import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class WorkoutDBTest_androidTest {
+public class WorkoutDBTest {
 
     private Workout workout_one;
     private Workout workout_two;
@@ -26,7 +26,7 @@ public class WorkoutDBTest_androidTest {
     private long end_timestamp_one = 1554912000; //03/11/2019 @ 12:00:00am utc
     private long start_timestamp_two = 1554976800; //03/15/2019 @ 2:00pm utc
     private long end_timestamp_two = 1554984000; //03/15/2019 @ 4:00pm utc
-    private int wait_time = 100;
+    private int wait_time = 300;
 
 
     @Before
@@ -72,67 +72,13 @@ public class WorkoutDBTest_androidTest {
 
 
     @Test
-    public void init_Units() throws Exception
-    {
-        final String yards = "Yards", meters = "Meters";
-        workout_repo.initUnitsTable();
-        Thread.sleep(wait_time);
-        int count = workout_repo.getNumUnits();
-        assertEquals(2,count);
-        List<Units> all_units = workout_repo.getAllUnits();
-        boolean have_yards = false, have_meters = false;
-        for (Units u : all_units)
-        {
-            if(u.getUnitName().equals(yards))
-            {
-                have_yards = true;
-            }
-
-            if(u.getUnitName().equals(meters))
-            {
-                have_meters = true;
-            }
-        }
-        assertTrue(have_yards);
-        assertTrue(have_meters);
-    }
-
-    @Test
-    public void insert_delete_Units() throws Exception
-    {
-        workout_repo.insert(units);
-        Thread.sleep(wait_time);
-        int num = workout_repo.getNumUnits();
-        assertEquals(1,num);
-        workout_repo.deleteUnits(units);
-        Thread.sleep(wait_time);
-        num = workout_repo.getNumUnits();
-        assertEquals(0,num);
-
-    }
-
-
-    @Test
-    public void insert_retrieve_Units() throws Exception
-    {
-        workout_repo.insert(units);
-        Thread.sleep(wait_time);
-        List<Units> retreived = workout_repo.getAllUnits();
-
-        assertEquals(1,retreived.size());
-
-        Units ret_units = retreived.get(0);
-        assertTrue(ret_units.getUnitName().equals(TestUnits));
-    }
-
-    @Test
     public void insert_retrieve_Workout() throws Exception
     {
         workout_repo.insert(units);
         workout_repo.insert(workout_one);
         Thread.sleep(wait_time);
         int id = workout_one.getID();
-        Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
+        Workout retreived = workout_repo.getWorkoutByID(id);
         Thread.sleep(wait_time);
         boolean val = retreived.equals(workout_one);
         assertTrue(val);
@@ -145,6 +91,7 @@ public class WorkoutDBTest_androidTest {
         workout_repo.insert(workout_one);
         Thread.sleep(wait_time);
         Workout retreived = workout_repo.getWorkoutByID(workout_one.getID());
+        Thread.sleep(wait_time);
         assertTrue(retreived != null && retreived.getID() == workout_one.getID());
         workout_repo.deleteWorkoutByID(workout_one.getID());
         Thread.sleep(wait_time);
@@ -160,7 +107,27 @@ public class WorkoutDBTest_androidTest {
         workout_repo.insert(workout_two);
         Thread.sleep(wait_time);
         List<Workout> retrieved = workout_repo.getAllWorkouts();
+        Thread.sleep(wait_time);
         assertEquals(2,retrieved.size());
 
     }
+
+    @Test
+    public void insert_retreieve_multiple_Workouts_Descending() throws Exception
+    {
+        workout_repo.insert(units);
+        workout_repo.insert(workout_two);
+        workout_repo.insert(workout_one);
+        Thread.sleep(wait_time);
+        List<Workout> retrieved = workout_repo.getAllWorkoutsDecending();
+        Thread.sleep(wait_time);
+        assertEquals(2,retrieved.size());
+        Workout ret_workout_one = retrieved.get(0);
+        Workout ret_workout_two = retrieved.get(1);
+        assertEquals(2, ret_workout_one.getID());
+        assertEquals(1, ret_workout_two.getID());
+
+
+    }
+
 }
