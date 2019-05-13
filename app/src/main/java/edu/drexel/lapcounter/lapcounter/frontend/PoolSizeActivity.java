@@ -1,6 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,13 +19,13 @@ public class PoolSizeActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_settings);
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
     //Default Values
-    private static final int defPoolSize = 25;
-    private static final String defPoolUnits = "Yards";
+    public static final int defPoolSize = 25;
+    public static final String defPoolUnits = "Yards";
 
     //Keys used for loading/save pool size and units
-    private static final String poolSizePreferences = "pool_size_pref";
-    private static final String poolSizeKey = "pool_size_key";
-    private static final String poolUnitsKey = "pool_size_units";
+    public static final String poolSizePreferences = "pool_size_pref";
+    public static final String poolSizeKey = "pool_size_key";
+    public static final String poolUnitsKey = "pool_size_units";
 
     private EditText custom_pool_text;
     private int poolSize;
@@ -175,6 +176,8 @@ public class PoolSizeActivity extends AppCompatActivity {
         editor.putInt(poolSizeKey,poolSize);
         editor.putString(poolUnitsKey,poolUnits);
         editor.apply();
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     private void tryGetCustomPoolSize(String s)

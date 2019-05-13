@@ -19,7 +19,6 @@ import java.util.List;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEScanner;
 import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
@@ -45,7 +44,7 @@ public class DeviceSelectActivity extends AppCompatActivity {
     public static final String KEY_DEVICE_ADDRESS = "device_address";
 
     // Sample device scanner
-    private DeviceScanner mDeviceScanner = new BLEScanner(this);// new DummyDeviceScanner();
+    private DeviceScanner mDeviceScanner = new BLEScanner(this);//new DummyDeviceScanner();
 
     /**
      * This callback gets called *once per device discovered*. Use it to populate
@@ -58,6 +57,8 @@ public class DeviceSelectActivity extends AppCompatActivity {
             Log.i(TAG, String.format("Found Registered Device '%s' '%s' %s", deviceName, deviceAddress, rssi));
             Device found_device = mDeviceViewModel.getDeviceByMacAddress(deviceAddress);
             mAdapter.addItem(found_device);
+            if(mDevice != null && found_device.getName().equals(mDevice.getName()))
+                mAdapter.setSelectedPos(mAdapter.getPosition(found_device.getName()));
             mAdapter.notifyDataSetChanged();
         }
     };
@@ -78,8 +79,8 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mDeviceViewModel = ViewModelProviders.of(this).get(DeviceViewModel.class);
-        ArrayList<Device> myDataset = new ArrayList<Device>();
-        mAdapter = new RecyclerAdapter(myDataset);
+        ArrayList<Device> Dataset = new ArrayList<Device>();
+        mAdapter = new RecyclerAdapter(Dataset,getResources().getColor(R.color.zebraStripeColorLight),getResources().getColor(R.color.zebraStripeColorDark));
         mRecyclerView.setAdapter(mAdapter);
 
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getBaseContext(), mRecyclerView, new RecyclerTouchListener.ClickListener() {
@@ -90,6 +91,8 @@ public class DeviceSelectActivity extends AppCompatActivity {
                 TextView selected_view = (TextView) view;
                 String device_name = (String) selected_view.getText();
                 mDevice = mAdapter.getDevice(device_name);
+                mAdapter.setSelectedPos(position);
+                mAdapter.notifyDataSetChanged();
 
                 // Select this device
                 selectDevice(mDevice);
@@ -97,12 +100,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
                 // Update the screen
                 refreshUI(mDevice);
             }
-
-            @Override
-            public void onLongClick(View view, int position) {
-                onClick(view, position);
-            }
-
         }));
 
         checkForSelectedDevice();
@@ -146,7 +143,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_ADDRESS, mDevice.getMacAddress());
-        intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_THRESHOLD, mDevice.getThreshold());
         intent.putExtra(
                 DeviceInfoActivity.EXTRAS_USE_DUMMY_CALIBRATOR,
                 mDeviceScanner instanceof DummyDeviceScanner);

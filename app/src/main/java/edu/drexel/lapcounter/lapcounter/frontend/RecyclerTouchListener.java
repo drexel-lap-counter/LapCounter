@@ -8,30 +8,18 @@ import android.view.View;
 
 public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener
 {
-    private GestureDetector gestureDetector;
-    private ClickListener clickListener;
+    private GestureDetector mGestureDetector;
+    private ClickListener mClickListener;
     public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener)
     {
-        this.clickListener = clickListener;
-        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener()
+        this.mClickListener = clickListener;
+        mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener()
         {
             @Override
             public boolean onSingleTapUp(MotionEvent e)
             {
                 return true;
             }
-
-            public void onLongPress(MotionEvent e)
-            {
-                View child = recyclerView.findChildViewUnder(e.getX(),e.getY());
-
-                if(child != null && clickListener != null)
-                {
-                    clickListener.onLongClick(child,recyclerView.getChildAdapterPosition(child));
-                }
-            }
-
-
         });
     }
 
@@ -40,9 +28,10 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener
     {
         View child = rv.findChildViewUnder(e.getX(),e.getY());
 
-        if(child != null && clickListener != null)
+
+        if(child != null && mClickListener != null && mGestureDetector.onTouchEvent(e))
         {
-            clickListener.onLongClick(child,rv.getChildAdapterPosition(child));
+            mClickListener.onClick(child,rv.getChildAdapterPosition(child));
         }
         return false;
     }
@@ -62,7 +51,6 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener
     public interface ClickListener
     {
         void onClick(View view, int  position);
-        void onLongClick(View view, int position);
     }
 
 }

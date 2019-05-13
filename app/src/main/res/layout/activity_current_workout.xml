@@ -99,60 +99,103 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal">
-            <!-- android:padding="6dp" > -->
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".125" />
 
             <Button
                 android:id="@+id/startResumeButton"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                style="@style/currentWorkoutButton"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
                 android:text="@string/startButtonLabel"
-                android:layout_weight="1"
-                android:textAlignment="center"/>
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/pauseButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".25" />
 
             <Button
                 android:id="@+id/pauseButton"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                style="@style/currentWorkoutButton"
+                android:layout_alignBaseline="@+id/startResumeButton"
+                android:layout_alignBottom="@+id/startResumeButton"
                 android:text="@string/pauseButtonLabel"
-                android:layout_weight="1"
-                android:textAlignment="center"/>
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/startResumeButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".125" />
         </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1.0">
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal">
-            <!-- android:padding="6dp" > -->
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".125"/>
 
             <Button
                 android:id="@+id/restartButton"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                style="@style/currentWorkoutButton"
                 android:text="@string/restartButtonLabel"
-                android:layout_weight="1"
-                android:textAlignment="center"/>
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/saveButton"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".25" />
 
             <Button
                 android:id="@+id/saveButton"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                style="@style/currentWorkoutButton"
+                android:layout_alignBaseline="@+id/restartButton"
+                android:layout_alignBottom="@+id/restartButton"
                 android:text="@string/saveButtonLabel"
-                android:layout_weight="1"
-                android:textAlignment="center"/>
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/restartButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight=".125" />
         </LinearLayout>
 
         <View

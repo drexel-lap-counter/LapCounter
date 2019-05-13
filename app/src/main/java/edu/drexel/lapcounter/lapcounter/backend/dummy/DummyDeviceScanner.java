@@ -24,7 +24,13 @@ public class DummyDeviceScanner implements DeviceScanner {
         "Dummy G",
         "Dummy H",
         "Dummy I",
-        "Dummy J"
+        "Dummy J",
+        "Dummy K",
+        "Dummy L",
+        "Dummy M",
+        "Dummy N",
+        "Dummy O",
+        "Dummy P"
     };
 
     private static final String[] MAC_ADDRESSES  = new String[] {
@@ -37,7 +43,13 @@ public class DummyDeviceScanner implements DeviceScanner {
         "FF:FF:FF:FF:FF:06",
         "FF:FF:FF:FF:FF:07",
         "FF:FF:FF:FF:FF:08",
-        "FF:FF:FF:FF:FF:09"
+        "FF:FF:FF:FF:FF:09",
+        "FF:FF:FF:FF:FF:10",
+        "FF:FF:FF:FF:FF:11",
+        "FF:FF:FF:FF:FF:12",
+        "FF:FF:FF:FF:FF:13",
+        "FF:FF:FF:FF:FF:14",
+        "FF:FF:FF:FF:FF:15"
     };
 
     private Runnable detectDummyDevice = new Runnable() {

@@ -32,7 +32,7 @@ public class BLEComm {
 
     // States of connection
     private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
+    static final int STATE_CONNECTING = 1;
     static final int STATE_CONNECTED = 2;
 
     private String mPreviousConnectAddress;
@@ -211,5 +211,36 @@ public class BLEComm {
         mPreviousConnectAddress = null;
         mCurrentConnectAddress = null;
         mIntentionalDisconnect = false;
+    }
+
+    // Methods for testing
+
+    public BluetoothGatt getmBluetoothGatt() {
+        return mBluetoothGatt;
+    }
+
+    public void setmBluetoothGatt(BluetoothGatt mBluetoothGatt) {
+        this.mBluetoothGatt = mBluetoothGatt;
+    }
+
+    public void setmConnectionState(int mConnectionState) {
+        this.mConnectionState = mConnectionState;
+    }
+
+    public BLEComm(Context mParent, BluetoothAdapter adapter){
+        this.mParent = mParent;
+        this.mBluetoothAdapter = adapter;
+    }
+
+    public void setmBluetoothAdapter(BluetoothAdapter mBluetoothAdapter) {
+        this.mBluetoothAdapter = mBluetoothAdapter;
+    }
+
+    public String getmPreviousConnectAddress() {
+        return mPreviousConnectAddress;
+    }
+
+    public String getmCurrentConnectAddress() {
+        return mCurrentConnectAddress;
     }
 }

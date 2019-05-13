@@ -13,9 +13,14 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder> {
     private ArrayList<Device> mDataset;
+    private int mSelectedPos = RecyclerView.NO_POSITION;
+    private int mZebraStripeColorDark;
+    private int mZebraStripeColorLight;
 
-    public RecyclerAdapter(ArrayList<Device> myDataset) {
+    public RecyclerAdapter(ArrayList<Device> myDataset, int light_zebra_color,int dark_zebra_color) {
         mDataset = myDataset;
+        mZebraStripeColorLight = light_zebra_color;
+        mZebraStripeColorDark = dark_zebra_color;
     }
 
     public void addItem(Device item) {
@@ -61,12 +66,30 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         return null;
     }
 
+    public int getPosition(String name)
+    {
+        for(int i = 0; i < mDataset.size(); i++)
+        {
+            Device device = mDataset.get(i);
+            if(device.getName().equals(name))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public Device getDevice(int positon) {
         if (positon < 0 || positon >= mDataset.size()) {
             return null;
         } else {
             return mDataset.get(positon);
         }
+    }
+
+    public void setSelectedPos(int pos)
+    {
+        mSelectedPos = pos;
     }
 
     public void clearItems() {
@@ -83,6 +106,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
+        holder.mTextView.setSelected(mSelectedPos == position);
+        if (position % 2 == 1)
+        {
+            holder.mTextView.setBackgroundColor(mZebraStripeColorLight);
+        }
+        else
+        {
+            holder.mTextView.setBackgroundColor(mZebraStripeColorDark);
+        }
+
         holder.mTextView.setText(mDataset.get(position).getName());
     }
 
