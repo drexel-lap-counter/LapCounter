@@ -27,7 +27,7 @@
     <string name="label_done">Done</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="resumeButtonLabel">RESUME</string>
+    <string name="resumeButtonLabel">Resume</string>
     <string name="pool_size_title">"Pool Size"</string>
     <string name="meters">Meters</string>
     <string name="yards">"Yards"</string>
