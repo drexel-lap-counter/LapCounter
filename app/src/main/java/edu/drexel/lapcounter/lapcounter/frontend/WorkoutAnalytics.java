@@ -133,6 +133,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             }
         });
 
+
         Date_Picker();
 
         // In the final version, use R.string.<string id> for titles
