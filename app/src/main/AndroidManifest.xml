@@ -87,9 +87,5 @@
             android:name=".frontend.DeviceInfoActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"/>
-        <activity
-            android:name=".frontend.temp.ReceiverTest"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden"/>
     </application>
 </manifest>
