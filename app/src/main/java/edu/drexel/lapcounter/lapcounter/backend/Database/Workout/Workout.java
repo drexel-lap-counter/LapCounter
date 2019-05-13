@@ -126,4 +126,28 @@ public class Workout {
         this.mDeviceMAC = device_mac;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if(o == this)
+        {
+            return true;
+        }
+
+        if(!(o instanceof Workout))
+        {
+            return false;
+        }
+        Workout w = (Workout) o;
+        return ((w.getDeviceMAC()==null && this.mDeviceMAC==null) || w.getDeviceMAC().equals(this.mDeviceMAC)) &&
+                w.getPoolUnits().equals(this.mPoolUnits) &&
+                w.getEndDate().equals(this.mEndDate) &&
+                w.getStartDate().equals(this.mStartDate) &&
+                w.getID() == this.getID() &&
+                w.getLaps() == this.getLaps() &&
+                w.getPoolLength() == this.getPoolLength() &&
+                w.getTotalDistanceTraveled() == this.getTotalDistanceTraveled();
+    }
+
+
 }

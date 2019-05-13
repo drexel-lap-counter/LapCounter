@@ -23,7 +23,7 @@ public class DeviceRepository {
         mDeviceDao = db.deviceDao();
     }
 
-    List<Device> getAllDevices()
+    public List<Device> getAllDevices()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<List<Device>> res = ex.submit(new Callable<List<Device>>() {
@@ -106,6 +106,25 @@ public class DeviceRepository {
         @Override
         protected Void doInBackground(String... strings) {
             mAsyncTaskDao.deleteByMacAddress(strings[0]);
+            return null;
+        }
+    }
+
+    public void deleteAllDevices() {
+        new DeleteAllAsyncTask(mDeviceDao).execute();
+    }
+
+    private static class DeleteAllAsyncTask extends AsyncTask<Void, Void, Void> {
+        private DeviceDao mAsyncTaskDao;
+
+        DeleteAllAsyncTask(DeviceDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mAsyncTaskDao.deleteAll();
             return null;
         }
     }

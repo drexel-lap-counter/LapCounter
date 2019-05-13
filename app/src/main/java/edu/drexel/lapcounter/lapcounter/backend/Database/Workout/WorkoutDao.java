@@ -27,7 +27,7 @@ public interface WorkoutDao {
     Workout getWorkoutByID(int id);
 
     @Query("DELETE FROM workouts")
-    void deleteAll();
+    void deleteAllWorkouts();
 
     @Query("DELETE FROM workouts WHERE ID=:id")
     void deleteWorkout(int id);

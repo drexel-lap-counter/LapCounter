@@ -54,6 +54,18 @@ public class LapCounterService extends Service {
      */
     private final IBinder mBinder = new LocalBinder();
 
+    @SuppressWarnings("unused")
+    public LapCounterService() {}
+
+    // Constructor for mocking in unit tests.
+    public LapCounterService(LocationStateMachine lsm, DisconnectManager dm, LapCounter lc,
+                             SimpleMessageReceiver r) {
+        mStateMachine = lsm;
+        mDisconnectManager = dm;
+        mLapCounter = lc;
+        mReceiver = r;
+    }
+
     /**
      * Binder implementation for LapCounterService
      */
@@ -89,7 +101,7 @@ public class LapCounterService extends Service {
      * Go through the sub-components and have them all register callback functions for
      * whatever events are applicable.
      */
-    private void initCallbacks() {
+    public void initCallbacks() {
         mLapCounter.initCallbacks(mReceiver);
         mDisconnectManager.initCallbacks(mReceiver);
         mStateMachine.initCallbacks(mReceiver);

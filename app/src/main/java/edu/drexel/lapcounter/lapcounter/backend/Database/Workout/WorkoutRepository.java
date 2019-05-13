@@ -108,6 +108,23 @@ public class WorkoutRepository {
         }
     }
 
+    public void deleteAllUnits()
+    {
+        new DeleteAllUnitsAsyncTask(mUnitsDao).execute();
+    }
+    private static class DeleteAllUnitsAsyncTask extends AsyncTask<Void,Void,Void>
+    {
+        private UnitsDao mAsyncTaskDao;
+        DeleteAllUnitsAsyncTask(UnitsDao dao) {mAsyncTaskDao = dao;}
+
+        @Override
+        protected Void doInBackground(Void...params)
+        {
+            mAsyncTaskDao.deleteAllUnits();
+            return null;
+        }
+    }
+
 
     /*** WORKOUT CODE ***/
     public List<Workout> getAllWorkouts()
@@ -209,19 +226,19 @@ public class WorkoutRepository {
         }
     }
 
-    public void deleteAll()
+    public void deleteAllWorkouts()
     {
-        new DeleteAllAsyncTask(mWorkoutDao).execute();
+        new DeleteAllWorkoutsAsyncTask(mWorkoutDao).execute();
     }
-    private static class DeleteAllAsyncTask extends AsyncTask<Void,Void,Void>
+    private static class DeleteAllWorkoutsAsyncTask extends AsyncTask<Void,Void,Void>
     {
         private WorkoutDao mAsyncTaskDao;
-        DeleteAllAsyncTask(WorkoutDao dao) {mAsyncTaskDao = dao;}
+        DeleteAllWorkoutsAsyncTask(WorkoutDao dao) {mAsyncTaskDao = dao;}
 
         @Override
         protected Void doInBackground(Void...params)
         {
-            mAsyncTaskDao.deleteAll();
+            mAsyncTaskDao.deleteAllWorkouts();
             return null;
         }
     }

@@ -11,6 +11,10 @@ public class SlidingWindow<T> extends ArrayDeque<T> {
 
     @Override
     public void addLast(T t) {
+        if (mWindowSize == 0) {
+            return;
+        }
+
         if (isFull()) {
             pollFirst();
         }

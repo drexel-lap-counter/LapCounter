@@ -73,7 +73,7 @@ public abstract class LapCounterDatabase extends RoomDatabase {
             int initialTotalDistanceTraveled = 1700;
 
 
-            mDao.deleteAll();
+            mDao.deleteAllWorkouts();
 
             Workout workout = new Workout();
 

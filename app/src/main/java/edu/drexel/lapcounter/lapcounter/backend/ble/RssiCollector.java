@@ -209,4 +209,18 @@ public class RssiCollector {
     public double computeThreshold(CalibrationRewardFunc rewardFunc) {
         return computeBestReward(rewardFunc).Rssi;
     }
+
+    public class ListSizes {
+        int NumValues;
+        int NumDeltas;
+
+        ListSizes(int numValues, int numDeltas) {
+            NumValues = numValues;
+            NumDeltas = numDeltas;
+        }
+    }
+
+    public ListSizes getListSizes() {
+        return new ListSizes(mRssiValues.size(), mRssiAbsDeltas.size());
+    }
 }

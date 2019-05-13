@@ -38,4 +38,10 @@ public class DeviceViewModel extends AndroidViewModel {
     public void deleteByMacAddress(String mac) {
         mRepository.deleteByMacAddress(mac);
     }
+
+    public void deleteAllDevices()
+    {
+        mRepository.deleteAllDevices();
+    }
+
 }
