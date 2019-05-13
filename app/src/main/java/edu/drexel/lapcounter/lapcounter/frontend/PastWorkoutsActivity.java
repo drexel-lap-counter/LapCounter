@@ -67,7 +67,7 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
     private void initRecyclerView(){
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerv_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         PastWorkoutsRecyclerAdapter adapter = new PastWorkoutsRecyclerAdapter(this, mWorkoutDate,mLaps,mID);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

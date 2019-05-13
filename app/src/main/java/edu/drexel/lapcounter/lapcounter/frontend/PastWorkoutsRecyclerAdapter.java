@@ -2,6 +2,7 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,7 +76,7 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView workoutDate;
         TextView laps;
-        RelativeLayout parentLayout;
+        ConstraintLayout parentLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
