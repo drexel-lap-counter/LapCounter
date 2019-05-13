@@ -23,4 +23,12 @@ public class LinearRewardFunc implements CalibrationRewardFunc {
     public double computeReward(int absRssi, int absDelta) {
         return mRssiWeight * absRssi + mDeltaWeight * (100 - absDelta);
     }
+
+    public double getRssiWeight() {
+        return mRssiWeight;
+    }
+
+    public double getDeltaWeight() {
+        return mDeltaWeight;
+    }
 }

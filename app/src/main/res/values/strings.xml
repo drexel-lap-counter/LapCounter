@@ -10,8 +10,8 @@
     <string name="timerVal">00:00:00</string>
     <string name="pauseButtonLabel">Pause</string>
     <string name="startButtonLabel">Start</string>
-    <string name="restartButtonLabel">Restart</string>
     <string name="saveButtonLabel">Save</string>
+    <string name="restartButtonLabel">Restart</string>
     <string name="select_device">Select Device</string>
     <string name="i_device_name">DEVICE_NAME</string>
     <string name="i_device_mac">DEVICE_MAC</string>
@@ -48,18 +48,19 @@
     <string name="current_workout_timer_format">%d:%02d:%03d</string>
     <string name="ConfirmRestart">Are you sure you want to restart your workout?</string>
     <string name="label_delete_device">Delete Device</string>
+    <string name="save_workout_successful">Saved Workout Successfully!</string>
     <string-array name="measurement_array">
         <item>Yards</item>
         <item>Meters</item>
     </string-array>
+
     <string-array name="graphTypes">
         <item>Distance Traveled</item>
         <item>Average Speed</item>
         <item>Workout Duration</item>
     </string-array>
 
-    <string name="device_name">Device Name</string>
-    <string name="device_mac">Device MAC</string>
+
     <string name="label_select_dates">Select Dates:</string>
     <string name="label_start_date">Start Date</string>
     <string name="label_end_date">End Date</string>
@@ -75,4 +76,8 @@
     <string name="label_date_name">Date_name</string>
     <string name ="label_Paskworkouts_date">Date</string>
     <string name ="label_Paskworkouts_laps">Laps</string>
+
+    <string name="device_name">Device Name</string>
+    <string name="device_mac">Device MAC</string>
+
 </resources>
