@@ -1,7 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothManager;
@@ -12,6 +11,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.Objects;
+
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.BluetoothAdapterWrapper;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 public class BLEComm {
     // Tag for logging
@@ -31,14 +33,15 @@ public class BLEComm {
 
 
     // States of connection
-    private static final int STATE_DISCONNECTED = 0;
+    static final int STATE_DISCONNECTED = 0;
     static final int STATE_CONNECTING = 1;
     static final int STATE_CONNECTED = 2;
+    private final IBroadcastManager mBroadcastManager;
 
     private String mPreviousConnectAddress;
     private String mCurrentConnectAddress;
 
-    private BluetoothAdapter mBluetoothAdapter;
+    private IBluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
 
     private int mConnectionState = STATE_DISCONNECTED;
@@ -85,9 +88,16 @@ public class BLEComm {
     }
 
     public BLEComm(Context parent) {
-        mParent = parent;
-        mBluetoothAdapter = getAdapter(mParent);
+        this(parent, new BluetoothAdapterWrapper(getAdapter(parent)),
+                LocalBroadcastManagerWrapper.getInstance(parent));
     }
+
+    public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){
+        mParent = parent;
+        setBluetoothAdapter(adapter);
+        mBroadcastManager = broadcastManager;
+    }
+
 
     private static BluetoothAdapter getAdapter(Context c) {
         BluetoothManager m = (BluetoothManager) c.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -104,7 +114,7 @@ public class BLEComm {
     }
 
     private void localBroadcast(Intent intent) {
-        LocalBroadcastManager.getInstance(mParent).sendBroadcast(intent);
+        mBroadcastManager.sendBroadcast(intent);
     }
 
     private void broadcastConnect(boolean isReconnect) {
@@ -158,7 +168,7 @@ public class BLEComm {
             return true;
         }
 
-        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        IBluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 
         if (device == null) {
             Log.w(TAG, "Device not found.  Unable to connect.");
@@ -227,13 +237,16 @@ public class BLEComm {
         this.mConnectionState = mConnectionState;
     }
 
-    public BLEComm(Context mParent, BluetoothAdapter adapter){
-        this.mParent = mParent;
-        this.mBluetoothAdapter = adapter;
+    public void setBluetoothAdapter(BluetoothAdapter adapter) {
+        if (adapter == null) {
+            setBluetoothAdapter((IBluetoothAdapter)null);
+        } else {
+            setBluetoothAdapter(new BluetoothAdapterWrapper(adapter));
+        }
     }
 
-    public void setmBluetoothAdapter(BluetoothAdapter mBluetoothAdapter) {
-        this.mBluetoothAdapter = mBluetoothAdapter;
+    public void setBluetoothAdapter(IBluetoothAdapter adapter) {
+        this.mBluetoothAdapter = adapter;
     }
 
     public String getmPreviousConnectAddress() {

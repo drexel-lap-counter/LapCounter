@@ -1,5 +1,7 @@
 package edu.drexel.lapcounter.lapcounter.backend.lapcounter;
 
+import java.util.Objects;
+
 /**
  * Snapshot of the estimated state of the athlete.
  */
@@ -33,5 +35,21 @@ public class AthleteState{
         other.travelDirection = travelDirection;
         other.timestamp = timestamp;
         return other;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AthleteState that = (AthleteState) o;
+        return Double.compare(that.distRssi, distRssi) == 0 &&
+                travelDirection == that.travelDirection &&
+                timestamp == that.timestamp &&
+                zone == that.zone;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(zone, distRssi, travelDirection, timestamp);
     }
 }

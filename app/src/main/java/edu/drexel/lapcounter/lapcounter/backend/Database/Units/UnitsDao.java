@@ -26,4 +26,7 @@ public interface UnitsDao
 
     @Delete()
     void deleteUnits(Units units);
+
+    @Query("DELETE FROM units_table")
+    void deleteAllUnits();
 }

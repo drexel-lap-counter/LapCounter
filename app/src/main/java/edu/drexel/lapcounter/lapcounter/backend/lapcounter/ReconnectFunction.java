@@ -58,52 +58,8 @@ public class ReconnectFunction {
         if (!wasFar && !isFar && isLongDelay)
             return true;
 
-        // Since the far zone is very large, after a long delay it's hard to tell whether
-        // we need to count a lap. use other information to get a better picture
-        if (wasFar && isFar && isLongDelay) {
-            // TODO: Revisit.
-            // Since direction data is not reliable shortly before and after disconnects,
-            // the current implementation of this algorithm will not receive good data.
-            // For now, we'll say a FAR->FAR transition with a long delay will NOT count a lap.
-            return false;
-//            return doubleCheckFarFar();
-        }
-
         // In all other cases, we do not count a lap
         return false;
     }
 
-    /**
-     * For the case of before.zone = Far, after.zone = Far, delay = Long, it's hard to tell
-     * what happened. Use other information from the RSSIManager to reconstruct what happened
-     *
-     * @return true if a lap should be counted
-     */
-    boolean doubleCheckFarFar() {
-        // Is the athlete moving inbound or outbound before and after the disconnection?
-        boolean wasInbound = mBeforeDisconnect.travelDirection == RSSIManager.DIRECTION_IN;
-        boolean isInbound = mAfterReconnect.travelDirection == RSSIManager.DIRECTION_IN;
-
-        // If we were inbound and now we're outbound, the path must have dipped inside the
-        // near zone.
-        if (wasInbound && !isInbound)
-            return true;
-
-        // Sort the distance estimates before and after disconnecting. Is the after state
-        // further away or closer than the old one? This helps distinguish the last two cases
-        boolean isFurtherAway = mBeforeDisconnect.distRssi < mAfterReconnect.distRssi;
-
-        // If both states are inbound but now the athlete is further away, the athlete's path must
-        // have gone through the near zone and and out before eventually turning around
-        if (wasInbound && isInbound && isFurtherAway)
-            return true;
-
-        // Similar to the previous case, if both states are outbound but the athlete is now
-        // closer to the phone, the path must have gone through the near zone.
-        if (!wasInbound && !isInbound && !isFurtherAway)
-            return true;
-
-        // In all other cases, do not count a lap
-        return false;
-    }
 }

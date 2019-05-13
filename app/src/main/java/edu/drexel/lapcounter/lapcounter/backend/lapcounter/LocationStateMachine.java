@@ -6,7 +6,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBroadcastManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_IN;
 import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DIRECTION_OUT;
@@ -53,7 +55,7 @@ public class LocationStateMachine {
     /**
      * Utility object for broadcasting intents
      */
-    private LocalBroadcastManager mBroadcastManager;
+    private IBroadcastManager mBroadcastManager;
 
     /**
      * Current state
@@ -68,10 +70,13 @@ public class LocationStateMachine {
      * @param threshold Threshold to use from the device callibration settings
      */
     public LocationStateMachine(Context context, double threshold) {
-        mBroadcastManager = LocalBroadcastManager.getInstance(context);
-        mThreshold = threshold;
+        this(LocalBroadcastManagerWrapper.getInstance(context), threshold);
     }
 
+    public LocationStateMachine(IBroadcastManager broadcastManager, double threshold) {
+        mBroadcastManager = broadcastManager;
+        mThreshold = threshold;
+    }
 
     public void setThreshold(double threshold) {
         this.mThreshold = threshold;

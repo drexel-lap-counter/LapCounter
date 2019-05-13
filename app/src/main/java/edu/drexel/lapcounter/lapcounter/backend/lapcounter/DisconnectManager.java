@@ -6,7 +6,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
+import edu.drexel.lapcounter.lapcounter.backend.ble.IBroadcastManager;
 import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
+import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
 /**
  * This class listens for BLE disconnect/reconnect events and using information about the
@@ -23,13 +25,14 @@ public class DisconnectManager {
     /**
      * Used to publish events.
      */
-    private LocalBroadcastManager mBroadcastManager;
+    private IBroadcastManager mBroadcastManager;
 
     /**
      * When the bluetooth device reconnects to the phone, it's rather complicated
      * to handle what happens. We decided to wrap the logic up in a dedicated class.
      */
     private ReconnectFunction mReconnectFunc = null;
+
 
     /**
      * Current state of the athlete. This is updated on receiving incoming intents. As needed,
@@ -48,7 +51,7 @@ public class DisconnectManager {
             if (mReconnectFunc != null) {
                 // When a device first disconnects, this method will get called.
                 // Approximately 30 seconds later, if the device does not connect, then the
-                // BLEComm will send out another disconnect event (not explicitly; this
+    // BLEComm will send out another disconnect event (not explicitly; this
                 // 30 second timeout for connection attempts appears to be baked into the
                 // Android BLE libraries).
 
@@ -156,7 +159,11 @@ public class DisconnectManager {
      * @param context the parent service for setting up Intent broadcasts
      */
     public DisconnectManager(Context context) {
-        mBroadcastManager = LocalBroadcastManager.getInstance(context);
+        this(LocalBroadcastManagerWrapper.getInstance(context));
+    }
+
+    public DisconnectManager(IBroadcastManager broadcastManager) {
+        mBroadcastManager = broadcastManager;
     }
 
 
@@ -185,5 +192,17 @@ public class DisconnectManager {
     private void publishMissedLap() {
         Intent intent = new Intent(ACTION_MISSED_LAPS);
         mBroadcastManager.sendBroadcast(intent);
+    }
+
+    public AthleteState getCurrentState() {
+        return mCurrentState;
+    }
+
+    public ReconnectFunction getReconnectFunc() {
+        return mReconnectFunc;
+    }
+
+    public void setReconnectFunc(ReconnectFunction f) {
+        this.mReconnectFunc = f;
     }
 }
