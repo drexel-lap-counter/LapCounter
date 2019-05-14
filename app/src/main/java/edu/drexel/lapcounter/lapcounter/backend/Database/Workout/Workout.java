@@ -22,6 +22,7 @@ import static android.arch.persistence.room.ForeignKey.SET_NULL;
                                     childColumns = "Pool_Units",
                                     onDelete = SET_NULL)})
 public class Workout {
+    @ColumnInfo(name = "ID")
     @PrimaryKey(autoGenerate = true)
     public int id;
 
