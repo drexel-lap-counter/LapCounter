@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -51,7 +52,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     List <Workout> workoutsBetweenDateRange;
     private final static int MILLISECONDS_IN_SECOND = 1000;
     String unit_abbrev;
-    String graphType;
+    String graphType = "";
     private double METERTOYARDCONVERT =1.09361;
     private double YARDTOMETERCONVERT =.9144;
 
@@ -133,6 +134,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             }
         });
 
+
         Date_Picker();
 
         // In the final version, use R.string.<string id> for titles
@@ -150,7 +152,17 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     public void onNothingSelected (AdapterView < ? > parent){
 
     }
+    @Override
+    protected void onPause(){
+        super.onPause();
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        mNavBar.init();
+    }
     public void Date_Picker(){
         Workout_Analytics_Start_Date = (TextView) findViewById(R.id.Workout_Analytics_Start_Date);
         Workout_Analytics_End_Date = (TextView) findViewById(R.id.Workout_Analytics_End_Date);
@@ -283,6 +295,24 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
                 createBarGraph(chartStartDate,chartEndDate);
 
            }
+
+
+            }
+        else if ((Workout_Analytics_Start_Date.getText().toString().equals("Start Date"))&&(Workout_Analytics_End_Date.getText().toString().equals("End Date"))){
+            try {
+                workoutsBetweenDateRange = mWorkoutViewModel.getAllWorkouts();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(workoutsBetweenDateRange.get(0).getStartDate());
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(workoutsBetweenDateRange.get(workoutsBetweenDateRange.size()-1).getStartDate());
+            chartStartDate = DateSetListener(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
+            chartEndDate = DateSetListener(cal2.get(Calendar.YEAR),cal2.get(Calendar.MONTH),cal2.get(Calendar.DAY_OF_MONTH)+1);
+            valueCalulations();
+            createBarGraph(chartStartDate,chartEndDate);
         }
     }
 
@@ -418,7 +448,9 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             for (int j = 0; j < dates.size(); j++) {
                 count = 0;
                 totaldistance = 0;
-
+                if (graphType == ""){
+                    graphType = "Distance Traveled";
+                }
                 if (graphType.compareTo("Distance Traveled") == 0) {
                     for (int i = 0; i <= workoutsBetweenDateRange.size() - 1; i++) {
 

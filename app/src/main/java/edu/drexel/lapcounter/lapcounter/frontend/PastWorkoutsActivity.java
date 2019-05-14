@@ -64,10 +64,20 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         initRecyclerView();
         mNavBar.init();
     }
+    @Override
+    protected void onPause(){
+        super.onPause();
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        initRecyclerView();
+        mNavBar.init();
+    }
     private void initRecyclerView(){
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerv_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         PastWorkoutsRecyclerAdapter adapter = new PastWorkoutsRecyclerAdapter(this, mWorkoutDate,mLaps,mID);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
