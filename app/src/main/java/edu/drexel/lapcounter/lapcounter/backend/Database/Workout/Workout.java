@@ -49,7 +49,6 @@ public class Workout {
     @ColumnInfo(name="Device_Mac")
     private String mDeviceMAC;
 
-
     //
     //GETTERS
     //

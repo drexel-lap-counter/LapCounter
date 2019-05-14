@@ -18,7 +18,7 @@ public class BLEScanner implements DeviceScanner {
     private Context mParentContext;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
-    private boolean mIsScanning = false;
+    boolean mIsScanning = false;
 
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
         @Override
@@ -73,5 +73,22 @@ public class BLEScanner implements DeviceScanner {
         mBleService.stopScan(mLeScanCallback);
         mParentContext.unbindService(mBleServiceConnection);
         mIsScanning = false;
+    }
+
+    // testing methods
+    public BluetoothAdapter.LeScanCallback getmLeScanCallback() {
+        return mLeScanCallback;
+    }
+
+    public List<String> getmWhitelist() {
+        return mWhitelist;
+    }
+
+    void setmBleService(BLEService mBleService) {
+        this.mBleService = mBleService;
+    }
+
+    public ServiceConnection getmBleServiceConnection() {
+        return mBleServiceConnection;
     }
 }

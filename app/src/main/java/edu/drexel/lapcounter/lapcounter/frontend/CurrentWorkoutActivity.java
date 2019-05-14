@@ -1,9 +1,12 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -13,6 +16,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,8 +25,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.time.Duration;
+import java.util.Date;
 
 import edu.drexel.lapcounter.lapcounter.R;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
+import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewModel;
 import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
@@ -43,18 +53,14 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private Button restartButton;
     private Button saveButton;
 
-//    public static final String ACTION_LAP_COUNT =
-//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
-//    public static final String EXTRA_CURRENT_LAP_COUNT =
-//            "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT";
-
     // Unique ID for the Bluetooth request Intent
     private static final int REQUEST_ENABLE_BT = 2;
 
     //    private int mFakeLapCount = 0;
     private TextView timerValue;
     private String mTimerFormat;
-    private long startTime = 0L;
+    private Date startTime;
+    private Date pauseTime;
     private Handler customHandler = new Handler();
     private boolean isPaused = false;
 
@@ -65,10 +71,51 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     // Text fields in the activity
     private TextView mCounter;
 
-    // Object for scheduling fake laps counted.
-//    private Handler mHandler = new Handler();
-
     private TextView mDebugConnectLabel;
+    private int mLapCount;
+
+    private String mDeviceAddress;
+
+    private void pause() {
+        // If we're already paused, do nothing.
+        if (isPaused)
+            return;
+
+        // Save the paused time to use as
+        pauseTime = new Date();
+
+        timeSwapBuff += timeInMilliseconds;
+        customHandler.removeCallbacks(updateTimerThread);
+
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+
+        isPaused = true;
+        mBleService.stopRssiRequests();
+    }
+
+    private void saveWorkout() {
+        Workout workout = new Workout();
+        workout.setDeviceMAC(loadDeviceAddress());
+        workout.setStartDate(startTime);
+        workout.setEndDate(pauseTime);
+        workout.setLaps(mLapCount);
+        int poolLength = loadPoolLength();
+
+        workout.setPoolLength(poolLength);
+        workout.setPoolUnits(loadPoolUnits());
+        workout.setTotalDistanceTraveled(mLapCount * poolLength);
+
+        WorkoutViewModel wvm = ViewModelProviders.of(this).get(WorkoutViewModel.class);
+        wvm.insert(workout);
+
+        Toast.makeText(this, R.string.save_workout_successful, Toast.LENGTH_SHORT).show();
+
+        startResumeButton.setText(R.string.startButtonLabel);
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        saveButton.setEnabled(false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,12 +147,13 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         startResumeButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
+                startTime = new Date();
                 customHandler.postDelayed(updateTimerThread, 0);
 
                 startResumeButton.setEnabled(false);
                 startResumeButton.setText(R.string.resumeButtonLabel);
                 pauseButton.setEnabled(true);
+                saveButton.setEnabled(true);
 
                 isPaused = false;
                 mBleService.startRssiRequests();
@@ -114,37 +162,22 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View view) {
-                timeSwapBuff += timeInMilliseconds;
-                customHandler.removeCallbacks(updateTimerThread);
-
-                startResumeButton.setEnabled(true);
-                pauseButton.setEnabled(false);
-
-                isPaused = true;
-                mBleService.stopRssiRequests();
+                pause();
             }
         });
 
-
-
         restartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
+                pause();
                 onButtonShowPopupWindowClick(view);
             }
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (!isPaused) {
-                    pauseButton.performClick();
-                }
-                // TODO: make version of this function for saving
-                //onButtonShowPopupWindowClick(view);
+                pause();
+                saveWorkout();
             }
         });
 
@@ -172,6 +205,58 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         mBleService = null;
         mLapCounterService = null;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        String currentDevice = loadDeviceAddress();
+
+        if (mDeviceAddress == null) {
+            // Pull the currently selected device from SharedPreferences.
+            mDeviceAddress = currentDevice;
+            return;
+        }
+
+        if (mDeviceAddress.equals(currentDevice)) {
+            // Device hasn't changed. There's nothing to do.
+            return;
+        }
+
+        // So the user changed their device mid-workout.
+
+        mDeviceAddress = currentDevice;
+
+        pause();
+
+        // Connect to the new device.
+        mBleService.disconnectDevice();
+
+        // Did the user already start a workout with the previous device?
+        if (updatedTime > 0)
+        {
+            // Ask if they'd like to save their current workout.
+            new android.support.v7.app.AlertDialog.Builder(this)
+                    .setMessage("Since you've connected to a different device, the current workout " +
+                            "must be stopped. Would you like to save your progress?")
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveWorkout();
+                            restartWorkout();
+                        }
+                    })
+                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            restartWorkout();
+                        }
+                    })
+                    .show();
+        }
+
+        mBleService.connectToDevice(mDeviceAddress);
     }
 
     private void requestBluetoothPermission() {
@@ -234,13 +319,27 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         }
     };
 
-    private void connect() {
+    private String loadDeviceAddress() {
         // Get the selected device from shared preferences (if there is one)
         SharedPreferences prefs = getSharedPreferences(
                 DeviceSelectActivity.PREFS_KEY, Context.MODE_PRIVATE);
-        String mac = prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+        return prefs.getString(DeviceSelectActivity.KEY_DEVICE_ADDRESS, null);
+    }
 
-        if (mac == null) {
+    private int loadPoolLength() {
+        SharedPreferences prefs = getSharedPreferences(
+                PoolSizeActivity.poolSizePreferences, Context.MODE_PRIVATE);
+        return prefs.getInt(PoolSizeActivity.poolSizeKey, PoolSizeActivity.defPoolSize);
+    }
+
+    private String loadPoolUnits() {
+        SharedPreferences prefs = getSharedPreferences(
+                PoolSizeActivity.poolSizePreferences, Context.MODE_PRIVATE);
+        return prefs.getString(PoolSizeActivity.poolUnitsKey, PoolSizeActivity.defPoolUnits);
+    }
+
+    private void connect() {
+        if (mDeviceAddress == null) {
             mDebugConnectLabel.setText(R.string.label_no_device_selected);
             // TODO: What should happen if the user does not have a currently selected device?
             // Should they be redirected to the DeviceSelectActivity? Should the
@@ -249,16 +348,20 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
-        String connectMessage = getResources().getString(R.string.label_connecting, mac);
+
+
+        String connectMessage = getResources().getString(R.string.label_connecting, mDeviceAddress);
         mDebugConnectLabel.setText(connectMessage);
-        mBleService.connectToDevice(mac);
-        mLapCounterService.updateThreshold(mac);
+        mBleService.connectToDevice(mDeviceAddress);
+        mLapCounterService.updateThreshold(mDeviceAddress);
     }
 
     private Runnable updateTimerThread = new Runnable() {
 
         public void run() {
-            timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
+            Date now = new Date();
+            timeInMilliseconds = now.getTime() - startTime.getTime();
+
             updatedTime = timeSwapBuff + timeInMilliseconds;
             int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
@@ -271,6 +374,25 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         }
 
     };
+
+    private void restartWorkout() {
+        startTime = new Date();
+        updatedTime = 0L;
+        timeSwapBuff = 0L;
+        timeInMilliseconds = 0L;
+        timerValue.setText(R.string.timerVal);
+
+//                mFakeLapCount = 0;
+        mCounter.setText("0");
+
+        startResumeButton.setText(R.string.startButtonLabel);
+        startResumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
+        saveButton.setEnabled(false);
+
+        mBleService.reset();
+        mLapCounterService.reset();
+    }
 
     public void onButtonShowPopupWindowClick(View view) {
 
@@ -301,22 +423,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         Button yesButton = popupView.findViewById(R.id.yesButton);
         yesButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                startTime = SystemClock.uptimeMillis();
-                updatedTime = 0L;
-                timeSwapBuff = 0L;
-                timeInMilliseconds = 0L;
-                timerValue.setText(R.string.timerVal);
-
-//                mFakeLapCount = 0;
-                mCounter.setText("0");
-
-                startResumeButton.setText(R.string.startButtonLabel);
-                startResumeButton.setEnabled(true);
-                pauseButton.setEnabled(false);
-
-                mBleService.reset();
-                mLapCounterService.reset();
-
+                restartWorkout();
                 popupWindow.dismiss();
             }
         } );
@@ -345,11 +452,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             // Extract info from the Intent
-            // TODO: Get the actual constant from LapCounter(Service?)
-            int lapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
+            mLapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
             //Update the TextView
-            mCounter.setText(Integer.toString(lapCount));
+            mCounter.setText(Integer.toString(mLapCount));
         }
     };
 
@@ -381,34 +487,4 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             connect();
         }
     };
-
-    /*
-      Simulate counting laps. This just increments the counter once a second
-     */
-//    private void simulateLaps() {
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(!isPaused) {
-//                    mFakeLapCount += 2;
-//
-//                    publishLapCount();
-//                }
-//                simulateLaps();
-//            }
-//        }, 1000);
-//    }
-//
-//    private void publishLapCount() {
-//        // Create the intent, specifying the name of the event (i.e. "action")
-//        Intent intent = new Intent(ACTION_LAP_COUNT);
-//
-//        // If needed, store some key-value pairs in the intent
-//        intent.putExtra(EXTRA_CURRENT_LAP_COUNT, mFakeLapCount);
-//
-//        // Finally, publish the event. As long as you have a Context (Activity/Service/etc) you
-//        // can broadcast intents
-//        //sendBroadcast(intent);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-//    }
 }

@@ -6,6 +6,26 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:buttonStyle">@style/menuButton</item>
     </style>
-
+    <style name="menuButton" parent="android:style/Widget.Button">
+        <item name="android:textSize">19sp</item>
+        <item name="android:layout_margin">0dip</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:drawable">@drawable/item_sel</item>
+    </style>
+    <style name="currentWorkoutButton" parent="android:style/Widget.Button">
+        <item name="android:textSize">19sp</item>
+        <item name="android:layout_margin">0dip</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_height">100dp</item>
+        <item name="android:layout_weight">.25</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:drawable">@drawable/item_sel</item>
+    </style>
 </resources>
