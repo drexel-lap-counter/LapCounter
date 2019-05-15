@@ -47,9 +47,21 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: started.");
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Past Workouts");
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        mWorkoutDate.removeAll(mWorkoutDate);
+        mLaps.removeAll(mLaps);
+        mID.removeAll(mID);
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
 
         try {
+
             allWorkoutsDesc =  mWorkoutViewModel.getAllWorkoutsDecending();
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,19 +72,8 @@ public class PastWorkoutsActivity extends AppCompatActivity {
             initPastWorkoutsView(wrkout);
         }
 
-
         initRecyclerView();
-        mNavBar.init();
-    }
-    @Override
-    protected void onPause(){
-        super.onPause();
 
-    }
-    @Override
-    protected void onResume(){
-        super.onResume();
-        initRecyclerView();
         mNavBar.init();
     }
     private void initRecyclerView(){
@@ -81,7 +82,6 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         PastWorkoutsRecyclerAdapter adapter = new PastWorkoutsRecyclerAdapter(this, mWorkoutDate,mLaps,mID);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
     }
 
 
