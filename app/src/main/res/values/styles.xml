@@ -28,4 +28,7 @@
         <item name="android:textAlignment">center</item>
         <item name="android:drawable">@drawable/item_sel</item>
     </style>
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
 </resources>
