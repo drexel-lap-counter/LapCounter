@@ -502,9 +502,11 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
                 else if (graphType.compareTo("Workout Duration") == 0) {
                     long difference;
                     long duration =0;
+                    int MILITOMINUTES = 60000;
 
                     for (int i = 0; i <= workoutsBetweenDateRange.size() - 1; i++) {
                         difference = workoutsBetweenDateRange.get(i).getEndDate().getTime() - workoutsBetweenDateRange.get(i).getStartDate().getTime();
+                        difference = difference/MILITOMINUTES;
                         tempStartDate = simpleDateFormat.format(workoutsBetweenDateRange.get(i).getStartDate());
 
 
@@ -529,13 +531,18 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         BarDataSet barDataSet = new BarDataSet(barEntries,"");
 
         if(graphType.compareTo("Distance Traveled") == 0) {
-            barDataSet = new BarDataSet(barEntries, "Distance Swam");
+            barDataSet = new BarDataSet(barEntries, "Distance Swam (m)");
         }
         else if(graphType.compareTo("Average Speed") == 0){
-            barDataSet = new BarDataSet(barEntries, "Average Speed");
+//             if (unit_abbrev ==" m") {
+                 barDataSet = new BarDataSet(barEntries, "Average Speed (m/s)");
+//             }
+//             else {
+//                 barDataSet = new BarDataSet(barEntries, "Average Speed (yds/s)");
+//             }
         }
         else if(graphType.compareTo("Workout Duration") == 0) {
-            barDataSet = new BarDataSet(barEntries, "Workout Duration");
+            barDataSet = new BarDataSet(barEntries, "Workout Duration (Min)");
         }
         BarData barData = new BarData(dates,barDataSet);
         barChart.setData(barData);
