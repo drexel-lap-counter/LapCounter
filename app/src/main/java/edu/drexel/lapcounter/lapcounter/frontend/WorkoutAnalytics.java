@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -51,6 +52,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     List <Workout> workoutsBetweenDateRange;
     private final static int MILLISECONDS_IN_SECOND = 1000;
     String unit_abbrev;
+    String graphType = "";
     private double METERTOYARDCONVERT =1.09361;
     private double YARDTOMETERCONVERT =.9144;
 
@@ -91,11 +93,47 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         setContentView(R.layout.activity_workout_analytics);
         mWorkoutViewModel = ViewModelProviders.of(this).get(WorkoutViewModel.class);
 
-        Spinner spinner = findViewById(R.id.measurements);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.measurement_array,android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
+        Spinner measurementSpinner = findViewById(R.id.measurements);
+        ArrayAdapter<CharSequence> measurementadapter = ArrayAdapter.createFromResource(this,R.array.measurement_array,android.R.layout.simple_spinner_item);
+        measurementadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        measurementSpinner.setAdapter(measurementadapter);
+
+        Spinner graphSpinner =findViewById(R.id.graphChoice);
+        ArrayAdapter<CharSequence> graphadapter = ArrayAdapter.createFromResource(this,R.array.graphTypes,android.R.layout.simple_spinner_item);
+        graphadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        graphSpinner.setAdapter(graphadapter);
+
+        measurementSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected (AdapterView < ? > parent, View view,int position, long id){
+            String text = parent.getItemAtPosition(position).toString();
+            Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
+            unit_abbrev = ((text.compareTo("Meters") == 0) ? " m" : " yd");
+            DateChecker();
+        }
+
+            @Override
+            public void onNothingSelected (AdapterView < ? > parent){
+
+        }
+        });
+        graphSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected (AdapterView < ? > parent, View view,int position, long id){
+                String text = parent.getItemAtPosition(position).toString();
+                Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
+                graphType = text;
+                DateChecker();
+            }
+
+            @Override
+            public void onNothingSelected (AdapterView < ? > parent){
+
+            }
+        });
+
 
         Date_Picker();
 
@@ -105,20 +143,26 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         mNavBar.init();
     }
 
-
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String text = parent.getItemAtPosition(position).toString();
-        Toast.makeText(parent.getContext(),text,Toast.LENGTH_SHORT).show();
-        unit_abbrev = ((text.compareTo("Meters") == 0) ? " m": " yd");
-        DateChecker();
+    public void onItemSelected (AdapterView < ? > parent, View view,int position, long id){
+
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    public void onNothingSelected (AdapterView < ? > parent){
 
     }
+    @Override
+    protected void onPause(){
+        super.onPause();
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        mNavBar.init();
+    }
     public void Date_Picker(){
         Workout_Analytics_Start_Date = (TextView) findViewById(R.id.Workout_Analytics_Start_Date);
         Workout_Analytics_End_Date = (TextView) findViewById(R.id.Workout_Analytics_End_Date);
@@ -249,8 +293,26 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
                 valueCalulations();
                 createBarGraph(chartStartDate,chartEndDate);
-                barChart.notifyDataSetChanged();
+
            }
+
+
+            }
+        else if ((Workout_Analytics_Start_Date.getText().toString().equals("Start Date"))&&(Workout_Analytics_End_Date.getText().toString().equals("End Date"))){
+            try {
+                workoutsBetweenDateRange = mWorkoutViewModel.getAllWorkouts();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(workoutsBetweenDateRange.get(0).getStartDate());
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(workoutsBetweenDateRange.get(workoutsBetweenDateRange.size()-1).getStartDate());
+            chartStartDate = DateSetListener(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
+            chartEndDate = DateSetListener(cal2.get(Calendar.YEAR),cal2.get(Calendar.MONTH),cal2.get(Calendar.DAY_OF_MONTH)+1);
+            valueCalulations();
+            createBarGraph(chartStartDate,chartEndDate);
         }
     }
 
@@ -315,7 +377,39 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         //
 
         float Avg_Workout_Time= ((float)difference / Float.valueOf(1))/MILLISECONDS_IN_SECOND;
-        String avg_time_str = String.format("%.2f sec",(Avg_Workout_Time/workoutsBetweenDateRange.size()));
+        int avg_time_int = (int) Avg_Workout_Time/workoutsBetweenDateRange.size();
+        String S1;
+        String S2;
+        String S3;
+
+        int p1 = avg_time_int % 60;
+        if(p1 <10){
+            S1 = "0" +Integer.toString(p1);
+        }
+        else
+            S1 = Integer.toString(p1);
+
+        int p2 = avg_time_int / 60;
+
+
+        int p3 = p2 % 60;
+        if(p3 <10){
+            S3 = "0" +Integer.toString(p3);
+        }
+        else
+            S3 = Integer.toString(p3);
+
+        p2 = p2 / 60;
+
+        if(p2 <10){
+            S2 = "0" +Integer.toString(p2);
+        }
+        else
+            S2 = Integer.toString(p2);
+
+
+
+        String avg_time_str = String.format("%s:%s:%s",S2,S3,S1);
         setAvgWorkoutTimeText.setText(avg_time_str);
 
     }
@@ -344,45 +438,86 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             mDate2.setTime(date2);
 
             dates = new ArrayList<>();
-            dates = getList(mDate1,mDate2);
+            dates = getList(mDate1, mDate2);
 
 
             String tempStartDate;
             barEntries = new ArrayList<>();
 
 
-
-            for(int j = 0; j< dates.size();j++){
+            for (int j = 0; j < dates.size(); j++) {
                 count = 0;
                 totaldistance = 0;
-//                Log.d(TAG, "Test" + dates.get(j));
+                if (graphType == ""){
+                    graphType = "Distance Traveled";
+                }
+                if (graphType.compareTo("Distance Traveled") == 0) {
+                    for (int i = 0; i <= workoutsBetweenDateRange.size() - 1; i++) {
 
-                for(int i = 0; i<=workoutsBetweenDateRange.size()-1;i++) {
-
-                    tempStartDate = simpleDateFormat.format(workoutsBetweenDateRange.get(i).getStartDate());
+                        tempStartDate = simpleDateFormat.format(workoutsBetweenDateRange.get(i).getStartDate());
 
 
-                    if (dates.get(j).equals(tempStartDate)) {
+                        if (dates.get(j).equals(tempStartDate)) {
 
-                        if((unit_abbrev.compareTo(" m") !=0 )&&(workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Meters") == 0)){
-                            totaldistance += (workoutsBetweenDateRange.get(i).getTotalDistanceTraveled()*METERTOYARDCONVERT);
+                            if ((unit_abbrev.compareTo(" m") != 0) && (workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Meters") == 0)) {
+                                totaldistance += (workoutsBetweenDateRange.get(i).getTotalDistanceTraveled() * METERTOYARDCONVERT);
+                            } else if ((unit_abbrev.compareTo(" yd") != 0) && (workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Yards") == 0)) {
+                                totaldistance += (workoutsBetweenDateRange.get(i).getTotalDistanceTraveled() * YARDTOMETERCONVERT);
+                            } else {
+                                totaldistance += workoutsBetweenDateRange.get(i).getTotalDistanceTraveled();
+                            }
+
                         }
-                        else if((unit_abbrev.compareTo(" yd") !=0 )&&(workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Yards") == 0)){
-                            totaldistance += (workoutsBetweenDateRange.get(i).getTotalDistanceTraveled()*YARDTOMETERCONVERT);
-                        }
-                        else {
-                            totaldistance += workoutsBetweenDateRange.get(i).getTotalDistanceTraveled();
-                        }
-
-                        count++;
                     }
-                }
-                if (count == 0) {
-                    count = 1;
+
+                    barEntries.add(new BarEntry(totaldistance, j));
                 }
 
-                totaldistance = totaldistance / count;
-                barEntries.add(new BarEntry(totaldistance,j));
+                else if (graphType.compareTo("Average Speed") == 0) {
+                    long difference;
+                    float avg_lap_time;
+                    float avg_speed =0;
+
+                    for (int i = 0; i <= workoutsBetweenDateRange.size() - 1; i++) {
+                        difference = workoutsBetweenDateRange.get(i).getEndDate().getTime() - workoutsBetweenDateRange.get(i).getStartDate().getTime();
+                        avg_lap_time = ((float)difference / Float.valueOf(workoutsBetweenDateRange.get(i).getLaps()))/MILLISECONDS_IN_SECOND;
+
+                        tempStartDate = simpleDateFormat.format(workoutsBetweenDateRange.get(i).getStartDate());
+
+
+                        if (dates.get(j).equals(tempStartDate)) {
+                            avg_speed +=workoutsBetweenDateRange.get(i).getPoolLength()/avg_lap_time;
+
+
+                            count++;
+                        }
+                    }
+                    if (count == 0) {
+                        count = 1;
+                    }
+
+                    avg_speed = avg_speed /count;
+                    barEntries.add(new BarEntry(avg_speed, j));
+                }
+                else if (graphType.compareTo("Workout Duration") == 0) {
+                    long difference;
+                    long duration =0;
+
+                    for (int i = 0; i <= workoutsBetweenDateRange.size() - 1; i++) {
+                        difference = workoutsBetweenDateRange.get(i).getEndDate().getTime() - workoutsBetweenDateRange.get(i).getStartDate().getTime();
+                        tempStartDate = simpleDateFormat.format(workoutsBetweenDateRange.get(i).getStartDate());
+
+
+                        if (dates.get(j).equals(tempStartDate)) {
+                            duration+=difference;
+
+
+
+                        }
+                    }
+
+                    barEntries.add(new BarEntry(duration, j));
+                }
             }
 
         }catch(ParseException e){
@@ -391,7 +526,17 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             e.printStackTrace();
         }
 
-        BarDataSet barDataSet = new BarDataSet(barEntries,"Distance Swam");
+        BarDataSet barDataSet = new BarDataSet(barEntries,"");
+
+        if(graphType.compareTo("Distance Traveled") == 0) {
+            barDataSet = new BarDataSet(barEntries, "Distance Swam");
+        }
+        else if(graphType.compareTo("Average Speed") == 0){
+            barDataSet = new BarDataSet(barEntries, "Average Speed");
+        }
+        else if(graphType.compareTo("Workout Duration") == 0) {
+            barDataSet = new BarDataSet(barEntries, "Workout Duration");
+        }
         BarData barData = new BarData(dates,barDataSet);
         barChart.setData(barData);
         barChart.setDescription("");
