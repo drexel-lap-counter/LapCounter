@@ -9,20 +9,20 @@ Packages that need documentation:
 
 I propose that we split the work into three branches:
 
-1. docs-frontend
+1. docs-frontend (Patrick)
     IMPORTANT: whoever does this should sync with master as bug-feature
     branches get merged in to make sure we don't miss a spot
 
     - frontend
     - frontend.navigationbar
 
-2. docs-backend
+2. docs-backend (Royce, Peter)
 
     - backend
     - backend.ble
     - backend.lapcounter
 
-3. docs-database
+3. docs-database (Jon)
 
     - backend.Database.*
 
@@ -46,6 +46,9 @@ Writing documentation:
     allows
 - You can skip @Override methods UNLESS the overridden method does
     something unexpected
+- For examples of javadoc format, look through the stuff in backend.lapcounter
+    Remember that javadoc comments begin with /** (two asterisks) and end with 
+    */
 
 Wrapping up a package documentation branch:
 
