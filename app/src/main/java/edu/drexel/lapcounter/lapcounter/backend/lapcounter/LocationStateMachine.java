@@ -43,12 +43,21 @@ public class LocationStateMachine {
         FAR,
     }
 
+    /**
+     * This event is published whenever the state machine changes states.
+     */
     public static final String ACTION_STATE_TRANSITION =
             "edu.drexel.lapcounter.lapcounter.ACTION_STATE_TRANSITION";
 
+    /**
+     * Each STATE_TRANSITION event includes a before state and an after state
+     */
     public static final String EXTRA_STATE_BEFORE =
             "edu.drexel.lapcounter.lapcounter.EXTRA_STATE_BEFORE";
 
+    /**
+     * Each STATE_TRANSITION event includes a before state and an after state
+     */
     public static final String EXTRA_STATE_AFTER =
             "edu.drexel.lapcounter.lapcounter.EXTRA_STATE_AFTER";
 
@@ -62,6 +71,9 @@ public class LocationStateMachine {
      */
     private State mState = State.UNKNOWN;
 
+    /**
+     * The current RSSI threshold between NEAR and FAR
+     */
     private double mThreshold;
 
     /**
@@ -73,11 +85,20 @@ public class LocationStateMachine {
         this(LocalBroadcastManagerWrapper.getInstance(context), threshold);
     }
 
+    /**
+     * Constructor for unit testing.
+     * @param broadcastManager the wrapper around a LocalBroadcastManager
+     * @param threshold the RSSI threshold
+     */
     public LocationStateMachine(IBroadcastManager broadcastManager, double threshold) {
         mBroadcastManager = broadcastManager;
         mThreshold = threshold;
     }
 
+    /**
+     * Change the threshold value
+     * @param threshold the new RSSI threshold
+     */
     public void setThreshold(double threshold) {
         this.mThreshold = threshold;
     }
