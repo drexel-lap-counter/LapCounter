@@ -19,11 +19,6 @@
             android:name=".frontend.CalibrateDeviceActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden" />
-        <activity
-            android:name=".frontend.temp.LapCounterServiceTest"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden"/>
-
         <service
             android:name=".backend.ble.BLEService"
             android:enabled="true"
@@ -32,7 +27,6 @@
             android:name=".backend.lapcounter.LapCounterService"
             android:enabled="true"
             android:exported="false" />
-        
         <activity
             android:name=".frontend.CurrentWorkoutActivity"
             android:screenOrientation="portrait"
