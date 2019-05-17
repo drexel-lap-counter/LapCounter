@@ -488,6 +488,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             if (wasCalibrating()) {
+                Log.i(TAG, "Ignored lap count because of calibration.");
                 return;
             }
 
@@ -526,7 +527,7 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         @Override
         public void onMessage(Intent message) {
             if (wasCalibrating()) {
-                Log.i(TAG, "Disconnected because user is calibrating another device.");
+                Log.i(TAG, "Ignored disconnect event because user is calibrating a device.");
                 return;
             }
             mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
