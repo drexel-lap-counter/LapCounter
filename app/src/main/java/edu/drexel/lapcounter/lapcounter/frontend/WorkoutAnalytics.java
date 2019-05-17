@@ -264,7 +264,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             tempDay = "0"+ String.valueOf(dayOfMonth);
         }
         else {
-            tempDay= String.valueOf(dayOfMonth);
+            tempDay= String.valueOf(dayOfMonth+1);
         }
 
         return tempMonth + "/" + tempDay + "/" + year;
