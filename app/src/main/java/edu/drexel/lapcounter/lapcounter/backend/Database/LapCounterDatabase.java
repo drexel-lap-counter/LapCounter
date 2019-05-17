@@ -16,7 +16,17 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDao;
 
-
+/**
+ * Database class that contains all of the database DAOS.
+ * Class will greate an instance of a RoomDatabase, and will pass DAOS from this instance to
+ * Repos.
+ * Entities: Workout
+ *           Device
+ *           Units
+ *           State
+ *           Transition
+ * Database: lapcounterdb
+ */
 @Database(entities = {
         Workout.class,
         Device.class,
@@ -27,15 +37,44 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutDao;
 public abstract class LapCounterDatabase extends RoomDatabase {
 
 
+    /**
+     * Workout DAO used to interact with Workouts table workouts
+     * @return WorkoutDAO object to use.
+     */
     public abstract WorkoutDao workoutDao();
+    /**
+     * Device DAO used to interact with Device table devices
+     * @return DeviceDAO object to use.
+     */
     public abstract DeviceDao deviceDao();
+    /**
+     * Units DAO used to interact with Units table units_table
+     * @return UnitsDAO object to use.
+     */
     public abstract UnitsDao unitsDao();
+    /**
+     * State DAO used to interact with State table states_table
+     * @return StateDAO object to use.
+     */
     public abstract StateDao stateDao();
+    /**
+     * Transition DAO used to interact with Trasnition table transitions_table
+     * @return TransitionDAO object to use.
+     */
     public abstract TransitionDao transitionDao();
 
     private static volatile LapCounterDatabase INSTANCE;
+    /**
+     * Name of database
+     */
     public final static String DATABASE_NAME = "lapcounterdb";
 
+    /**
+     * Creates and returns an instance of the database.
+     * If the instance was already created, will return it instead of create a new one.
+     * @param context  Context of activity to make build database with.
+     * @return LapCounterDatabase object.
+     */
     public static LapCounterDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (LapCounterDatabase.class) {
