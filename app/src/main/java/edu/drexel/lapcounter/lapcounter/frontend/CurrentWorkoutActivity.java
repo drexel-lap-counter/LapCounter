@@ -1,7 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -26,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.app.AlertDialog;
 
 import java.time.Duration;
 import java.util.Date;
@@ -210,8 +210,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
     private void alertToSaveBeforeRestart(String alertText) {
+        pause();
+
         // Ask if they'd like to save their current workout.
-        new android.support.v7.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setMessage(alertText)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -262,8 +264,6 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         // So the user changed their device mid-workout.
 
         mDeviceAddress = currentDevice;
-
-        pause();
 
         // Connect to the new device.
         mBleService.disconnectDevice();
