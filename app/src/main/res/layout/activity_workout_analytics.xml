@@ -181,6 +181,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="20dp"
+        android:fadeScrollbars="false"
         app:layout_constraintBottom_toTopOf="@+id/graphChoice"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.52"
