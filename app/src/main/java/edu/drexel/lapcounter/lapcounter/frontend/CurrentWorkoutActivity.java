@@ -45,6 +45,9 @@ import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_M
 
 //import android.support.v4.content.LocalBroadcastManager;
 
+/**
+ * The main screen for recording workouts.
+ */
 public class CurrentWorkoutActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
@@ -394,6 +397,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mLapCounterService.reset();
     }
 
+    /**
+     * creates a confirmation dialog.
+     * @param view
+     */
     public void onButtonShowPopupWindowClick(View view) {
 
         // inflate the layout of the popup window
