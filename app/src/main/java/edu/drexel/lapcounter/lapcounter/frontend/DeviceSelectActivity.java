@@ -25,8 +25,10 @@ import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 /**
- * It's a bit confusing at this point, but this class is for scanning for *registered*
- * bluetooth devices. DeviceScanActivity is for scanning for *new devices*
+ * This class is for scanning for *registered* bluetooth devices.
+ * Registered meaning that it is stored in the database.
+ * the class for scanning for *unregistered* devices is DeviceScanActivity
+ * @see DeviceScanActivity
  */
 public class DeviceSelectActivity extends AppCompatActivity {
 
@@ -55,7 +57,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
     /**
      * This callback gets called *once per device discovered*. Use it to populate
      *
-     * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
     private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
@@ -69,6 +70,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Creates screen and sets up recycler view for known devices
+     * @param savedInstanceState Bundle saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

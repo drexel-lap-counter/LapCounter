@@ -82,6 +82,10 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
         mNavBar.init();
     }
+
+    /**
+     * Initializes the Recycler View
+     */
     private void initRecyclerView(){
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);

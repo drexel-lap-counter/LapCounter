@@ -576,7 +576,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
      * generates a list of the days between the start date and end date.
      * @param startDate
      * @param endDate
-     * @return
+     * @return list of days between start date and end date
      */
     public ArrayList<String> getList(Calendar startDate, Calendar endDate){
         ArrayList<String> list = new ArrayList<String>();
@@ -590,7 +590,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     /**
      * gets the current date in MM/dd/yyyy format.
      * @param cld
-     * @return
+     * @return String of date in MM/dd/yyyy format.
      */
     public String getDate(Calendar cld){
 

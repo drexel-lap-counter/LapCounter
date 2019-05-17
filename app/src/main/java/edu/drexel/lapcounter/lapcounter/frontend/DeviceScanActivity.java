@@ -94,6 +94,9 @@ public class DeviceScanActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
+    /**
+     * Initalizes the Recycler view for listing all found devices.
+     */
     private void initRecyclerView()
     {
         //RecyclerView

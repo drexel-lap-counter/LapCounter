@@ -16,6 +16,10 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * Activity that lists the info about the currently selected device.  Allows user to re-calibrate or
+ * delete the device from the database.
+ */
 public class DeviceInfoActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
     private String mDeviceName;

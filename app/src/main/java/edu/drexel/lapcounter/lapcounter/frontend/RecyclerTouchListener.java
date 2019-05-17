@@ -6,10 +6,20 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+/**
+ * Recycler Touch Listener that is used to define fuctionality of clicking for recycler view.
+ */
 public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener
 {
     private GestureDetector mGestureDetector;
     private ClickListener mClickListener;
+
+    /**
+     * Constructor for Recycler Touch Adapter
+     * @param context context to generate GestureDetector from.
+     * @param recyclerView RecyclerView
+     * @param clickListener ClickListener to use for when an item is clicked.
+     */
     public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ClickListener clickListener)
     {
         this.mClickListener = clickListener;
@@ -45,9 +55,9 @@ public class RecyclerTouchListener implements RecyclerView.OnItemTouchListener
     {}
 
 
-
-
-
+    /**
+     * Interface establishing what methods the ClickListener needs
+     */
     public interface ClickListener
     {
         void onClick(View view, int  position);

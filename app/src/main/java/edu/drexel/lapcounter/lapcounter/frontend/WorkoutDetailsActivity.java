@@ -58,6 +58,10 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         DisplayWorkoutDetails(workout);
     }
 
+    /**
+     * Displays the passed in workout on the page
+     * @param workout Workout to display
+     */
     private void DisplayWorkoutDetails(Workout workout)
     {
         String unit_abbrev = ((workout.getPoolUnits().compareTo("Meters") == 0) ? " m": " yd");

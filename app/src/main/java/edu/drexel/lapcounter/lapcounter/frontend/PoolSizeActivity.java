@@ -79,6 +79,11 @@ public class PoolSizeActivity extends AppCompatActivity {
     }
 
     //Load the saved pool data and setup our two radio groups
+
+    /**
+     * Loads the saved pool data from shared preferences.
+     * Also Updates radio buttons to match.
+     */
     private void loadPoolData()
     {
         poolSize = pref.getInt(poolSizeKey,defPoolSize);
@@ -133,7 +138,7 @@ public class PoolSizeActivity extends AppCompatActivity {
 
     /**
      * records which pool size radio button is clicked
-     * @param view
+     * @param view button that was clicked
      */
     public void onPoolSizeRadioButtonClicked(View view)
     {
@@ -174,7 +179,7 @@ public class PoolSizeActivity extends AppCompatActivity {
 
     /**
      * records which pool units radio button is clicked
-     * @param view
+     * @param view button that was clicked
      */
     public void onPoolUnitsRadioButtonClicked(View view)
     {
@@ -198,7 +203,7 @@ public class PoolSizeActivity extends AppCompatActivity {
 
     /**
      * navigates to the SettingsActivity
-     * @param view
+     * @param view button that was clicked
      */
     public void onConfirmButtonClicked(View view)
     {

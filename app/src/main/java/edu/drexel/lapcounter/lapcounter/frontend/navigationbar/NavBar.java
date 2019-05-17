@@ -17,6 +17,9 @@ import edu.drexel.lapcounter.lapcounter.frontend.PastWorkoutsActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.SettingsActivity;
 import edu.drexel.lapcounter.lapcounter.frontend.WorkoutAnalytics;
 
+/**
+ * Navigation Bar class that is at the bottom of every screen within the app.
+ */
 public class NavBar implements BottomNavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = NavBar.class.getSimpleName();
     private static final int TOGGLE_NONE = -1;
@@ -31,17 +34,30 @@ public class NavBar implements BottomNavigationView.OnNavigationItemSelectedList
     // If this field is TOGGLE_NONE, then no items will be toggled.
     private int mMenuOptionIdToToggle;
 
+    /**
+     * Constructor for Navbar that has an item selected
+     * @param parent Activity that called this function
+     * @param menuOptionIdToToggle int id of menu option to toggle
+     */
     public NavBar(AppCompatActivity parent, int menuOptionIdToToggle) {
         mParent = new WeakReference<>(parent);
         mMenuOptionIdToToggle = menuOptionIdToToggle;
     }
 
+    /**
+     * Constructor for Navbar that has no item selected
+     * @param parent Activity that called this function
+     */
     public NavBar(AppCompatActivity parent) {
         this(parent, TOGGLE_NONE);
     }
 
     // Attach eventhandlers for the menu bar, and toggle the checked state for the menu option
     // with id == mMenuOptionIdToToggle.
+
+    /**
+     * Initalize the Nav bar.
+     */
     public void init() {
         BottomNavigationView view = getBottomNavigationView();
 
