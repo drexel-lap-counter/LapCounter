@@ -47,7 +47,6 @@ public class LapCounter {
     /**
      * Count laps in the normal case: a state transition. This method filters for
      * FAR -> NEAR transitions only
-     * @param intent the received message
      */
     private MessageHandler countLaps = new MessageHandler() {
         @Override
