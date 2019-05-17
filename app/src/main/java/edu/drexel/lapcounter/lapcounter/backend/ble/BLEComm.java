@@ -23,6 +23,10 @@ import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWr
  * This class publishes the underlying connection events used by other backend components.
  */
 public class BLEComm {
+
+    /**
+     * The tag used to identify this class in execution logs.
+     */
     private static final String TAG = BLEComm.class.getSimpleName();
 
     // Unique IDs for the Intents this server publishes
@@ -52,9 +56,11 @@ public class BLEComm {
     public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
 
     /**
-     * The extra in a disconnect event signifying whether the disconnection was explicitly requested.
+     * The extra in a disconnect event signifying whether the disconnection was explicitly
+     * requested.
      */
-    public final static String EXTRA_DISCONNECT_IS_INTENTIONAL = qualify("EXTRA_DISCONNECT_IS_INTENTIONAL");
+    public final static String EXTRA_DISCONNECT_IS_INTENTIONAL =
+            qualify("EXTRA_DISCONNECT_IS_INTENTIONAL");
 
 
     /**
@@ -78,21 +84,62 @@ public class BLEComm {
      * Connection state when connected to a device.
      */
     static final int STATE_CONNECTED = 2;
+
+
+    /**
+     * An Intent-publishing manager to send Intents across Activities and Services.
+     */
     private final IBroadcastManager mBroadcastManager;
 
+
+    /**
+     * The MAC address of the previously connected device, or null if no device has yet connected.
+     */
     private String mPreviousConnectAddress;
+
+
+    /**
+     * The MAC address of the currently connected device, or null if no device is connected.
+     */
     private String mCurrentConnectAddress;
 
+
+    /**
+     * An adapter to construct BluetoothDevice objects and to scan for devices.
+     */
     private IBluetoothAdapter mBluetoothAdapter;
+
+
+    /**
+     * The underlying Android BLE server to communicate with the phone's BLE hardware.
+     */
     private BluetoothGatt mBluetoothGatt;
 
+
+    /**
+     * The current connection state.
+     * @see #getConnectionState()
+     */
     private int mConnectionState = STATE_DISCONNECTED;
 
+    /**
+     * BLEcomm requires a Context to request BLE permissions and to send Intents.
+     */
     private final Context mParent;
 
+
+    /**
+     * A flag to keep track of whether the last disconnect was explicitly requested by the app
+     * (as opposed to a disconnect caused by the device moving out-of-range).
+     */
     private boolean mIntentionalDisconnect = false;
 
-    // Callback for GATT server events.
+
+    /**
+     * Callbacks for hardware BLE events, i.e., connection/disconnection, read RSSI.
+     * These callbacks are responsible for publishing the corresponding Intents that other backend
+     * components listen for.
+     */
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -124,6 +171,10 @@ public class BLEComm {
 
     };
 
+    /**
+     * @param s The identifier to prepend with the qualified package name.
+     * @return The identifier fully-qualified with package information.
+     */
     private static String qualify(String s) {
         Package p = Objects.requireNonNull(BLEComm.class.getPackage());
         return p.getName() + "." + s;
@@ -150,6 +201,12 @@ public class BLEComm {
     }
 
 
+    /**
+     * @param c The Context that makes the request to the Android OS for access to the underlying
+     *          Bluetooth adapter.
+     * @return An instance of the underlying Bluetooth adapter, or null if the app cannot access
+     * the BLE hardware, e.g., lack of permissions, lack of hardware support.
+     */
     private static BluetoothAdapter getAdapter(Context c) {
         BluetoothManager m = (BluetoothManager) c.getSystemService(Context.BLUETOOTH_SERVICE);
         return m.getAdapter();
@@ -169,10 +226,19 @@ public class BLEComm {
         }
     }
 
+    /** Broadcast an Intent locally to other IBroadcastManagers in the app.
+     * @param intent The Intent to locally broadcast.
+     */
     private void localBroadcast(Intent intent) {
         mBroadcastManager.sendBroadcast(intent);
     }
 
+
+    /** Broadcast a connection event to other IBroadcastManagers in the app.
+     * @param isReconnect Whether the connection event refers to a reconnection.
+     * @see #ACTION_CONNECTED
+     * @see #ACTION_RECONNECTED
+     */
     private void broadcastConnect(boolean isReconnect) {
         String action = isReconnect ? ACTION_RECONNECTED : ACTION_CONNECTED;
         Intent intent = new Intent(action);
