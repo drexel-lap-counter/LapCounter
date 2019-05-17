@@ -3,6 +3,11 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 import java.util.List;
 
+/**
+ * A DeviceScanner scans for Bluetooth devices and calls a callback for every one found.
+ * This interface is used so we can have a dummy scanner that produces fake devices for use
+ * on emulators where there is no Bluetooth capability.
+ */
 public interface DeviceScanner {
 
     /**

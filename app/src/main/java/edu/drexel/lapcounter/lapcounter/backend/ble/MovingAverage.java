@@ -2,10 +2,12 @@ package edu.drexel.lapcounter.lapcounter.backend.ble;
 
 
 /**
- * Compute a moving average of N values
+ * Compute a moving average of N values. This is used as a low-pass filter on the RSSI values.
  */
 public class MovingAverage {
-    // the last N values seen
+    /**
+     * The last N values seen
+     */
     private final SlidingWindow<Double> mValues;
 
     /**
@@ -17,6 +19,10 @@ public class MovingAverage {
     }
 
 
+    /**
+     * Check if the sliding window is full. This means we have a valid average value
+     * @return true if the buffer is full.
+     */
     public boolean windowIsFull() {
         return mValues.isFull();
     }
@@ -41,11 +47,19 @@ public class MovingAverage {
         return sum / mValues.size();
     }
 
+    /**
+     * Add a value to the moving average filter
+     * @param value the new value to add to thee buffer
+     * @return the new moving average
+     */
     public double filter(double value) {
         mValues.addLast(value);
         return computeAverage();
     }
 
+    /***
+     * Clear the underlying buffer.
+     */
     public void clear() {
         mValues.clear();
     }

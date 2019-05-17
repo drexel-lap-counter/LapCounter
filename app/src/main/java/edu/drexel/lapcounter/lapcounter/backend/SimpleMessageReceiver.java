@@ -89,8 +89,12 @@ public class SimpleMessageReceiver extends BroadcastReceiver {
         }
     }
 
-    // testing methods
+    // Testing methods ========================================================================
 
+    /**
+     * Set the intent filter. This is used for unit testing.
+     * @param mIntentFilter the intent filter to set
+     */
     protected void setmIntentFilter(IntentFilter mIntentFilter) {
         this.mIntentFilter = mIntentFilter;
     }

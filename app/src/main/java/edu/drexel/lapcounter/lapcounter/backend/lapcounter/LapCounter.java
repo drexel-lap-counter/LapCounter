@@ -17,8 +17,14 @@ import static edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateM
  * when to increment the counter. It also publishes an event whenever the counter changes.
  */
 public class LapCounter {
+    /**
+     * This message is sent whenever the lap count changes.
+     */
     public static final String ACTION_LAP_COUNT_UPDATED =
             "edu.drexel.lapcounter.lapcounter.ACTION_LAP_COUNT_UPDATED";
+    /**
+     * Each LAP_COUNT_UPDATED event includes the current lap counter for the UI to use.
+     */
     public static final String EXTRA_LAP_COUNT =
             "edu.drexel.lapcounter.lapcounter.EXTRA_LAP_COUNT";
 
@@ -74,6 +80,10 @@ public class LapCounter {
         this(LocalBroadcastManagerWrapper.getInstance(context));
     }
 
+    /**
+     * Constructor. This version is used in unit testing
+     * @param broadcastManager A wrapper around a LocalBroadcastManager for use in unit tests
+     */
     public LapCounter(IBroadcastManager broadcastManager) {
         mBroadcastManager = broadcastManager;
     }

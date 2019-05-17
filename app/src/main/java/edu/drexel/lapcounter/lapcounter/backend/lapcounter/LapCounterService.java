@@ -15,11 +15,14 @@ import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
  * them when is the appropriate time to start subscribing to Intents.
  */
 public class LapCounterService extends Service {
-    // For debugging
+    /** logging tag */
     private final static String TAG = LapCounterService.class.getSimpleName();
 
-    // TODO: Load from calibration.
+    /**
+     * Default threshold before loading from SharedPreferences.
+     */
     private static final double DEFAULT_THRESHOLD = 60;
+
     /**
      * The location state machine tracks the state of the athlete.
      */
@@ -54,10 +57,19 @@ public class LapCounterService extends Service {
      */
     private final IBinder mBinder = new LocalBinder();
 
+    /**
+     * Constructor not used because services are launched by binding.
+     */
     @SuppressWarnings("unused")
     public LapCounterService() {}
 
-    // Constructor for mocking in unit tests.
+    /**
+     * Constructor for mocking in unit tests
+     * @param lsm the location state machine component
+     * @param dm the disconnect manager component
+     * @param lc the lap counter component
+     * @param r the message receiver component
+     */
     public LapCounterService(LocationStateMachine lsm, DisconnectManager dm, LapCounter lc,
                              SimpleMessageReceiver r) {
         mStateMachine = lsm;
@@ -108,6 +120,10 @@ public class LapCounterService extends Service {
         mLog.initCallbacks(mReceiver);
     }
 
+    /**
+     * Reset the lap counter by unsubscribing from all events and re-instantiating the
+     * sub-components.
+     */
     public void reset() {
         if (mReceiver != null)
             mReceiver.detach(this);
@@ -121,6 +137,10 @@ public class LapCounterService extends Service {
         mReceiver.attach(this);
     }
 
+    /**
+     * Update the RSSI threshold to match that of the currently connected device.
+     * @param mac the MAC address of the device to look up.
+     */
     public void updateThreshold(String mac) {
         DeviceRepository repo = new DeviceRepository(getApplication());
         Device device = repo.getDeviceByMacAddress(mac);

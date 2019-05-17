@@ -41,6 +41,7 @@ public class DisconnectManager {
     private AthleteState mCurrentState = new AthleteState();
 
     // Callbacks =================================================================================
+
     /**
      * On disconnect, take a "before disconnect" snapshot of the current state and start setting up
      * the reconnect function. We need to wait for after reconnection to get the "after" state.
@@ -51,7 +52,7 @@ public class DisconnectManager {
             if (mReconnectFunc != null) {
                 // When a device first disconnects, this method will get called.
                 // Approximately 30 seconds later, if the device does not connect, then the
-    // BLEComm will send out another disconnect event (not explicitly; this
+                // BLEComm will send out another disconnect event (not explicitly; this
                 // 30 second timeout for connection attempts appears to be baked into the
                 // Android BLE libraries).
 
@@ -114,7 +115,8 @@ public class DisconnectManager {
             }
 
             // We only care about Unknown -> Near/Far. Filter out irrelevant transitions here
-            if (beforeState != LocationStateMachine.State.UNKNOWN || afterState == LocationStateMachine.State.UNKNOWN)
+            if (beforeState != LocationStateMachine.State.UNKNOWN
+                    || afterState == LocationStateMachine.State.UNKNOWN)
                 return;
 
             // Use the reconnection function to examine the state and determine if we
@@ -162,6 +164,11 @@ public class DisconnectManager {
         this(LocalBroadcastManagerWrapper.getInstance(context));
     }
 
+    /**
+     * Constructor using a specific local broadcast manager. The wrapper interface is
+     * used because this makes unit tests more feasible.
+     * @param broadcastManager The broadcast manager for sending Intent messages.
+     */
     public DisconnectManager(IBroadcastManager broadcastManager) {
         mBroadcastManager = broadcastManager;
     }
@@ -187,21 +194,35 @@ public class DisconnectManager {
         receiver.registerHandler(RSSIManager.ACTION_RSSI_AND_DIR_AVAILABLE, onRssi);
     }
     /**
-     * Publish a missed lap
+     * Publish a missed lap event
      */
     private void publishMissedLap() {
         Intent intent = new Intent(ACTION_MISSED_LAPS);
         mBroadcastManager.sendBroadcast(intent);
     }
 
+    // HELPERS FOR UNIT TESTS =================================================================
+
+    /**
+     * Get the current lap. Used for unit tests.
+     * @return the current state
+     */
     public AthleteState getCurrentState() {
         return mCurrentState;
     }
 
+    /**
+     * Get the current reconnection function. Used for unit tests.
+     * @return the algorithm for computing missed laps on reconnection
+     */
     public ReconnectFunction getReconnectFunc() {
         return mReconnectFunc;
     }
 
+    /**
+     * Get the current reconnection function. Used for unit tests.
+     * @param f the algorithm for computing missed laps on reconnection
+     */
     public void setReconnectFunc(ReconnectFunction f) {
         this.mReconnectFunc = f;
     }
