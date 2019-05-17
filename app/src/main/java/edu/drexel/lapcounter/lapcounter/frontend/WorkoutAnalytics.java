@@ -35,6 +35,9 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewMode
 import edu.drexel.lapcounter.lapcounter.backend.TimestampConverter;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * screen for viewing aggregate workout data
+ */
 public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
 
     //
@@ -163,6 +166,11 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
         mNavBar.init();
     }
+
+
+    /**
+     * specifies which workouts will be included in the aggregate view
+     */
     public void Date_Picker(){
         Workout_Analytics_Start_Date = (TextView) findViewById(R.id.Workout_Analytics_Start_Date);
         Workout_Analytics_End_Date = (TextView) findViewById(R.id.Workout_Analytics_End_Date);
@@ -230,6 +238,13 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     }
 
 
+    /**
+     * gets unix timestamp given date parts
+     * @param year the date's year
+     * @param month the date's month
+     * @param dayOfMonth the day
+     * @return
+     */
     public long createUnixTime(int year, int month, int dayOfMonth){
         long epoch = 0;
         try {
@@ -247,6 +262,13 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     }
 
 
+    /**
+     * formats a date String of the format mm/dd/yyyy
+     * @param year
+     * @param month
+     * @param dayOfMonth
+     * @return String date
+     */
     public String DateSetListener(int year, int month, int dayOfMonth){
         String tempMonth;
         String tempDay;
@@ -271,7 +293,9 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     }
 
 
-
+    /**
+     * handles redrawing after dates are selected
+     */
     public void DateChecker(){
 
 
@@ -317,6 +341,9 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     }
 
 
+    /**
+     * calculates and displays numerical workout data
+     */
     public void valueCalulations(){
         TextView setTotalDistanceTraveledText = findViewById(R.id.TDT_Data);
         TextView setAvgWorkoutDistanceText = findViewById(R.id.AVG_WD_Data);
@@ -415,10 +442,11 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
     }
 
 
-
-
-
-
+    /**
+     * calculates and displays bar graph for data between the given dates
+     * @param Date1
+     * @param Date2
+     */
     public void createBarGraph(String Date1, String Date2){
         int count;
         int totaldistance;
@@ -544,6 +572,12 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
     }
 
+    /**
+     * generates a list of the days between the start date and end date.
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     public ArrayList<String> getList(Calendar startDate, Calendar endDate){
         ArrayList<String> list = new ArrayList<String>();
         while(startDate.compareTo(endDate)<=0){
@@ -553,6 +587,11 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         return list;
     }
 
+    /**
+     * gets the current date in MM/dd/yyyy format.
+     * @param cld
+     * @return
+     */
     public String getDate(Calendar cld){
 
         String curDate =  (cld.get(Calendar.MONTH) + 1)+ "/" +cld.get(Calendar.DAY_OF_MONTH)  + "/"

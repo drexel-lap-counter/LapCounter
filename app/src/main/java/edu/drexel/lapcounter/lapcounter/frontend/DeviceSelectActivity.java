@@ -40,7 +40,13 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
+    /**
+     * used to label device selection in shared preferences.
+     */
     public static final String PREFS_KEY = "lapcounter_device_selection";
+    /**
+     * used to label device address in shared preferences
+     */
     public static final String KEY_DEVICE_ADDRESS = "device_address";
 
     // Sample device scanner
@@ -139,6 +145,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
+    /**
+     * navigates to the DeviceInfoActivity.
+     * @param view
+     */
     public void viewDevice(View view) {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
@@ -149,7 +159,9 @@ public class DeviceSelectActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // This goes to DeviceScanActivity to select a new device to register
+    /**
+     * goes to DeviceScanActivity to select a new device to register.
+     */
     public void scanForDevices(View view) {
         Intent intent = new Intent(this, DeviceScanActivity.class);
         startActivity(intent);

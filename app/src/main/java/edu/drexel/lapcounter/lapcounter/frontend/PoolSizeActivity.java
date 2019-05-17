@@ -15,16 +15,34 @@ import android.widget.RadioButton;
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * screen for setting the pool size
+ */
 public class PoolSizeActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_settings);
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
     //Default Values
+    /**
+     * default pool length
+     */
     public static final int defPoolSize = 25;
+    /**
+     * default measurement units
+     */
     public static final String defPoolUnits = "Yards";
 
     //Keys used for loading/save pool size and units
+    /**
+     * shared preference key for pool size preferences
+     */
     public static final String poolSizePreferences = "pool_size_pref";
+    /**
+     * shared preference key for pool size
+     */
     public static final String poolSizeKey = "pool_size_key";
+    /**
+     * shared preference key for pool units
+     */
     public static final String poolUnitsKey = "pool_size_units";
 
     private EditText custom_pool_text;
@@ -113,6 +131,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         loadPoolData();
     }
 
+    /**
+     * records which pool size radio button is clicked
+     * @param view
+     */
     public void onPoolSizeRadioButtonClicked(View view)
     {
         boolean checked = ((RadioButton) view).isChecked();
@@ -150,6 +172,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * records which pool units radio button is clicked
+     * @param view
+     */
     public void onPoolUnitsRadioButtonClicked(View view)
     {
         boolean checked = ((RadioButton) view).isChecked();
@@ -170,6 +196,10 @@ public class PoolSizeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * navigates to the SettingsActivity
+     * @param view
+     */
     public void onConfirmButtonClicked(View view)
     {
         SharedPreferences.Editor editor = pref.edit();
