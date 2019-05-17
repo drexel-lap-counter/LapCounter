@@ -372,7 +372,9 @@ public class BLEComm {
     }
 
     /**
-     * Resets internal state.
+     * Resets internal state. Consumers of this class should call this method when
+     * the device's subsequent connection event should be broadcast as a {@link #ACTION_CONNECTED}
+     * instead of as a {@link #ACTION_RECONNECTED}.
      */
     void reset() {
         mPreviousConnectAddress = null;
