@@ -205,7 +205,6 @@ public class BLEComm {
     }
 
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        disconnect();
         mBluetoothAdapter.startLeScan(scanCallback);
     }
 
