@@ -56,6 +56,8 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     private final ServiceConnection mBleServiceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            setWasCalibrating();
+
             BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
             mBleService = binder.getService();
             mBleService.connectToDevice(mDeviceAddress);
@@ -164,10 +166,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             finishCalibration();
             goToDeviceSelectScreen();
         } else {
-            SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
-            prefs.edit().putBoolean(KEY_WAS_CALIBRATING, true).apply();
             startCalibration();
         }
+    }
+
+    private void setWasCalibrating() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_WAS_CALIBRATING, true).apply();
     }
 
     private void startCalibration() {
