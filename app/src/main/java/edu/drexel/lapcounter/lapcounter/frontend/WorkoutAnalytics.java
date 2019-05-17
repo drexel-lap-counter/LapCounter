@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -107,16 +106,16 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         {
             @Override
             public void onItemSelected (AdapterView < ? > parent, View view,int position, long id){
-            String text = parent.getItemAtPosition(position).toString();
-            Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
-            unit_abbrev = ((text.compareTo("Meters") == 0) ? " m" : " yd");
-            DateChecker();
-        }
+                String text = parent.getItemAtPosition(position).toString();
+                Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
+                unit_abbrev = ((text.compareTo("Meters") == 0) ? " m" : " yd");
+                DateChecker();
+            }
 
             @Override
             public void onNothingSelected (AdapterView < ? > parent){
 
-        }
+            }
         });
         graphSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
@@ -242,7 +241,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
         } catch(ParseException e) {
             e.printStackTrace();
             return epoch;
-    }
+        }
         return epoch;
     }
 
@@ -264,7 +263,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             tempDay = "0"+ String.valueOf(dayOfMonth);
         }
         else {
-            tempDay= String.valueOf(dayOfMonth+1);
+            tempDay= String.valueOf(dayOfMonth);
         }
 
         return tempMonth + "/" + tempDay + "/" + year;
@@ -273,7 +272,8 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
 
     public void DateChecker(){
-
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         if ((!Workout_Analytics_Start_Date.getText().toString().equals("Start Date"))&&(!Workout_Analytics_End_Date.getText().toString().equals("End Date")))
         {
@@ -282,22 +282,31 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
             try {
                 Date startDate = TimestampConverter.fromTimestamp(dbStartDate);
-                Date endDate = TimestampConverter.fromTimestamp(dbEndDate);
+                Date endDate = TimestampConverter.fromTimestamp(dbEndDate+24*60*60);
                 workoutsBetweenDateRange =  mWorkoutViewModel.getWorkoutsByDateRange(startDate, endDate);
+
+                if (workoutsBetweenDateRange.size() > 0) {
+
+                    Date chartEndDate1 = simpleDateFormat.parse(chartEndDate);
+
+
+
+                    Calendar cal2 = Calendar.getInstance();
+
+
+                    cal2.setTime(chartEndDate1);
+
+                    cal2.add(Calendar.DATE,2);
+                    chartEndDate = DateSetListener(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH), cal2.get(Calendar.DAY_OF_MONTH));
+                    valueCalulations();
+                    createBarGraph(chartStartDate,chartEndDate);
+
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if (workoutsBetweenDateRange.size() > 0) {
 
-
-
-                valueCalulations();
-                createBarGraph(chartStartDate,chartEndDate);
-
-           }
-
-
-            }
+        }
         else if ((Workout_Analytics_Start_Date.getText().toString().equals("Start Date"))&&(Workout_Analytics_End_Date.getText().toString().equals("End Date"))){
             try {
                 workoutsBetweenDateRange = mWorkoutViewModel.getAllWorkouts();
@@ -309,8 +318,9 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
                 cal.setTime(workoutsBetweenDateRange.get(0).getStartDate());
                 Calendar cal2 = Calendar.getInstance();
                 cal2.setTime(workoutsBetweenDateRange.get(workoutsBetweenDateRange.size() - 1).getStartDate());
+                cal2.add(Calendar.DATE,2);
                 chartStartDate = DateSetListener(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-                chartEndDate = DateSetListener(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH), cal2.get(Calendar.DAY_OF_MONTH) + 1);
+                chartEndDate = DateSetListener(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH), cal2.get(Calendar.DAY_OF_MONTH));
                 valueCalulations();
                 createBarGraph(chartStartDate, chartEndDate);
             }
@@ -431,13 +441,14 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             Date date2 = simpleDateFormat.parse(Date2);
 
             Calendar mDate1 = Calendar.getInstance();
+
             Calendar mDate2 = Calendar.getInstance();
             mDate1.clear();
             mDate2.clear();
 
             mDate1.setTime(date1);
+            mDate1.add(Calendar.DATE,1);
             mDate2.setTime(date2);
-
             dates = new ArrayList<>();
             dates = getList(mDate1, mDate2);
 
@@ -534,12 +545,12 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             barDataSet = new BarDataSet(barEntries, "Distance Swam (m)");
         }
         else if(graphType.compareTo("Average Speed") == 0){
-             if (unit_abbrev ==" m") {
-                 barDataSet = new BarDataSet(barEntries, "Average Speed (m/s)");
-             }
-             else {
-                 barDataSet = new BarDataSet(barEntries, "Average Speed (yds/s)");
-             }
+            if (unit_abbrev ==" m") {
+                barDataSet = new BarDataSet(barEntries, "Average Speed (m/s)");
+            }
+            else {
+                barDataSet = new BarDataSet(barEntries, "Average Speed (yds/s)");
+            }
         }
         else if(graphType.compareTo("Workout Duration") == 0) {
             barDataSet = new BarDataSet(barEntries, "Workout Duration (Min)");
