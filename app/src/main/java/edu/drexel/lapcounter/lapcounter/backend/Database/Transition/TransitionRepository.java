@@ -14,11 +14,31 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.State;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.StateDao;
 
+/**
+ * TransitionRepository class for interacting with database using state and transition DAO.
+ * Allows caller to asynchronously touch database using possible queries specified in DAOs
+ * @see StateDao
+ * @see TransitionDao
+ * @see State
+ * @see Transition
+ * @see LapCounterDatabase
+ */
 public class TransitionRepository
 {
+    /**
+     * The state dao used for interacting with DB.
+     */
     private StateDao mStateDao;
+    /**
+     * the Transition dao used for interacting with DB.
+     */
     private TransitionDao mTransitionDao;
 
+    /**
+     * Constructor for TransitionRepository
+     * gets the database, and sets its dao's using DB.
+     * @param application Application to get database from.
+     */
     public TransitionRepository(Application application)
     {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
@@ -26,6 +46,12 @@ public class TransitionRepository
         mTransitionDao = db.transitionDao();
     }
 
+    /**
+     * Gets all of the States currently stored in database.
+     * @return List of all States in DB.
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     public List<State> getAllStates() throws InterruptedException, ExecutionException
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -38,6 +64,12 @@ public class TransitionRepository
         return res.get();
     }
 
+    /**
+     * Gets the number of states currently stored in database, returned as int
+     * @return int value of total number of states in DB
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     public int getNumStates() throws ExecutionException, InterruptedException {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<Integer> res = ex.submit(new Callable<Integer>() {
@@ -50,10 +82,18 @@ public class TransitionRepository
     }
 
 
+    /**
+     * insert given State into the database.
+     * @param state state to insert.
+     */
     public void insert(State state)
     {
         new insertStateAsyncTask(mStateDao).execute(state);
     }
+    /**
+     * ASyncTask used for State insertion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class insertStateAsyncTask extends AsyncTask<State,Void,Void>
     {
         private StateDao mAsyncTaskDao;
@@ -68,10 +108,18 @@ public class TransitionRepository
         }
     }
 
+    /**
+     * deletes given State from database.
+     * @param state state to delete.
+     */
     public void deleteState(State state)
     {
         new DeleteStateASyncTask(mStateDao).execute(state);
     }
+    /**
+     * ASyncTask used for State deletion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class DeleteStateASyncTask extends AsyncTask<State,Void,Void>
     {
         private StateDao mAsyncTaskDao;
@@ -88,7 +136,8 @@ public class TransitionRepository
     }
 
     /**
-     * Initialize the States table
+     * Initialize the States table, to contain NEAR, FAR, and UNKNOWN
+     * This is used to ensure that the three states are always in the database.
      */
     public void initStatesTable() throws ExecutionException, InterruptedException {
         // First, let's check if the table already is full. If so, we can stop.
@@ -102,9 +151,18 @@ public class TransitionRepository
         }
     }
 
+    /**
+     * inserts given transition into the database.
+     * @param transition transition to insert.
+     */
     public void insert(Transition transition) {
         new InsertTransitionTask(mTransitionDao).execute(transition);
     }
+
+    /**
+     * ASyncTask used for transition insertion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class InsertTransitionTask extends AsyncTask<Transition, Void, Void> {
         private TransitionDao mTransitionDao;
 
@@ -119,6 +177,12 @@ public class TransitionRepository
         }
     }
 
+    /**
+     * Gets a list of all transitions that exist in database.
+     * @return List of all transitions in database.
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     public List<Transition> getAllTransitions() throws InterruptedException, ExecutionException
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
