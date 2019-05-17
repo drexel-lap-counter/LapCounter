@@ -172,8 +172,8 @@ public class BLEComm {
     };
 
     /**
-     * @param s The identifier to prepend with the qualified package name.
-     * @return The identifier fully-qualified with package information.
+     * @param s the identifier to prepend with the qualified package name.
+     * @return the identifier fully-qualified with package information.
      */
     private static String qualify(String s) {
         Package p = Objects.requireNonNull(BLEComm.class.getPackage());
@@ -194,8 +194,8 @@ public class BLEComm {
      * Construct a BLEComm with core dependencies injected. Used for unit testing this class.
      *
      * @param parent BLEcomm requires a Context to request BLE permissions and to send Intents.
-     * @param adapter An adapter to construct BluetoothDevice objects and to scan for devices.
-     * @param broadcastManager An Intent-publishing manager to send Intents across Activities and
+     * @param adapter an adapter to construct BluetoothDevice objects and to scan for devices.
+     * @param broadcastManager an Intent-publishing manager to send Intents across Activities and
      *                         services.
      */
     public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){
@@ -206,9 +206,9 @@ public class BLEComm {
 
 
     /**
-     * @param c The Context that makes the request to the Android OS for access to the underlying
+     * @param c the Context that makes the request to the Android OS for access to the underlying
      *          Bluetooth adapter.
-     * @return An instance of the underlying Bluetooth adapter, or null if the app cannot access
+     * @return an instance of the underlying Bluetooth adapter, or null if the app cannot access
      * the BLE hardware, e.g., lack of permissions, lack of hardware support.
      */
     private static BluetoothAdapter getAdapter(Context c) {
@@ -233,7 +233,7 @@ public class BLEComm {
     /**
      * Broadcast an Intent locally in the app.
      *
-     * @param intent The Intent to locally broadcast.
+     * @param intent the Intent to locally broadcast.
      */
     private void localBroadcast(Intent intent) {
         mBroadcastManager.sendBroadcast(intent);
@@ -244,7 +244,7 @@ public class BLEComm {
      * Locally broadcast a connection event to the app.
      * The extra {@link #EXTRA_DEVICE_ADDRESS} contains the MAC address of the connected device.
      *
-     * @param isReconnect Whether the connection event refers to a reconnection.
+     * @param isReconnect whether the connection event refers to a reconnection.
      * @see #ACTION_CONNECTED
      * @see #ACTION_RECONNECTED
      */
@@ -272,7 +272,7 @@ public class BLEComm {
      * Locally broadcast an RSSI value to the app.
      * The extra {@link #EXTRA_RAW_RSSI} contains the RSSI value.
      *
-     * @param rssi The RSSI value to broadcast.
+     * @param rssi the RSSI value to broadcast.
      * @see #ACTION_RAW_RSSI_AVAILABLE
      */
     private void broadcastUpdate(int rssi) {
@@ -284,8 +284,8 @@ public class BLEComm {
     /**
      * Connect to a BLE device.
      *
-     * @param address The MAC address of the BLE device to connect to.
-     * @return Return true if the connection is initiated successfully. The connection result
+     * @param address the MAC address of the BLE device to connect to.
+     * @return return true if the connection is initiated successfully. The connection result
      * is reported asynchronously through an Intent with action {@link #ACTION_CONNECTED}.
      */
     boolean connect(final String address) {
@@ -343,7 +343,7 @@ public class BLEComm {
     /**
      * Begin scanning for BLE devices.
      *
-     * @param scanCallback The callback to invoke when devices are found.
+     * @param scanCallback the callback to invoke when devices are found.
      */
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
         disconnect();
@@ -353,7 +353,7 @@ public class BLEComm {
     /**
      * Stop scanning for BLE devices.
      *
-     * @param scanCallback The callback previously used when starting a scan.
+     * @param scanCallback the callback previously used when starting a scan.
      * @see #startScan(BluetoothAdapter.LeScanCallback)
      */
     void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
@@ -361,7 +361,7 @@ public class BLEComm {
     }
 
     /**
-     * @return The current connection state of the device.
+     * @return the current connection state of the device.
      *
      * @see #STATE_CONNECTED
      * @see #STATE_CONNECTING
