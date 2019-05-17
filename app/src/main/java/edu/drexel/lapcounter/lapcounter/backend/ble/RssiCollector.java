@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A class to store Received Signal Strength Indicator (RSSI) values and to receive useful
- * metrics.
+ * A class to store Received Signal Strength Indicator (RSSI) values and to provide useful
+ * metrics on them.
  */
 public class RssiCollector {
     private static final String TAG = RssiCollector.class.getSimpleName();
