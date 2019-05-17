@@ -14,14 +14,42 @@ import java.util.List;
 import edu.drexel.lapcounter.lapcounter.backend.wrappers.ContextWrapper;
 
 /**
- * A class to help facilitate scanning for Bluetooth Low Energy devices.
+ * A class to facilitate scanning for Bluetooth Low Energy devices.
+ *
  * @see BLEComm
  */
 public class BLEScanner implements DeviceScanner {
+    /**
+     * The tag used to identify this class in execution logs.
+     */
     private static final String TAG = BLEScanner.class.getSimpleName();
+
+    /**
+     * The collection of MAC addresses of found devices to report back to the consumers of this
+     * class. Found devices without MAC addresses in this collection will not be reported.
+     *
+     * If this collection is null, then BLEScanner will report all found devices.
+     * @see DeviceScanner#setAddressWhitelist(List)
+     */
     private List<String> mWhitelist;
+
+
+    /**
+     * The Service interface to {@link BLEComm}.
+     */
     private BLEService mBleService;
+
+
+    /**
+     * BLEScanner requires a Context to send Intents and to bind to Services.
+     */
     private IContext mParentContext;
+
+
+    /**
+     * The user-supplied {@link DeviceScanner.Callback} wrapped in Android's underlying scanner
+     * callback object.
+     */
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
     /**
@@ -29,7 +57,14 @@ public class BLEScanner implements DeviceScanner {
      */
     boolean mIsScanning = false;
 
+    /**
+     * The Service connection/disconnection callbacks attached to {@link #mBleService}.
+     */
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
+        /**
+         * {@inheritDoc}
+         * On Service connection, BLEScanner will start scanning for BLE devices.
+         */
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
@@ -43,7 +78,7 @@ public class BLEScanner implements DeviceScanner {
     };
 
     /** Construct a BLEScanner with a reference to its owner.
-     * @param parent BLEScanner requires a Context to send Intents.
+     * @param parent BLEScanner requires a Context to send Intents and to bind to Services.
      */
     public BLEScanner(Context parent) {
         this(new ContextWrapper(parent));
@@ -51,12 +86,15 @@ public class BLEScanner implements DeviceScanner {
 
 
     /** Construct a BLEScanner with a reference to its owner.
-     * @param parent BLEScanner requires a Context to send Intents.
+     * @param parent BLEScanner requires a Context to send Intents and to bind to Services.
      */
     public BLEScanner(IContext parent) {
         mParentContext = parent;
     }
 
+    /**
+     * @param callback The callback the receives information about found devices.
+     */
     @Override
     public void setCallback(final Callback callback) {
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
