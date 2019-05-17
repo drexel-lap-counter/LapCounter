@@ -243,42 +243,51 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        // Get the current bluetooth device address from
         String currentDevice = loadDeviceAddress();
 
-        if (mDeviceAddress == null) {
-            // Pull the currently selected device from SharedPreferences.
-            mDeviceAddress = currentDevice;
-            return;
-        }
+        // There are many situtations where onStart() gets called. Let's make some flags to
+        // distinguish them
+        boolean oldDeviceExists = mDeviceAddress != null;
+        boolean newDeviceExists = currentDevice != null;
 
-        if (wasCalibrating()) {
+        // This checks that both old and new device addresses exist and are equal in MAC address.
+        boolean devicesSame = oldDeviceExists
+                && newDeviceExists
+                && mDeviceAddress.equals(currentDevice);
+
+        boolean servicesReady = mLapCounterService != null && mBleService != null;
+
+        // Check if the addresses are different. Note that we need to make sure at least one
+        // device is non-null for them to be different.
+        boolean bothNull = !oldDeviceExists && !newDeviceExists;
+        boolean addressChanged = !devicesSame && !bothNull;
+
+        // Check for a flag in shared preferences that indicates that we just calibrated a device
+        boolean justCalibrated = wasCalibrating();
+
+        // If the address changed or we calibrated, the lap counting will have to restart
+        boolean deviceSettingsChanged = addressChanged || justCalibrated;
+
+
+        // Step 1. Disconnect the old device if it exists and the old device did not change.
+        if (oldDeviceExists && !devicesSame)
             mBleService.disconnectDevice();
 
-            String s = "Since you calibrated a device mid-workout, the workout must be " +
-                    "stopped. Would you like to save your progress?";
-            alertToSaveBeforeRestart(s);
-
-            mDeviceAddress = currentDevice;
-            connect();
-            return;
+        // Step 2. If device settings changed at all (including deleting the device) prompt
+        // the user to save the progress before restarting;
+        if (servicesReady && deviceSettingsChanged) {
+            String msg = "Since you changed device settings mid-workout, the workout must be "
+                + "stopped. Would you like to save your progress?";
+            alertToSaveBeforeRestart(msg);
         }
 
-        if (mDeviceAddress.equals(currentDevice)) {
-            // Device hasn't changed.
-            return;
-        }
-
-        // So the user changed their device mid-workout.
+        // Step 3. Set the new device address
         mDeviceAddress = currentDevice;
 
-        // Disconnect from previous device.
-        mBleService.disconnectDevice();
-
-        String s = "Since you connected to a different device, the current workout " +
-                "must be stopped. Would you like to save your progress?";
-        alertToSaveBeforeRestart(s);
-
-        connect();
+        // Step 4. Connect to the new device if there is one
+        if (servicesReady && newDeviceExists && !devicesSame)
+            connect();
     }
 
     private void requestBluetoothPermission() {
