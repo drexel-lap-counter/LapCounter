@@ -487,6 +487,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler updateUI = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (wasCalibrating()) {
+                return;
+            }
+
             // Extract info from the Intent
             mLapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
@@ -521,6 +525,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (wasCalibrating()) {
+                Log.i(TAG, "Disconnected because user is calibrating another device.");
+                return;
+            }
             mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
             connect();
         }
