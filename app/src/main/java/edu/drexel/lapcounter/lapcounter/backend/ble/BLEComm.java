@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.Objects;
@@ -118,6 +117,7 @@ public class BLEComm {
 
     /**
      * The current connection state.
+     *
      * @see #getConnectionState()
      */
     private int mConnectionState = STATE_DISCONNECTED;
@@ -153,7 +153,7 @@ public class BLEComm {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = STATE_DISCONNECTED;
                 Log.d(TAG, "Disconnected from GATT server. status = " + status);
-                broadcastDisconnect(ACTION_DISCONNECTED);
+                broadcastDisconnect();
 
                 mIntentionalDisconnect = false;
             }
@@ -163,7 +163,7 @@ public class BLEComm {
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("BLE_RSSI", "Callback called successfully " + Integer.toString(rssi));
-                broadcastUpdate(ACTION_RAW_RSSI_AVAILABLE, rssi);
+                broadcastUpdate(rssi);
             } else {
                 Log.w("BLE_RSSI", "Could not read remote RSSI!");
             }
@@ -180,7 +180,9 @@ public class BLEComm {
         return p.getName() + "." + s;
     }
 
-    /** Construct a BLEComm with a reference to its Context owner.
+    /**
+     *  Construct a BLEComm with a reference to its Context owner.
+     *
      * @param parent BLEcomm requires a Context to request BLE permissions and to send Intents.
      */
     public BLEComm(Context parent) {
@@ -188,7 +190,9 @@ public class BLEComm {
                 LocalBroadcastManagerWrapper.getInstance(parent));
     }
 
-    /** Construct a BLEComm with core dependencies injected.
+    /**
+     * Construct a BLEComm with core dependencies injected. Used for unit testing this class.
+     *
      * @param parent BLEcomm requires a Context to request BLE permissions and to send Intents.
      * @param adapter An adapter to construct BluetoothDevice objects and to scan for devices.
      * @param broadcastManager An Intent-publishing manager to send Intents across Activities and
@@ -226,7 +230,9 @@ public class BLEComm {
         }
     }
 
-    /** Broadcast an Intent locally to other IBroadcastManagers in the app.
+    /**
+     * Broadcast an Intent locally in the app.
+     *
      * @param intent The Intent to locally broadcast.
      */
     private void localBroadcast(Intent intent) {
@@ -234,7 +240,10 @@ public class BLEComm {
     }
 
 
-    /** Broadcast a connection event to other IBroadcastManagers in the app.
+    /**
+     * Locally broadcast a connection event to the app.
+     * The extra {@link #EXTRA_DEVICE_ADDRESS} contains the MAC address of the connected device.
+     *
      * @param isReconnect Whether the connection event refers to a reconnection.
      * @see #ACTION_CONNECTED
      * @see #ACTION_RECONNECTED
@@ -247,24 +256,27 @@ public class BLEComm {
     }
 
     /**
-     * Broadcast an an intent for device connected/disconnected
+     * Locally broadcast a disconnect event to the app.
+     * The extra {@link #EXTRA_DISCONNECT_IS_INTENTIONAL} contains whether the disconnect event
+     * was explicitly requested the app.
      *
-     * @param action
+     * @see #ACTION_DISCONNECTED
      */
-    private void broadcastDisconnect(final String action) {
-        final Intent intent = new Intent(action);
+    private void broadcastDisconnect() {
+        final Intent intent = new Intent(BLEComm.ACTION_DISCONNECTED);
         intent.putExtra(EXTRA_DISCONNECT_IS_INTENTIONAL, mIntentionalDisconnect);
         localBroadcast(intent);
     }
 
     /**
-     * Broadcast an intent for device RSSI update
+     * Locally broadcast an RSSI value to the app.
+     * The extra {@link #EXTRA_RAW_RSSI} contains the RSSI value.
      *
-     * @param action
-     * @param rssi
+     * @param rssi The RSSI value to broadcast.
+     * @see #ACTION_RAW_RSSI_AVAILABLE
      */
-    private void broadcastUpdate(final String action, int rssi) {
-        final Intent intent = new Intent(action);
+    private void broadcastUpdate(int rssi) {
+        final Intent intent = new Intent(BLEComm.ACTION_RAW_RSSI_AVAILABLE);
         intent.putExtra(EXTRA_RAW_RSSI, rssi);
         localBroadcast(intent);
     }
@@ -274,9 +286,7 @@ public class BLEComm {
      *
      * @param address The MAC address of the BLE device to connect to.
      * @return Return true if the connection is initiated successfully. The connection result
-     * is reported asynchronously through the
-     * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
-     * callback.
+     * is reported asynchronously through an Intent with action {@link #ACTION_CONNECTED}.
      */
     boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
@@ -315,7 +325,10 @@ public class BLEComm {
 
     /**
      * Disconnect from the connected device and release internal resources.
+     *
      * @see #connect(String)
+     * @see #ACTION_DISCONNECTED
+     * @see #EXTRA_DISCONNECT_IS_INTENTIONAL
      */
     void disconnect() {
         if (mBluetoothGatt == null) {
@@ -327,7 +340,9 @@ public class BLEComm {
         mIntentionalDisconnect = true;
     }
 
-    /** Begin scanning for BLE devices.
+    /**
+     * Begin scanning for BLE devices.
+     *
      * @param scanCallback The callback to invoke when devices are found.
      */
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
@@ -335,7 +350,9 @@ public class BLEComm {
         mBluetoothAdapter.startLeScan(scanCallback);
     }
 
-    /** Stop scanning for BLE devices.
+    /**
+     * Stop scanning for BLE devices.
+     *
      * @param scanCallback The callback previously used when starting a scan.
      * @see #startScan(BluetoothAdapter.LeScanCallback)
      */
@@ -345,6 +362,7 @@ public class BLEComm {
 
     /**
      * @return The current connection state of the device.
+     *
      * @see #STATE_CONNECTED
      * @see #STATE_CONNECTING
      * @see #STATE_DISCONNECTED
