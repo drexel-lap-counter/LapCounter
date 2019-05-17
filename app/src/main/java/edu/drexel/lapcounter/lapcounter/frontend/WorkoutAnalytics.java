@@ -304,15 +304,16 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             }catch (Exception e) {
                 e.printStackTrace();
             }
-
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(workoutsBetweenDateRange.get(0).getStartDate());
-            Calendar cal2 = Calendar.getInstance();
-            cal2.setTime(workoutsBetweenDateRange.get(workoutsBetweenDateRange.size()-1).getStartDate());
-            chartStartDate = DateSetListener(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DAY_OF_MONTH));
-            chartEndDate = DateSetListener(cal2.get(Calendar.YEAR),cal2.get(Calendar.MONTH),cal2.get(Calendar.DAY_OF_MONTH)+1);
-            valueCalulations();
-            createBarGraph(chartStartDate,chartEndDate);
+            if (workoutsBetweenDateRange.size() > 0) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(workoutsBetweenDateRange.get(0).getStartDate());
+                Calendar cal2 = Calendar.getInstance();
+                cal2.setTime(workoutsBetweenDateRange.get(workoutsBetweenDateRange.size() - 1).getStartDate());
+                chartStartDate = DateSetListener(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+                chartEndDate = DateSetListener(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH), cal2.get(Calendar.DAY_OF_MONTH) + 1);
+                valueCalulations();
+                createBarGraph(chartStartDate, chartEndDate);
+            }
         }
     }
 
@@ -458,7 +459,6 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
 
 
                         if (dates.get(j).equals(tempStartDate)) {
-
                             if ((unit_abbrev.compareTo(" m") != 0) && (workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Meters") == 0)) {
                                 totaldistance += (workoutsBetweenDateRange.get(i).getTotalDistanceTraveled() * METERTOYARDCONVERT);
                             } else if ((unit_abbrev.compareTo(" yd") != 0) && (workoutsBetweenDateRange.get(i).getPoolUnits().compareTo("Yards") == 0)) {
@@ -534,12 +534,12 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
             barDataSet = new BarDataSet(barEntries, "Distance Swam (m)");
         }
         else if(graphType.compareTo("Average Speed") == 0){
-//             if (unit_abbrev ==" m") {
+             if (unit_abbrev ==" m") {
                  barDataSet = new BarDataSet(barEntries, "Average Speed (m/s)");
-//             }
-//             else {
-//                 barDataSet = new BarDataSet(barEntries, "Average Speed (yds/s)");
-//             }
+             }
+             else {
+                 barDataSet = new BarDataSet(barEntries, "Average Speed (yds/s)");
+             }
         }
         else if(graphType.compareTo("Workout Duration") == 0) {
             barDataSet = new BarDataSet(barEntries, "Workout Duration (Min)");
