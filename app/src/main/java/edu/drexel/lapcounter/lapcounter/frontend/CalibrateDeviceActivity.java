@@ -172,7 +172,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     private void setWasCalibrating() {
         SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean(KEY_WAS_CALIBRATING, true).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_WAS_CALIBRATING, true);
+        editor.commit();
     }
 
     private void startCalibration() {

@@ -370,7 +370,9 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
     private void clearCalibratingFlag() {
-        getCalibrationSharedPrefs().edit().clear().apply();
+        SharedPreferences.Editor editor = getCalibrationSharedPrefs().edit();
+        editor.clear();
+        editor.commit();
     }
 
     private void connect() {
