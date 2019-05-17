@@ -46,6 +46,8 @@ import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_M
 //import android.support.v4.content.LocalBroadcastManager;
 
 public class CurrentWorkoutActivity extends AppCompatActivity {
+    private static final String TAG = CurrentWorkoutActivity.class.getSimpleName();
+
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
     private Button startResumeButton;
@@ -212,6 +214,12 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private void alertToSaveBeforeRestart(String alertText) {
         pause();
 
+        if (updatedTime <= 0 ) {
+            // User hasn't started a workout.
+            restartWorkout();
+            return;
+        }
+
         // Ask if they'd like to save their current workout.
         new AlertDialog.Builder(this)
                 .setMessage(alertText)
@@ -250,9 +258,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
                     "stopped. Would you like to save your progress?";
             alertToSaveBeforeRestart(s);
 
-            clearCalibratingFlag();
-
-            mBleService.connectToDevice(currentDevice);
+            mDeviceAddress = currentDevice;
+            connect();
             return;
         }
 
@@ -262,20 +269,16 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         }
 
         // So the user changed their device mid-workout.
-
         mDeviceAddress = currentDevice;
 
-        // Connect to the new device.
+        // Disconnect from previous device.
         mBleService.disconnectDevice();
 
-        // Did the user already start a workout with the previous device?
-        if (updatedTime > 0) {
-            String s = "Since you connected to a different device, the current workout " +
-                    "must be stopped. Would you like to save your progress?";
-            alertToSaveBeforeRestart(s);
-        }
+        String s = "Since you connected to a different device, the current workout " +
+                "must be stopped. Would you like to save your progress?";
+        alertToSaveBeforeRestart(s);
 
-        mBleService.connectToDevice(mDeviceAddress);
+        connect();
     }
 
     private void requestBluetoothPermission() {
@@ -371,6 +374,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     }
 
     private void connect() {
+        clearCalibratingFlag();
+
         if (mDeviceAddress == null) {
             mDebugConnectLabel.setText(R.string.label_no_device_selected);
             // TODO: What should happen if the user does not have a currently selected device?
@@ -380,12 +385,11 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
-
-
         String connectMessage = getResources().getString(R.string.label_connecting, mDeviceAddress);
         mDebugConnectLabel.setText(connectMessage);
         mBleService.connectToDevice(mDeviceAddress);
         mLapCounterService.updateThreshold(mDeviceAddress);
+
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -488,6 +492,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
             //Update the TextView
             mCounter.setText(Integer.toString(mLapCount));
+
+            Log.i(TAG, "Lap count is now " + mLapCount);
         }
     };
 
