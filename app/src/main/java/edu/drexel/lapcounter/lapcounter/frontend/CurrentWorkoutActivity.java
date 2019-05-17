@@ -127,6 +127,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         mNavBar.init();
 
+        clearCalibratingFlag();
+
         timerValue = findViewById(R.id.timerValue);
         mTimerFormat = getString(R.string.current_workout_timer_format);
 
@@ -207,6 +209,26 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mLapCounterService = null;
     }
 
+    private void alertToSaveBeforeRestart(String alertText) {
+        // Ask if they'd like to save their current workout.
+        new android.support.v7.app.AlertDialog.Builder(this)
+                .setMessage(alertText)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveWorkout();
+                        restartWorkout();
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        restartWorkout();
+                    }
+                })
+                .show();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -219,8 +241,21 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
+        if (wasCalibrating()) {
+            mBleService.disconnectDevice();
+
+            String s = "Since you calibrated a device mid-workout, the workout must be " +
+                    "stopped. Would you like to save your progress?";
+            alertToSaveBeforeRestart(s);
+
+            clearCalibratingFlag();
+
+            mBleService.connectToDevice(currentDevice);
+            return;
+        }
+
         if (mDeviceAddress.equals(currentDevice)) {
-            // Device hasn't changed. There's nothing to do.
+            // Device hasn't changed.
             return;
         }
 
@@ -234,26 +269,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mBleService.disconnectDevice();
 
         // Did the user already start a workout with the previous device?
-        if (updatedTime > 0)
-        {
-            // Ask if they'd like to save their current workout.
-            new android.support.v7.app.AlertDialog.Builder(this)
-                    .setMessage("Since you've connected to a different device, the current workout " +
-                            "must be stopped. Would you like to save your progress?")
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            saveWorkout();
-                            restartWorkout();
-                        }
-                    })
-                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            restartWorkout();
-                        }
-                    })
-                    .show();
+        if (updatedTime > 0) {
+            String s = "Since you connected to a different device, the current workout " +
+                    "must be stopped. Would you like to save your progress?";
+            alertToSaveBeforeRestart(s);
         }
 
         mBleService.connectToDevice(mDeviceAddress);
@@ -336,6 +355,19 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(
                 PoolSizeActivity.poolSizePreferences, Context.MODE_PRIVATE);
         return prefs.getString(PoolSizeActivity.poolUnitsKey, PoolSizeActivity.defPoolUnits);
+    }
+
+    private SharedPreferences getCalibrationSharedPrefs() {
+        return getSharedPreferences(CalibrateDeviceActivity.PREFS_KEY, Context.MODE_PRIVATE);
+    }
+
+    private boolean wasCalibrating() {
+        SharedPreferences prefs = getCalibrationSharedPrefs();
+        return prefs.getBoolean(CalibrateDeviceActivity.KEY_WAS_CALIBRATING, false);
+    }
+
+    private void clearCalibratingFlag() {
+        getCalibrationSharedPrefs().edit().clear().apply();
     }
 
     private void connect() {

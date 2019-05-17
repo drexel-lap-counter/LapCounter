@@ -3,8 +3,10 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +35,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
 
     public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
     public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
+
+    public static final String PREFS_KEY = qualify("SHARED_PREFERENCES");
+    public static final String KEY_WAS_CALIBRATING = qualify("KEY_WAS_CALIBRATING");
 
     private final static int PRINT_COLLECTOR_STATS_FREQ_MS = 500;
 
@@ -159,6 +164,8 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
             finishCalibration();
             goToDeviceSelectScreen();
         } else {
+            SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+            prefs.edit().putBoolean(KEY_WAS_CALIBRATING, true).apply();
             startCalibration();
         }
     }
