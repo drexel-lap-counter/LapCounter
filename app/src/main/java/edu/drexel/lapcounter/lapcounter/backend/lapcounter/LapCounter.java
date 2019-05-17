@@ -104,8 +104,8 @@ public class LapCounter {
      * MISSED_LAPS -> If we reconnected and it is determined that the athlete went from
      *      FAR -> NEAR in the meantime, count laps
      */
-    public void initCallbacks(SimpleMessageReceiver mReceiver) {
-        mReceiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, countLaps);
-        mReceiver.registerHandler(DisconnectManager.ACTION_MISSED_LAPS, onMissedLaps);
+    public void initCallbacks(SimpleMessageReceiver receiver) {
+        receiver.registerHandler(LocationStateMachine.ACTION_STATE_TRANSITION, countLaps);
+        receiver.registerHandler(DisconnectManager.ACTION_MISSED_LAPS, onMissedLaps);
     }
 }

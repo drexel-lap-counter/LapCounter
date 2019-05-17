@@ -33,7 +33,7 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
     List<Workout> allWorkoutsDesc;
     private ArrayList<String> mWorkoutDate = new ArrayList<>();
-    private ArrayList<String> mPoolLength = new ArrayList<>();
+    private ArrayList<String> mLaps = new ArrayList<>();
     private ArrayList<String> mID = new ArrayList<>();
 
 
@@ -47,9 +47,21 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: started.");
         // In the final version, use R.string.<string id> for titles
         getSupportActionBar().setTitle("Past Workouts");
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        mWorkoutDate.removeAll(mWorkoutDate);
+        mLaps.removeAll(mLaps);
+        mID.removeAll(mID);
 
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
 
         try {
+
             allWorkoutsDesc =  mWorkoutViewModel.getAllWorkoutsDecending();
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,18 +72,16 @@ public class PastWorkoutsActivity extends AppCompatActivity {
             initPastWorkoutsView(wrkout);
         }
 
-
         initRecyclerView();
+
         mNavBar.init();
     }
-
     private void initRecyclerView(){
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerv_view);
-        PastWorkoutsRecyclerAdapter adapter = new PastWorkoutsRecyclerAdapter(this, mWorkoutDate,mPoolLength,mID);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        PastWorkoutsRecyclerAdapter adapter = new PastWorkoutsRecyclerAdapter(this, mWorkoutDate,mLaps,mID);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
     }
 
 
@@ -86,7 +96,7 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
         tempStartDate =  String.valueOf(output);
         mWorkoutDate.add(String.valueOf(tempStartDate));
-        mPoolLength.add(String.valueOf(Workout.getPoolLength()));
+        mLaps.add(String.valueOf(Workout.getLaps()));
         mID.add(String.valueOf(Workout.getID()));
 
     }

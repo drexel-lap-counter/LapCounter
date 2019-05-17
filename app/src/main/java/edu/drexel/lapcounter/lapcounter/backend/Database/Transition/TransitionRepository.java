@@ -13,18 +13,17 @@ import java.util.concurrent.Future;
 import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.State;
 import edu.drexel.lapcounter.lapcounter.backend.Database.State.StateDao;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
-import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutRepository;
 
 public class TransitionRepository
 {
     private StateDao mStateDao;
+    private TransitionDao mTransitionDao;
 
     public TransitionRepository(Application application)
     {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mStateDao = db.stateDao();
+        mTransitionDao = db.transitionDao();
     }
 
     public List<State> getAllStates() throws InterruptedException, ExecutionException
@@ -101,5 +100,34 @@ public class TransitionRepository
             State state = new State(state_name);
             insert(state);
         }
+    }
+
+    public void insert(Transition transition) {
+        new InsertTransitionTask(mTransitionDao).execute(transition);
+    }
+    private static class InsertTransitionTask extends AsyncTask<Transition, Void, Void> {
+        private TransitionDao mTransitionDao;
+
+        public InsertTransitionTask(TransitionDao dao) {
+            mTransitionDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(Transition... transitions) {
+            mTransitionDao.insertTransition(transitions[0]);
+            return null;
+        }
+    }
+
+    public List<Transition> getAllTransitions() throws InterruptedException, ExecutionException
+    {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        Future<List<Transition>> res = ex.submit(new Callable<List<Transition>>() {
+            @Override
+            public List<Transition> call(){
+                return mTransitionDao.getAllTransitions();
+            }
+        });
+        return res.get();
     }
 }

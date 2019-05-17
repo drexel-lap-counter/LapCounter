@@ -27,7 +27,7 @@
     <string name="label_done">Done</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="resumeButtonLabel">RESUME</string>
+    <string name="resumeButtonLabel">Resume</string>
     <string name="pool_size_title">"Pool Size"</string>
     <string name="meters">Meters</string>
     <string name="yards">"Yards"</string>
@@ -53,6 +53,31 @@
         <item>Yards</item>
         <item>Meters</item>
     </string-array>
+
+    <string-array name="graphTypes">
+        <item>Distance Traveled</item>
+        <item>Average Speed</item>
+        <item>Workout Duration</item>
+    </string-array>
+
+
+    <string name="label_select_dates">Select Dates:</string>
+    <string name="label_start_date">Start Date</string>
+    <string name="label_end_date">End Date</string>
+    <string name="label_to">to</string>
+    <string name="label_total_distance">Total Distance:</string>
+    <string name="label_avg_workout_time">Avg Workout Time:</string>
+    <string name="label_duration">Duration:</string>
+    <string name="label_avg_workout_dist">Avg Workout Dist:</string>
+    <string name="label_no_data">No Data</string>
+    <string name="no_data">No Data</string>
+    <string name="label_past_workout_distances">PAST WORKOUT DISTANCES</string>
+    <string name="label_txt_lap_count">txt_lap_count</string>
+    <string name="label_date_name">Date_name</string>
+    <string name ="label_Paskworkouts_date">Date</string>
+    <string name ="label_Paskworkouts_laps">Laps</string>
+
     <string name="device_name">Device Name</string>
     <string name="device_mac">Device MAC</string>
+
 </resources>

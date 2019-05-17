@@ -2,6 +2,7 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,13 +21,15 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
 
     private ArrayList<String> mWorkoutDate;
     private ArrayList<String> mPoolLength;
+
+    private ArrayList<String> mLaps;
     private ArrayList<String> mID;
     private Context mContext;
 
-    public PastWorkoutsRecyclerAdapter(Context context, ArrayList<String> workoutDate,ArrayList<String> poolLength,ArrayList<String> ID ) {
+    public PastWorkoutsRecyclerAdapter(Context context, ArrayList<String> workoutDate,ArrayList<String> laps,ArrayList<String> ID ) {
         mWorkoutDate = workoutDate;
         mContext = context;
-        mPoolLength = poolLength;
+        mLaps = laps;
         mID = ID;
 
 
@@ -45,7 +48,9 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
 
 
         holder.workoutDate.setText(mWorkoutDate.get(position));
-        holder.poolLength.setText(mPoolLength.get(position));
+        holder.laps.setText(mLaps.get(position));
+
+
 
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
@@ -53,21 +58,11 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked on: " + mWorkoutDate.get(position));
                 Intent intent = new Intent(mContext, WorkoutDetailsActivity.class);
-                //Note for Neil, once someone selects a workout from your list, just pass its id
-                //to workout details like below, my code should then handle the rest
                 int id = Integer.parseInt(mID.get(position));
 
                 intent.putExtra(WorkoutDetailsActivity.EXTRAS_WORKOUT_ID, id);
                 mContext.startActivity(intent);
 
-
-
-//
-//                Intent intent = new Intent(mContext,WorkoutDetailsActivity.class);
-//
-//                intent.putExtra("image_URL",mID.get(position));
-//
-//                mContext.startActivity(intent);
             }
         });
     }
@@ -79,16 +74,17 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
 
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView poolLength;
         TextView workoutDate;
-        RelativeLayout parentLayout;
+        TextView laps;
+        ConstraintLayout parentLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             workoutDate = itemView.findViewById(R.id.Date_name);
-            poolLength = itemView.findViewById(R.id.txt_pool_sizes);
+            laps = itemView.findViewById(R.id.txt_pool_sizes);
             parentLayout = itemView.findViewById(R.id.parent_layout);
+
         }
     }
 

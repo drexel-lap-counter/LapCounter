@@ -44,6 +44,12 @@ public class LapCounterService extends Service {
     private SimpleMessageReceiver mReceiver;
 
     /**
+     * This service logs transitions in the current workout, and upon the save
+     * button being pressed, it flushes these transitions to the database.
+     */
+    private TransitionLog mLog;
+
+    /**
      * a binder for this service
      */
     private final IBinder mBinder = new LocalBinder();
@@ -99,6 +105,7 @@ public class LapCounterService extends Service {
         mLapCounter.initCallbacks(mReceiver);
         mDisconnectManager.initCallbacks(mReceiver);
         mStateMachine.initCallbacks(mReceiver);
+        mLog.initCallbacks(mReceiver);
     }
 
     public void reset() {
@@ -109,6 +116,7 @@ public class LapCounterService extends Service {
         mStateMachine = new LocationStateMachine(this, DEFAULT_THRESHOLD);
         mDisconnectManager = new DisconnectManager(this);
         mLapCounter = new LapCounter(this);
+        mLog = new TransitionLog(this);
         initCallbacks();
         mReceiver.attach(this);
     }
