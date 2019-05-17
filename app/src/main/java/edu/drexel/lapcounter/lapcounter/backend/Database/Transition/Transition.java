@@ -19,18 +19,18 @@ import static android.arch.persistence.room.ForeignKey.NO_ACTION;
 /** Transition object used to represent a state switch in lap counting.
  * Tracks movement of the device by showing when the device changes states
  * <p>
- * Class also used to interact with DB table transitions_table using TransitionDao
- * fields of object:
- * Workout_ID       ID of the workout in DB that is associated with this transition
- * Transition_Time  (NonNull) Time that transition occured
- * Before_State:    State of device before transition
- * After_State:     State of device after transition
+ * Class also used to interact with DB table transitions_table using TransitionDao<p>
+ * fields of object:<p>
+ * Workout_ID:       ID of the workout in DB that is associated with this transition<p>
+ * Transition_Time:  (NonNull) Time that transition occured<p>
+ * Before_State:    State of device before transition<p>
+ * After_State:     State of device after transition<p>
  *
- * Keys:
- * Primary Key: Composite Key of Workout_ID and Transition_Time
- * Foreign Key: Workout_ID from workouts, on delete is CASCADE
- *              Before_State from States, on delete is NO_ACTION;
- *              After_State from States, on delete is NO_ACTION;
+ * Keys:<p>
+ * Primary Key: Composite Key of Workout_ID and Transition_Time<p>
+ * Foreign Key: Workout_ID from workouts, on delete is CASCADE,<p>
+ *              Before_State from States, on delete is NO_ACTION,<p>
+ *              After_State from States, on delete is NO_ACTION
  * @see edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase
  * @see Workout
  * @see State

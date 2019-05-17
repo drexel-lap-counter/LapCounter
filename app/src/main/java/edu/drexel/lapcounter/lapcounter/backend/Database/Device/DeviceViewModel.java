@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ViewModel for Devices used by UI Activities to interact with the DB.
- * Has Repo object within that is used to interace with DAO that interacts with DB.
+ * ViewModel for Devices that are used by UI Activities to interact with the DB.
+ * Has Repo object within it that is used to interacts with DAO that interacts with DB.
  * @see DeviceRepository
  * @see DeviceDao
  * @see Device
@@ -17,14 +17,14 @@ import java.util.List;
 public class DeviceViewModel extends AndroidViewModel {
 
     /**
-     * DeviceRepository used for interacting with DB's DeivceDao
+     * DeviceRepository used for interacting with DB's DeviceDao
      */
     private DeviceRepository mRepository;
     private List<Device> mAllDevices;
 
     /**
      * Constructor for setting up a DeviceViewModel
-     * @param application Application to see up ViewModel for
+     * @param application Application to set up ViewModel for
      */
     public DeviceViewModel(Application application) {
         super(application);

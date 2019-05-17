@@ -16,8 +16,8 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase;
 /**
  * DeviceRepository class for interacting with deviceDAO and the database
  * If you are in a service, use this to interact with db.
- * If you are in an activity use the DeviceViewModel instead.
- * Allows caller to asynchronously touch database using possible queries specifed in DeviceDao
+ * If you are in an activity, use the DeviceViewModel instead.
+ * Allows caller to asynchronously touch database using possible queries specified in DeviceDao
  * @see DeviceDao
  * @see DeviceViewModel
  * @see Device

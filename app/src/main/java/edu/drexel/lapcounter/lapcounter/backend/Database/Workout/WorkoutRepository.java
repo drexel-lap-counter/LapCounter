@@ -21,13 +21,33 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Units.Units;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Units.UnitsDao;
 import edu.drexel.lapcounter.lapcounter.backend.lapcounter.TransitionLog;
 
+/**
+ * WorkoutRepository class for interacting with Workout and Units DAO to touch database.
+ * If you are in a service, use this to interact with db.
+ * If you are an activity, use the WorkoutViewModel instead.
+ * Allows caller to asynchronously touch database using possible queries specified in Daos.
+ */
 public class WorkoutRepository {
 
+    /**
+     * The Workout DAO used for interacting with workouts table.
+     */
     private WorkoutDao mWorkoutDao;
+    /**
+     * The Units DAO used for interacting with units table.
+     */
     private UnitsDao mUnitsDao;
+    /**
+     * Application that created the database.
+     */
     private Application mApp;
 
 
+    /**
+     * Constructor for Workout Repository.
+     * gets the database, and sets its daos using DB.
+     * @param application Application to get database from.
+     */
     public WorkoutRepository(Application application) {
         LapCounterDatabase db = LapCounterDatabase.getDatabase(application);
         mWorkoutDao = db.workoutDao();
@@ -46,6 +66,13 @@ public class WorkoutRepository {
     }*/
 
     /*** UNITS CODE***/
+    /**
+     * Gets all of the Units stored within the database.
+     * gets list of all units, or empty list if there is none.
+     * @return List of Units for all units in database, or empty list
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     public List<Units> getAllUnits() throws InterruptedException, ExecutionException
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -59,6 +86,12 @@ public class WorkoutRepository {
         return res.get();
     }
 
+    /**
+     * Gets the total number of Units stored within the database.
+     * @return int value for number of Units entries in database.
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     public int getNumUnits() throws ExecutionException, InterruptedException {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         Future<Integer> res = ex.submit(new Callable<Integer>() {
@@ -70,10 +103,18 @@ public class WorkoutRepository {
         return res.get();
     }
 
+    /**
+     * Inserts given Units into the database.
+     * @param units Units to insert.
+     */
     public void insert(Units units)
     {
         new insertUnitsAsyncTask(mUnitsDao).execute(units);
     }
+    /**
+     * ASyncTask used for Units insertion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class insertUnitsAsyncTask extends AsyncTask<Units,Void,Void>
     {
         private UnitsDao mAsyncTaskDao;
@@ -89,10 +130,18 @@ public class WorkoutRepository {
         }
     }
 
+    /**
+     * Deletes given units from database if it exists in it.
+     * @param units Units to delete from database.
+     */
     public void deleteUnits(Units units)
     {
         new DeleteUnitsASyncTask(mUnitsDao).execute(units);
     }
+    /**
+     * ASyncTask used for Units deletion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class DeleteUnitsASyncTask extends AsyncTask<Units,Void,Void>
     {
         private UnitsDao mAsyncTaskDao;
@@ -108,10 +157,17 @@ public class WorkoutRepository {
         }
     }
 
+    /**
+     * Deletes all units from the database.
+     */
     public void deleteAllUnits()
     {
         new DeleteAllUnitsAsyncTask(mUnitsDao).execute();
     }
+    /**
+     * ASyncTask used for all Units deletion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class DeleteAllUnitsAsyncTask extends AsyncTask<Void,Void,Void>
     {
         private UnitsDao mAsyncTaskDao;
@@ -127,6 +183,10 @@ public class WorkoutRepository {
 
 
     /*** WORKOUT CODE ***/
+    /**
+     * Gets all of the workouts currently stored in database
+     * @return List of all workouts in DB.  Will be an empty list if there are no workouts in DB.
+     */
     public List<Workout> getAllWorkouts()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -150,6 +210,13 @@ public class WorkoutRepository {
         output.addAll(workouts);
         return output;
     }
+
+    /**
+     * Gets the workout in database with given id if it exists.
+     * if it does not exist, it will return null.
+     * @param id int id of workout to look for.
+     * @return Workout object with id if it is found, else null.
+     */
     public Workout getWorkoutByID(final int id)
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -173,6 +240,14 @@ public class WorkoutRepository {
 
     }
 
+    /**
+     * Gets the workouts in database who were completed between given start and end time.
+     * If there are none in the range, empty list is returned.
+     * @param start_time Date object of start time and date of range
+     * @param end_time Date object of end time and date of range
+     * @return List of Workouts within range, or empty list if there is none.
+     * @throws Exception
+     */
     public List<Workout> getWorkoutsByDateRange(final Date start_time,final Date end_time) throws Exception
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -197,10 +272,19 @@ public class WorkoutRepository {
         return output;
     }
 
+    /**
+     * Insert a workout into the database if it is not present, else replace.
+     * @param workout Workout object to insert or replace.
+     */
     public void insert(Workout workout)
     {
         new InsertAsyncTask(mWorkoutDao, mApp).execute(workout);
     }
+    /**
+     * ASyncTask used for workout insertion.
+     * Also passes the ID to transition log once inserted for use in lap counting logic
+     * Allows for DB usage off of UI thread.
+     */
     private static class InsertAsyncTask extends AsyncTask<Workout,Void,Integer>
     {
         private WorkoutDao mAsyncTaskDao;
@@ -226,10 +310,18 @@ public class WorkoutRepository {
         }
     }
 
+    /**
+     * Deletes all workouts that are within the database
+     */
     public void deleteAllWorkouts()
     {
         new DeleteAllWorkoutsAsyncTask(mWorkoutDao).execute();
     }
+
+    /**
+     * ASyncTask used for deleting all workouts.
+     * Allows for DB usage off of UI thread.
+     */
     private static class DeleteAllWorkoutsAsyncTask extends AsyncTask<Void,Void,Void>
     {
         private WorkoutDao mAsyncTaskDao;
@@ -243,10 +335,19 @@ public class WorkoutRepository {
         }
     }
 
+    /**
+     * Deletes workout with given id from database if it is present.
+     * @param id  int id of workout to look for.
+     */
     public void deleteWorkoutByID(int id)
     {
         new DeleteIDAsyncTask(mWorkoutDao).execute(id);
     }
+
+    /**
+     * ASyncTask used for workout deletion.
+     * Allows for DB usage off of UI thread.
+     */
     private static class DeleteIDAsyncTask extends AsyncTask<Integer,Void,Void>
     {
         private WorkoutDao mAsyncTaskDao;
@@ -260,6 +361,12 @@ public class WorkoutRepository {
         }
     }
 
+    /**
+     * Gets all workouts within the database, and returns them in a list descending by start date.
+     * Returns a list of all workouts in database in descending format based on the start date.
+     * If there are no values in database, returns empty list
+     * @return List of Workouts in descending order, or empty list
+     */
     public List<Workout> getAllWorkoutsDecending()
     {
         ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -285,7 +392,8 @@ public class WorkoutRepository {
     }
 
     /**
-     * Initialize the Units table
+     * Initialize the Units table.
+     * Used to make sure that all required Units are in the database.
      */
     public void initUnitsTable() throws ExecutionException, InterruptedException {
         // First, let's check if the table already is full. If so, we can stop.

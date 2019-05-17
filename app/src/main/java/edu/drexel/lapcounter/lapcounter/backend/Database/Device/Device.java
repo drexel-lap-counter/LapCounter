@@ -11,11 +11,11 @@ import java.util.Objects;
 /**
  * BLE Device Object.
  * Class Represents a BLE Device, Is an entity of table devices.
- * Used within the DeviceDAO to interface with the RoomDatabase.
- * Has the following fields:
- * Mac Address (Primary Key)  Mac Address of the Device
- * Name                       Name of the Device
- * Threshold (Non Null)       Calibrated Threshold value of device
+ * Used within the DeviceDAO to interface with the RoomDatabase.<p>
+ * Has the following fields:<p>
+ * Mac Address (Primary Key):  Mac Address of the Device,<p>
+ * Name:                       Name of the Device,<p>
+ * Threshold (Non Null):      Calibrated Threshold value of device
  */
 @Entity(tableName = "devices")
 public class Device
@@ -43,7 +43,6 @@ public class Device
 
     /**
      * Empty Constructor that generates Device Object with no data.
-     * @Return Empty Device Object
      */
     public Device()
     {
@@ -51,9 +50,9 @@ public class Device
 
     /**
      * Constructor that generates Device Object with data for all fields.
-     * @Param name the name of the device
-     * @Param mac_address   the mac address of the device
-     * @Param threshold     calibrated device threshold
+     * @param name the name of the device
+     * @param mac_address   the mac address of the device
+     * @param threshold     calibrated device threshold
      */
     public Device(String name, String mac_address, double threshold)
     {

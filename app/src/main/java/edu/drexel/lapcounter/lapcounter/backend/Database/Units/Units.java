@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
  * Units object used to represent the units a workout is measured in.
  * Tracks what measurement the pool was in for a given workout.
  * <p>
- * Class also used to interact with DB table units_table using UnitsDao.
+ * Class also used to interact with DB table units_table using UnitsDao.<p>
  * field of object:
  * Unit_Name: Name of Unit (Primary Key)
  * @see edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout

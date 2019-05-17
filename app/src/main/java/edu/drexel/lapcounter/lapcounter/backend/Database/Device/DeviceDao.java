@@ -8,7 +8,7 @@ import android.arch.persistence.room.Query;
 import java.util.List;
 
 /**
- * DeviceDAO is used for interface with the RoomDatabase device table name devices.
+ * DeviceDAO is used for interface with the RoomDatabase device table name: devices.
  * This serves as an interface for interacting with the DB specifically for device objects
  * Distributed to Repos by LapCounterDatabase
  * @see edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase

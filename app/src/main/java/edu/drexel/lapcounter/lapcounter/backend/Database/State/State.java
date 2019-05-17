@@ -15,8 +15,8 @@ import edu.drexel.lapcounter.lapcounter.backend.lapcounter.LocationStateMachine;
  * UNKNOWN: devices location is unknown
  * <p>
  * This class is also used to interact with the Roomdatabase states_table.
- * Is a foreign key in the Transitions table
- * has the following field
+ * Is a foreign key in the Transitions table<p>
+ * has the following field<p>
  * mStateName: Name of the state. (Primary Key)
  * @see edu.drexel.lapcounter.lapcounter.backend.Database.Transition.Transition
  * @see edu.drexel.lapcounter.lapcounter.backend.Database.LapCounterDatabase
