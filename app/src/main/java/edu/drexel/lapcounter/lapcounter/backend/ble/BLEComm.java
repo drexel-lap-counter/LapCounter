@@ -15,26 +15,68 @@ import java.util.Objects;
 import edu.drexel.lapcounter.lapcounter.backend.wrappers.BluetoothAdapterWrapper;
 import edu.drexel.lapcounter.lapcounter.backend.wrappers.LocalBroadcastManagerWrapper;
 
+/**
+ * A low-level class to interface with Android's Bluetooth Low Energy stack.
+ * This class provides functionality to connect, disconnect, and scan devices, as well as read
+ * their Received Signal Strength Indicator (RSSI) values.
+ *
+ * This class publishes the underlying connection events used by other backend components.
+ */
 public class BLEComm {
-    // Tag for logging
     private static final String TAG = BLEComm.class.getSimpleName();
 
     // Unique IDs for the Intents this server publishes
+    /**
+     * The action of the Intent that BLEComm publishes after a device connection.
+     */
     public final static String ACTION_CONNECTED = qualify("ACTION_CONNECTED");
+
+    /**
+     * The action of the Intent that BLEComm publishes after the same device reconnects.
+     */
     public final static String ACTION_RECONNECTED = qualify("ACTION_RECONNECTED");
+
+    /**
+     * The action of the Intent that BLEComm publishes after a device disconnection.
+     */
     public final static String ACTION_DISCONNECTED = qualify("ACTION_DISCONNECTED");
+
+    /**
+     * The action of the Intent that BLEComm publishes after receiving a signal strength value.
+     */
     public final static String ACTION_RAW_RSSI_AVAILABLE = qualify("ACTION_RAW_RSSI_AVAILABLE");
 
-    // Tag for the RSSI data in the Intent payload
+    /**
+     * The extra containing the RSSI data in the Intent payload
+     */
     public final static String EXTRA_RAW_RSSI = qualify("EXTRA_RAW_RSSI");
+
+    /**
+     * The extra in a disconnect event signifying whether the disconnection was explicitly requested.
+     */
     public final static String EXTRA_DISCONNECT_IS_INTENTIONAL = qualify("EXTRA_DISCONNECT_IS_INTENTIONAL");
 
+
+    /**
+     * The extra in a connect event containing the connected device's MAC address.
+     */
     public final static String EXTRA_DEVICE_ADDRESS = qualify("EXTRA_DEVICE_ADDRESS");
 
 
-    // States of connection
+    /**
+     * Connection state when no device is connected.
+     */
     static final int STATE_DISCONNECTED = 0;
+
+
+    /**
+     * Connection state when attempting to connect to a device.
+     */
     static final int STATE_CONNECTING = 1;
+
+    /**
+     * Connection state when connected to a device.
+     */
     static final int STATE_CONNECTED = 2;
     private final IBroadcastManager mBroadcastManager;
 
@@ -87,11 +129,20 @@ public class BLEComm {
         return p.getName() + "." + s;
     }
 
+    /** Construct a BLEComm with a reference to its Context owner.
+     * @param parent BLEcomm requires a Context to request BLE permissions and to send Intents.
+     */
     public BLEComm(Context parent) {
         this(parent, new BluetoothAdapterWrapper(getAdapter(parent)),
                 LocalBroadcastManagerWrapper.getInstance(parent));
     }
 
+    /** Construct a BLEComm with core dependencies injected.
+     * @param parent BLEcomm requires a Context to request BLE permissions and to send Intents.
+     * @param adapter An adapter to construct BluetoothDevice objects and to scan for devices.
+     * @param broadcastManager An Intent-publishing manager to send Intents across Activities and
+     *                         services.
+     */
     public BLEComm(Context parent, IBluetoothAdapter adapter, IBroadcastManager broadcastManager){
         mParent = parent;
         setBluetoothAdapter(adapter);
@@ -104,10 +155,15 @@ public class BLEComm {
         return m.getAdapter();
     }
 
+
     /**
-     * Use the GATT object to request an update to the RSSI
+     * Notify the underlying BLE stack to read an RSSI value from the connected device.
+     * If the read operation is successful, then BLEComm will publish an event.
+     *
+     * @see #ACTION_RAW_RSSI_AVAILABLE
+     * @see #EXTRA_RAW_RSSI
      */
-    void requestRssi() {
+    public void requestRssi() {
         if (mConnectionState == STATE_CONNECTED) {
             mBluetoothGatt.readRemoteRssi();
         }
@@ -148,9 +204,9 @@ public class BLEComm {
     }
 
     /**
-     * Connects to the GATT server hosted on the Bluetooth LE device.
+     * Connect to a BLE device.
      *
-     * @param address The device address of the destination device.
+     * @param address The MAC address of the BLE device to connect to.
      * @return Return true if the connection is initiated successfully. The connection result
      * is reported asynchronously through the
      * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
@@ -190,9 +246,10 @@ public class BLEComm {
         return true;
     }
 
+
     /**
-     * After using a given BLE device, the app must call this method to ensure resources are
-     * released properly.
+     * Disconnect from the connected device and release internal resources.
+     * @see #connect(String)
      */
     void disconnect() {
         if (mBluetoothGatt == null) {
@@ -204,19 +261,35 @@ public class BLEComm {
         mIntentionalDisconnect = true;
     }
 
+    /** Begin scanning for BLE devices.
+     * @param scanCallback The callback to invoke when devices are found.
+     */
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
         disconnect();
         mBluetoothAdapter.startLeScan(scanCallback);
     }
 
+    /** Stop scanning for BLE devices.
+     * @param scanCallback The callback previously used when starting a scan.
+     * @see #startScan(BluetoothAdapter.LeScanCallback)
+     */
     void stopScan(BluetoothAdapter.LeScanCallback scanCallback) {
         mBluetoothAdapter.stopLeScan(scanCallback);
     }
 
+    /**
+     * @return The current connection state of the device.
+     * @see #STATE_CONNECTED
+     * @see #STATE_CONNECTING
+     * @see #STATE_DISCONNECTED
+     */
     int getConnectionState() {
         return mConnectionState;
     }
 
+    /**
+     * Resets internal state.
+     */
     void reset() {
         mPreviousConnectAddress = null;
         mCurrentConnectAddress = null;

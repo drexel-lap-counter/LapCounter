@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A class to store Received Signal Strength Indicator (RSSI) values and to receive useful
+ * metrics.
+ */
 public class RssiCollector {
     private static final String TAG = RssiCollector.class.getSimpleName();
 
@@ -25,6 +29,10 @@ public class RssiCollector {
     private int mMinRssi = Integer.MAX_VALUE;
     private int mMaxRssi = Integer.MIN_VALUE;
 
+    /**
+     * Add an RSSI value to the internal state.
+     * @param rssi The signal strength value to add.
+     */
     public void collect(int rssi) {
         if (!isEnabled()) {
             Log.w(TAG, "collect() when isEnabled() == false");
@@ -68,10 +76,17 @@ public class RssiCollector {
         }
     }
 
+    /**
+     * @return Whether this RssiCollector is accepting more values.
+     */
     public boolean isEnabled() {
         return mIsEnabled;
     }
 
+
+    /**
+     * Remove all collected RSSI values and reset calculated metrics.
+     */
     public void clear() {
         log_thread("clear()");
         mRssiValues.clear();
@@ -80,16 +95,26 @@ public class RssiCollector {
         mMaxRssi = Integer.MIN_VALUE;
     }
 
+
+    /**
+     * Instruct the RssiCollector to accept RSSI values.
+     */
     public void enable() {
         log_thread("enable()");
         mIsEnabled = true;
     }
 
+    /**
+     * Instruct the RssiCollector to stop accepting RSSI values.
+     */
     public void disable() {
         log_thread("disable()");
         mIsEnabled = false;
     }
 
+    /**
+     * @return The mean of collected RSSI values, or 0 if no RSSI values were collected.
+     */
     public double mean() {
         if (mRssiValues.isEmpty()) {
             return 0;
@@ -104,6 +129,11 @@ public class RssiCollector {
         return sum / mRssiValues.size();
     }
 
+    /**
+     * @param mean The mean to use when calculating the standard deviation.
+     * @return The unbiased sample standard deviation, or 0 if fewer than two RSSI values were
+     * collected.
+     */
     public double stdDev(double mean) {
         int n = mRssiValues.size();
 

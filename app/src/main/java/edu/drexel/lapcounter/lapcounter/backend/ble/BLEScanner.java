@@ -13,6 +13,10 @@ import java.util.List;
 
 import edu.drexel.lapcounter.lapcounter.backend.wrappers.ContextWrapper;
 
+/**
+ * A class to help facilitate scanning for Bluetooth Low Energy devices.
+ * @see BLEComm
+ */
 public class BLEScanner implements DeviceScanner {
     private static final String TAG = BLEScanner.class.getSimpleName();
     private List<String> mWhitelist;
@@ -20,6 +24,9 @@ public class BLEScanner implements DeviceScanner {
     private IContext mParentContext;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
+    /**
+     * A flag to indicate whether this scanner is currently looking for BLE devices.
+     */
     boolean mIsScanning = false;
 
     private ServiceConnection mBleServiceConnection = new ServiceConnection() {
@@ -35,10 +42,17 @@ public class BLEScanner implements DeviceScanner {
         }
     };
 
+    /** Construct a BLEScanner with a reference to its owner.
+     * @param parent BLEScanner requires a Context to send Intents.
+     */
     public BLEScanner(Context parent) {
         this(new ContextWrapper(parent));
     }
 
+
+    /** Construct a BLEScanner with a reference to its owner.
+     * @param parent BLEScanner requires a Context to send Intents.
+     */
     public BLEScanner(IContext parent) {
         mParentContext = parent;
     }
