@@ -243,7 +243,7 @@ public class WorkoutAnalytics extends AppCompatActivity implements AdapterView.O
      * @param year the date's year
      * @param month the date's month
      * @param dayOfMonth the day
-     * @return
+     * @return long unix timestamp of given date.
      */
     public long createUnixTime(int year, int month, int dayOfMonth){
         long epoch = 0;
