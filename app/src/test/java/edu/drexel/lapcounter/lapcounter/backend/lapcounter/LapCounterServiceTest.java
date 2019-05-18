@@ -24,6 +24,7 @@ public class LapCounterServiceTest {
     private SimpleMessageReceiver mReceiver;
 
     private LapCounterService mService;
+    private TransitionLog mLog;
 
     @Before
     public void setup() {
@@ -32,8 +33,10 @@ public class LapCounterServiceTest {
         mLapCounter = mock(LapCounter.class);
 
         mReceiver = mock(SimpleMessageReceiver.class);
+        mLog = mock(TransitionLog.class);
 
-        mService = new LapCounterService(mStateMachine, mDisconnectManager, mLapCounter, mReceiver);
+        mService = new LapCounterService(
+                mStateMachine, mDisconnectManager, mLapCounter, mReceiver, mLog);
     }
 
     @Test

@@ -100,7 +100,7 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         DateFormat df = new SimpleDateFormat("dd MMM yyyy");
 
 
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //df.setTimeZone(TimeZone.getTimeZone("UTC"));
         String output = df.format(Workout.getStartDate());
 
 

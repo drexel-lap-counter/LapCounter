@@ -3,8 +3,10 @@ package edu.drexel.lapcounter.lapcounter.frontend;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +45,9 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
      */
     public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
 
+    public static final String PREFS_KEY = qualify("SHARED_PREFERENCES");
+    public static final String KEY_WAS_CALIBRATING = qualify("KEY_WAS_CALIBRATING");
+
     private final static int PRINT_COLLECTOR_STATS_FREQ_MS = 500;
 
     private TextView mCalibrateInfo;
@@ -60,6 +65,8 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
     private final ServiceConnection mBleServiceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            setWasCalibrating();
+
             BLEService.LocalBinder binder = (BLEService.LocalBinder)service;
             mBleService = binder.getService();
             mBleService.connectToDevice(mDeviceAddress);
@@ -174,6 +181,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         } else {
             startCalibration();
         }
+    }
+
+    private void setWasCalibrating() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_WAS_CALIBRATING, true);
+        editor.apply();
     }
 
     private void startCalibration() {

@@ -7,7 +7,6 @@ import android.view.View;
 
 import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
-import edu.drexel.lapcounter.lapcounter.frontend.temp.LapCounterServiceTest;
 
 /**
  * used to navigate to DeviceSelectActivity or PoolSizeActivity
@@ -41,11 +40,6 @@ public class SettingsActivity extends AppCompatActivity {
      */
     public void selectDevice(View view) {
         Intent intent = new Intent(this, DeviceSelectActivity.class);
-        startActivity(intent);
-    }
-
-    public void testLapCounterService(View view) {
-        Intent intent = new Intent(this, LapCounterServiceTest.class);
         startActivity(intent);
     }
 }
