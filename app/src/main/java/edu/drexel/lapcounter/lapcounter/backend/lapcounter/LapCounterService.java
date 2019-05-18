@@ -58,12 +58,17 @@ public class LapCounterService extends Service {
     public LapCounterService() {}
 
     // Constructor for mocking in unit tests.
-    public LapCounterService(LocationStateMachine lsm, DisconnectManager dm, LapCounter lc,
-                             SimpleMessageReceiver r) {
+    public LapCounterService(
+            LocationStateMachine lsm,
+            DisconnectManager dm,
+            LapCounter lc,
+            SimpleMessageReceiver r,
+            TransitionLog lg) {
         mStateMachine = lsm;
         mDisconnectManager = dm;
         mLapCounter = lc;
         mReceiver = r;
+        mLog = lg;
     }
 
     /**
