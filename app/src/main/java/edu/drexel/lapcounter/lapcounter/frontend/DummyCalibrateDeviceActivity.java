@@ -11,6 +11,9 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Device.Device;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * a calibration screen replacement for dummy devices and emulators.
+ */
 public class DummyCalibrateDeviceActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
 
@@ -26,6 +29,10 @@ public class DummyCalibrateDeviceActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
+    /**
+     * navigates to device selection screen.
+     * @param view
+     */
     public void finishCalibration(View view) {
         // TODO: Not sure if it's best to go back to the device selection or
         // device info page.

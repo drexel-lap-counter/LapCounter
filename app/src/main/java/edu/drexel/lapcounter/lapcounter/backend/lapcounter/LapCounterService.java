@@ -69,13 +69,21 @@ public class LapCounterService extends Service {
      * @param dm the disconnect manager component
      * @param lc the lap counter component
      * @param r the message receiver component
+     * @param lg the Transition log component
      */
-    public LapCounterService(LocationStateMachine lsm, DisconnectManager dm, LapCounter lc,
-                             SimpleMessageReceiver r) {
+
+    public LapCounterService(
+            LocationStateMachine lsm,
+            DisconnectManager dm,
+            LapCounter lc,
+            SimpleMessageReceiver r,
+            TransitionLog lg) {
+        // Constructor for mocking in unit tests.
         mStateMachine = lsm;
         mDisconnectManager = dm;
         mLapCounter = lc;
         mReceiver = r;
+        mLog = lg;
     }
 
     /**

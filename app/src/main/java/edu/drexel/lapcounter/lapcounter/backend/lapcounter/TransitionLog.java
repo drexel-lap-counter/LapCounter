@@ -91,10 +91,13 @@ public class TransitionLog {
         public void onMessage(Intent message) {
             int workoutID = message.getIntExtra(EXTRA_WORKOUT_ID, -1);
             TransitionRepository repo = new TransitionRepository(mService.getApplication());
+
             for (Transition transition : mTransitions) {
                 transition.setWorkoutID(workoutID);
                 repo.insert(transition);
             }
+
+            mTransitions.clear();
         }
     };
 

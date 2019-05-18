@@ -21,6 +21,9 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewMode
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * displays the list of past workouts.
+ */
 public class PastWorkoutsActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_past_workouts);
     private String tempStartDate;
@@ -31,6 +34,9 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
     private static final String TAG = "PastWorkoutsActivity";
 
+    /**
+     * a list of workouts
+     */
     List<Workout> allWorkoutsDesc;
     private ArrayList<String> mWorkoutDate = new ArrayList<>();
     private ArrayList<String> mLaps = new ArrayList<>();
@@ -76,6 +82,10 @@ public class PastWorkoutsActivity extends AppCompatActivity {
 
         mNavBar.init();
     }
+
+    /**
+     * Initializes the Recycler View
+     */
     private void initRecyclerView(){
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
@@ -90,7 +100,7 @@ public class PastWorkoutsActivity extends AppCompatActivity {
         DateFormat df = new SimpleDateFormat("dd MMM yyyy");
 
 
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //df.setTimeZone(TimeZone.getTimeZone("UTC"));
         String output = df.format(Workout.getStartDate());
 
 

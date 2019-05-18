@@ -346,7 +346,6 @@ public class BLEComm {
      * @param scanCallback the callback to invoke when devices are found.
      */
     void startScan(BluetoothAdapter.LeScanCallback scanCallback) {
-        disconnect();
         mBluetoothAdapter.startLeScan(scanCallback);
     }
 

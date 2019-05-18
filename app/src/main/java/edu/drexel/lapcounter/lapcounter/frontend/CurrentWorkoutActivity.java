@@ -1,7 +1,6 @@
 package edu.drexel.lapcounter.lapcounter.frontend;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -26,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.app.AlertDialog;
 
 import java.time.Duration;
 import java.util.Date;
@@ -45,7 +45,12 @@ import static edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager.DEFAULT_M
 
 //import android.support.v4.content.LocalBroadcastManager;
 
+/**
+ * The main screen for recording workouts.
+ */
 public class CurrentWorkoutActivity extends AppCompatActivity {
+    private static final String TAG = CurrentWorkoutActivity.class.getSimpleName();
+
     private final NavBar mNavBar = new NavBar(this, R.id.navigation_home);
 
     private Button startResumeButton;
@@ -127,6 +132,8 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
 
         mNavBar.init();
 
+        clearCalibratingFlag();
+
         timerValue = findViewById(R.id.timerValue);
         mTimerFormat = getString(R.string.current_workout_timer_format);
 
@@ -207,56 +214,83 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mLapCounterService = null;
     }
 
+    private void alertToSaveBeforeRestart(String alertText) {
+        pause();
+
+        if (updatedTime <= 0 ) {
+            // User hasn't started a workout.
+            restartWorkout();
+            return;
+        }
+
+        // Ask if they'd like to save their current workout.
+        new AlertDialog.Builder(this)
+                .setMessage(alertText)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveWorkout();
+                        restartWorkout();
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        restartWorkout();
+                    }
+                })
+                .show();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
 
+        // Get the current bluetooth device address from
         String currentDevice = loadDeviceAddress();
 
-        if (mDeviceAddress == null) {
-            // Pull the currently selected device from SharedPreferences.
-            mDeviceAddress = currentDevice;
-            return;
+        // There are many situtations where onStart() gets called. Let's make some flags to
+        // distinguish them
+        boolean oldDeviceExists = mDeviceAddress != null;
+        boolean newDeviceExists = currentDevice != null;
+
+        // This checks that both old and new device addresses exist and are equal in MAC address.
+        boolean devicesSame = oldDeviceExists
+                && newDeviceExists
+                && mDeviceAddress.equals(currentDevice);
+
+        boolean servicesReady = mLapCounterService != null && mBleService != null;
+
+        // Check if the addresses are different. Note that we need to make sure at least one
+        // device is non-null for them to be different.
+        boolean bothNull = !oldDeviceExists && !newDeviceExists;
+        boolean addressChanged = !devicesSame && !bothNull;
+
+        // Check for a flag in shared preferences that indicates that we just calibrated a device
+        boolean justCalibrated = wasCalibrating();
+
+        // If the address changed or we calibrated, the lap counting will have to restart
+        boolean deviceSettingsChanged = addressChanged || justCalibrated;
+
+
+        // Step 1. Disconnect the old device if it exists and the old device did not change.
+        if (oldDeviceExists && !devicesSame)
+            mBleService.disconnectDevice();
+
+        // Step 2. If device settings changed at all (including deleting the device) prompt
+        // the user to save the progress before restarting;
+        if (servicesReady && deviceSettingsChanged) {
+            String msg = "Since you changed device settings mid-workout, the workout must be "
+                + "stopped. Would you like to save your progress?";
+            alertToSaveBeforeRestart(msg);
         }
 
-        if (mDeviceAddress.equals(currentDevice)) {
-            // Device hasn't changed. There's nothing to do.
-            return;
-        }
-
-        // So the user changed their device mid-workout.
-
+        // Step 3. Set the new device address
         mDeviceAddress = currentDevice;
 
-        pause();
-
-        // Connect to the new device.
-        mBleService.disconnectDevice();
-
-        // Did the user already start a workout with the previous device?
-        if (updatedTime > 0)
-        {
-            // Ask if they'd like to save their current workout.
-            new android.support.v7.app.AlertDialog.Builder(this)
-                    .setMessage("Since you've connected to a different device, the current workout " +
-                            "must be stopped. Would you like to save your progress?")
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            saveWorkout();
-                            restartWorkout();
-                        }
-                    })
-                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            restartWorkout();
-                        }
-                    })
-                    .show();
-        }
-
-        mBleService.connectToDevice(mDeviceAddress);
+        // Step 4. Connect to the new device if there is one
+        if (servicesReady && newDeviceExists && !devicesSame)
+            connect();
     }
 
     private void requestBluetoothPermission() {
@@ -338,7 +372,24 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         return prefs.getString(PoolSizeActivity.poolUnitsKey, PoolSizeActivity.defPoolUnits);
     }
 
+    private SharedPreferences getCalibrationSharedPrefs() {
+        return getSharedPreferences(CalibrateDeviceActivity.PREFS_KEY, Context.MODE_PRIVATE);
+    }
+
+    private boolean wasCalibrating() {
+        SharedPreferences prefs = getCalibrationSharedPrefs();
+        return prefs.getBoolean(CalibrateDeviceActivity.KEY_WAS_CALIBRATING, false);
+    }
+
+    private void clearCalibratingFlag() {
+        SharedPreferences.Editor editor = getCalibrationSharedPrefs().edit();
+        editor.clear();
+        editor.commit();
+    }
+
     private void connect() {
+        clearCalibratingFlag();
+
         if (mDeviceAddress == null) {
             mDebugConnectLabel.setText(R.string.label_no_device_selected);
             // TODO: What should happen if the user does not have a currently selected device?
@@ -348,12 +399,11 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
             return;
         }
 
-
-
         String connectMessage = getResources().getString(R.string.label_connecting, mDeviceAddress);
         mDebugConnectLabel.setText(connectMessage);
         mBleService.connectToDevice(mDeviceAddress);
         mLapCounterService.updateThreshold(mDeviceAddress);
+
     }
 
     private Runnable updateTimerThread = new Runnable() {
@@ -394,6 +444,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
         mLapCounterService.reset();
     }
 
+    /**
+     * creates a confirmation dialog.
+     * @param view
+     */
     public void onButtonShowPopupWindowClick(View view) {
 
         // inflate the layout of the popup window
@@ -451,11 +505,18 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler updateUI = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (wasCalibrating()) {
+                Log.i(TAG, "Ignored lap count because of calibration.");
+                return;
+            }
+
             // Extract info from the Intent
             mLapCount = message.getIntExtra(LapCounter.EXTRA_LAP_COUNT, 0);
 
             //Update the TextView
             mCounter.setText(Integer.toString(mLapCount));
+
+            Log.i(TAG, "Lap count is now " + mLapCount);
         }
     };
 
@@ -483,6 +544,10 @@ public class CurrentWorkoutActivity extends AppCompatActivity {
     private SimpleMessageReceiver.MessageHandler onDisconnect = new SimpleMessageReceiver.MessageHandler() {
         @Override
         public void onMessage(Intent message) {
+            if (wasCalibrating()) {
+                Log.i(TAG, "Ignored disconnect event because user is calibrating a device.");
+                return;
+            }
             mDebugConnectLabel.setText(R.string.label_device_disconnected_try_reconnect);
             connect();
         }
