@@ -25,8 +25,10 @@ import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
 /**
- * It's a bit confusing at this point, but this class is for scanning for *registered*
- * bluetooth devices. DeviceScanActivity is for scanning for *new devices*
+ * This class is for scanning for *registered* bluetooth devices.
+ * Registered meaning that it is stored in the database.
+ * the class for scanning for *unregistered* devices is DeviceScanActivity
+ * @see DeviceScanActivity
  */
 public class DeviceSelectActivity extends AppCompatActivity {
 
@@ -40,7 +42,13 @@ public class DeviceSelectActivity extends AppCompatActivity {
 
     private static final String TAG = DeviceSelectActivity.class.getSimpleName();
 
+    /**
+     * used to label device selection in shared preferences.
+     */
     public static final String PREFS_KEY = "lapcounter_device_selection";
+    /**
+     * used to label device address in shared preferences
+     */
     public static final String KEY_DEVICE_ADDRESS = "device_address";
 
     // Sample device scanner
@@ -49,7 +57,6 @@ public class DeviceSelectActivity extends AppCompatActivity {
     /**
      * This callback gets called *once per device discovered*. Use it to populate
      *
-     * TODO: Evaluate ListView vs RecyclerView. ListView is apparently deprecated but simpler.
      */
     private DeviceScanner.Callback mDeviceCallback = new DeviceScanner.Callback() {
         @Override
@@ -63,6 +70,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Creates screen and sets up recycler view for known devices
+     * @param savedInstanceState Bundle saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,6 +150,10 @@ public class DeviceSelectActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
+    /**
+     * navigates to the DeviceInfoActivity.
+     * @param view
+     */
     public void viewDevice(View view) {
         Intent intent = new Intent(this, DeviceInfoActivity.class);
         intent.putExtra(DeviceInfoActivity.EXTRAS_DEVICE_NAME, mDevice.getName());
@@ -149,7 +164,9 @@ public class DeviceSelectActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // This goes to DeviceScanActivity to select a new device to register
+    /**
+     * goes to DeviceScanActivity to select a new device to register.
+     */
     public void scanForDevices(View view) {
         Intent intent = new Intent(this, DeviceScanActivity.class);
         startActivity(intent);

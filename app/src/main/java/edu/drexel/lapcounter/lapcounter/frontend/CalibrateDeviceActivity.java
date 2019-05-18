@@ -26,6 +26,9 @@ import edu.drexel.lapcounter.lapcounter.backend.SimpleMessageReceiver;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEComm;
 import edu.drexel.lapcounter.lapcounter.backend.ble.BLEService;
 
+/**
+ * Used to calibrate a device's RSSI threshold.
+ */
 public class CalibrateDeviceActivity extends AppCompatActivity {
     private final static String TAG = CalibrateDeviceActivity.class.getSimpleName();
 
@@ -33,7 +36,13 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         return CalibrateDeviceActivity.class.getPackage().getName() + "." + s;
     }
 
+    /**
+     * labels the device address in an intent
+     */
     public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
+    /**
+     * labels the device name in an intent
+     */
     public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
 
     public static final String PREFS_KEY = qualify("SHARED_PREFERENCES");
@@ -161,6 +170,10 @@ public class CalibrateDeviceActivity extends AppCompatActivity {
         mBleService = null;
     }
 
+    /**
+     * starts and stops the calibration process
+     * @param view
+     */
     public void calibrate(View view) {
         if (mRssiCollector.isEnabled()) {
             finishCalibration();

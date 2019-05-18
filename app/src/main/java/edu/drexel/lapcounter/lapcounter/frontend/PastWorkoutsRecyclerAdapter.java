@@ -15,6 +15,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import edu.drexel.lapcounter.lapcounter.R;
+
+/**
+ * Class is an adapter used with a recycler view that handles the data storage and displaying.
+ * Used to bind views to the recycler view to display
+ */
 public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkoutsRecyclerAdapter.ViewHolder>{
 
     private static final String TAG = "RecyclerViewAdapter";
@@ -26,6 +31,13 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
     private ArrayList<String> mID;
     private Context mContext;
 
+    /**
+     * Constructor for creating adapter
+     * @param context Context of Activity that is creating this.
+     * @param workoutDate ArrayList of workout dates (Start Date)
+     * @param laps ArrayList of laps
+     * @param ID Arraylist of workout ids
+     */
     public PastWorkoutsRecyclerAdapter(Context context, ArrayList<String> workoutDate,ArrayList<String> laps,ArrayList<String> ID ) {
         mWorkoutDate = workoutDate;
         mContext = context;
@@ -35,6 +47,12 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
 
     }
 
+    /**
+     * Creates ViewHolder to hold workout data
+     * @param parent ViewGroup parent
+     * @param viewType int that specifies the viewType.
+     * @return The created ViewHolder object
+     */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_past_workouts_layout_listitem, parent, false);
@@ -42,6 +60,11 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
         return holder;
     }
 
+    /**
+     * Sets the view holder values for a specific workout
+     * @param holder ViewHolder for displaying workout data
+     * @param position position the ViewHolder is in the list
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Log.d(TAG, "onBindViewHolder: called.");
@@ -67,12 +90,19 @@ public class PastWorkoutsRecyclerAdapter extends RecyclerView.Adapter<PastWorkou
         });
     }
 
+    /**
+     * Gets the total amount of items in the list
+     * @return int number of items in list
+     */
     @Override
     public int getItemCount() {
         return mWorkoutDate.size();
     }
 
-
+    /**
+     * ViewHolder class for workout data.
+     * Contains the workout date, as well as number of laps completed for that workout
+     */
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView workoutDate;
         TextView laps;

@@ -16,6 +16,10 @@ import edu.drexel.lapcounter.lapcounter.R;
 import edu.drexel.lapcounter.lapcounter.backend.Database.Device.DeviceViewModel;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * Activity that lists the info about the currently selected device.  Allows user to re-calibrate or
+ * delete the device from the database.
+ */
 public class DeviceInfoActivity extends AppCompatActivity {
     private final NavBar mNavBar = new NavBar(this);
     private String mDeviceName;
@@ -25,8 +29,17 @@ public class DeviceInfoActivity extends AppCompatActivity {
         return DeviceInfoActivity.class.getPackage().getName() + "." + s;
     }
 
+    /**
+     * labels the device address in an intent
+     */
     public static final String EXTRAS_DEVICE_ADDRESS = qualify("DEVICE_ADDRESS");
+    /**
+     * labels the device name in an intent
+     */
     public static final String EXTRAS_DEVICE_NAME = qualify("DEVICE_NAME");
+    /**
+     * marks the use of a dummy device
+     */
     public static final String EXTRAS_USE_DUMMY_CALIBRATOR = qualify("USE_DUMMY_CALIBRRATOR");
 
 
@@ -50,6 +63,10 @@ public class DeviceInfoActivity extends AppCompatActivity {
         mNavBar.init();
     }
 
+    /**
+     * launches the CalibrateDeviceActivity when calibrate is selected.
+     * @param view
+     */
     public void calibrate(View view) {
         Intent parentIntent = getIntent();
         boolean useDummy = parentIntent.getBooleanExtra(EXTRAS_USE_DUMMY_CALIBRATOR, true);
@@ -64,6 +81,10 @@ public class DeviceInfoActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * provides a confirmation dialog before deleting device info.
+     * @param view
+     */
     public void confirmDelete(View view) {
         new AlertDialog.Builder(this)
                 .setMessage("Are you sure you want to delete this device?")
@@ -78,6 +99,9 @@ public class DeviceInfoActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * deletes the selected device and opens the DeviceSelectionActivity
+     */
     public void deleteDevice() {
         // Delete the current device by mac address
         DeviceViewModel dvm = ViewModelProviders.of(this).get(DeviceViewModel.class);

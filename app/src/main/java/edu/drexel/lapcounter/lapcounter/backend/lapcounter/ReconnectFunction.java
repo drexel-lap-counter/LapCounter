@@ -13,6 +13,10 @@ import edu.drexel.lapcounter.lapcounter.backend.ble.RSSIManager;
  * if a lap was missed.
  */
 public class ReconnectFunction {
+    /**
+     * Thjs threshold is used to distinguish a short disconnection from a long disconnection.
+     * The value can be set in the Hyperparameters class.
+     */
     private static final int LONG_DELAY_THRESHOLD_SEC =
             Hyperparameters.RECONNECT_LONG_DELAY_THRESHOLD_SEC;
 
@@ -20,6 +24,7 @@ public class ReconnectFunction {
      * State just before disconnecting
      */
     private AthleteState mBeforeDisconnect;
+
     /**
      * State just after reconnecting
      */

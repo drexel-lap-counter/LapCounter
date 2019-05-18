@@ -20,6 +20,9 @@ import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.WorkoutViewMode
 import edu.drexel.lapcounter.lapcounter.backend.Database.Workout.Workout;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * displays the details of an individual workout.
+ */
 public class WorkoutDetailsActivity extends AppCompatActivity {
 
 
@@ -31,6 +34,10 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
     private static String qualify(String s) {
         return WorkoutDetailsActivity.class.getPackage().getName() + "." + s;
     }
+
+    /**
+     * used to identify a device address in intent extras.
+     */
     public static final String EXTRAS_WORKOUT_ID = qualify("DEVICE_ADDRESS");
 
     @Override
@@ -51,6 +58,10 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
         DisplayWorkoutDetails(workout);
     }
 
+    /**
+     * Displays the passed in workout on the page
+     * @param workout Workout to display
+     */
     private void DisplayWorkoutDetails(Workout workout)
     {
         String unit_abbrev = ((workout.getPoolUnits().compareTo("Meters") == 0) ? " m": " yd");

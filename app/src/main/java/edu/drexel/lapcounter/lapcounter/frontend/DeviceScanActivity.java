@@ -29,6 +29,9 @@ import edu.drexel.lapcounter.lapcounter.backend.ble.DeviceScanner;
 import edu.drexel.lapcounter.lapcounter.backend.dummy.DummyDeviceScanner;
 import edu.drexel.lapcounter.lapcounter.frontend.navigationbar.NavBar;
 
+/**
+ * lists bluetooth devices that are available and not currently registered.
+ */
 public class DeviceScanActivity extends AppCompatActivity {
 
     private List<String> whitelist;
@@ -91,6 +94,9 @@ public class DeviceScanActivity extends AppCompatActivity {
         mDeviceScanner.startScan();
     }
 
+    /**
+     * Initalizes the Recycler view for listing all found devices.
+     */
     private void initRecyclerView()
     {
         //RecyclerView
@@ -208,6 +214,10 @@ public class DeviceScanActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * launches the calibrate device activity for a selected device
+     * @param view
+     */
     public void calibrateSelectedDevice(View view) {
 
         boolean shouldLaunchDummyCalibrate = mDeviceScanner instanceof DummyDeviceScanner;
