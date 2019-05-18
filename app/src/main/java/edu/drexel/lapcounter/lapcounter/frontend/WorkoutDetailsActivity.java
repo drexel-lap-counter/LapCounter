@@ -65,7 +65,7 @@ public class WorkoutDetailsActivity extends AppCompatActivity {
 
         //Date of Workout
         DateFormat df = new SimpleDateFormat("dd MMM yyyy");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //df.setTimeZone(TimeZone.getTimeZone("UTC"));
         String output = df.format(workout.getStartDate());
         date_view.setText(output);
 
